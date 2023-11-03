@@ -19,7 +19,7 @@ func GenerateTokenAdmin(admin models.AdminDetailsResponse) (string, error) {
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	tokenString, err := token.SignedString([]byte("comebuyjersey"))
+	tokenString, err := token.SignedString([]byte("comebuyheadphones"))
 
 	if err != nil {
 		return "", err

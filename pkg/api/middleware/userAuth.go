@@ -21,7 +21,7 @@ func UserAuthMiddleware(c *gin.Context) {
 
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 
-		return []byte("comebuyjersey"), nil
+		return []byte("comebuyheadphones"), nil
 	})
 
 	if err != nil || !token.Valid {

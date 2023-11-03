@@ -7,7 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func AdminRoutes(engine *gin.RouterGroup, adminHandler *handler.AdminHandler) {
+func AdminRoutes(engine *gin.RouterGroup, adminHandler *handler.AdminHandler, categoryHandler *handler.CategoryHandler) {
 
 	engine.POST("/adminlogin", adminHandler.LoginHandler)
 
@@ -18,6 +18,12 @@ func AdminRoutes(engine *gin.RouterGroup, adminHandler *handler.AdminHandler) {
 			usermanagement.POST("/block", adminHandler.BlockUser)
 			usermanagement.POST("/unblock", adminHandler.UnBlockUser)
 			usermanagement.GET("/", adminHandler.GetUsers)
+		}
+
+		categorymanagement := engine.Group("/category")
+		{
+			categorymanagement.POST("/add", categoryHandler.AddCategory)
+			categorymanagement.GET("/getcategory", categoryHandler.GetCategory)
 		}
 	}
 }
