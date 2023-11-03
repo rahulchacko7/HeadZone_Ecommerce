@@ -24,6 +24,8 @@ func AdminRoutes(engine *gin.RouterGroup, adminHandler *handler.AdminHandler, ca
 		{
 			categorymanagement.POST("/add", categoryHandler.AddCategory)
 			categorymanagement.GET("/getcategory", categoryHandler.GetCategory)
+			categorymanagement.PUT("/updatecategory", categoryHandler.UpdateCategory)
+			// categorymanagement.DELETE("/deletecategory", categoryHandler.DeleteCategory)
 		}
 	}
 }

@@ -3,6 +3,7 @@ package repository
 import (
 	"HeadZone/pkg/domain"
 	interfaces "HeadZone/pkg/repository/interfaces"
+	"errors"
 
 	"gorm.io/gorm"
 )
@@ -34,4 +35,39 @@ func (c *categoryRespository) GetCategories() ([]domain.Category, error) {
 	}
 
 	return Model, nil
+}
+
+func (p *categoryRespository) CheckCategory(current string) (bool, error) {
+	var i int
+	err := p.DB.Raw("SELECT COUNT(*) FROM categories WHERE category=?", current).Scan(&i).Error
+	if err != nil {
+		return false, err
+	}
+
+	if i == 0 {
+		return false, err
+	}
+
+	return true, err
+}
+
+func (p *categoryRespository) UpdateCategory(current, new string) (domain.Category, error) {
+
+	// Check the database connection
+	if p.DB == nil {
+		return domain.Category{}, errors.New("database connection is nil")
+	}
+
+	// Update the category
+	if err := p.DB.Exec("UPDATE categories SET category = $1 WHERE category = $2", new, current).Error; err != nil {
+		return domain.Category{}, err
+	}
+
+	// Retrieve the updated category
+	var newcat domain.Category
+	if err := p.DB.First(&newcat, "category = ?", new).Error; err != nil {
+		return domain.Category{}, err
+	}
+
+	return newcat, nil
 }

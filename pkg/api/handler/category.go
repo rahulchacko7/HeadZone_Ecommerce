@@ -3,6 +3,7 @@ package handler
 import (
 	"HeadZone/pkg/domain"
 	"HeadZone/pkg/usecase/interfaces"
+	"HeadZone/pkg/utils/models"
 	"HeadZone/pkg/utils/response"
 	"net/http"
 
@@ -51,4 +52,23 @@ func (Cat *CategoryHandler) GetCategory(c *gin.Context) {
 	successRes := response.ClientResponse(http.StatusOK, "Successfully got all categories", categories, nil)
 	c.JSON(http.StatusOK, successRes)
 
+}
+
+func (Cat *CategoryHandler) UpdateCategory(c *gin.Context) {
+	var p models.SetNewName
+
+	if err := c.BindJSON(&p); err != nil {
+		errRes := response.ClientResponse(http.StatusBadRequest, "Fields provided are in wrong format", nil, err.Error())
+		c.JSON(http.StatusBadRequest, errRes)
+		return
+	}
+	a, err := Cat.CategoryUseCase.UpdateCategory(p.Current, p.New)
+	if err != nil {
+		errorRes := response.ClientResponse(http.StatusBadRequest, "Could not update the category", nil, err.Error())
+		c.JSON(http.StatusBadRequest, errorRes)
+		return
+	}
+
+	successRes := response.ClientResponse(http.StatusOK, "Sucessfully updated updated...", a, nil)
+	c.JSON(http.StatusOK, successRes)
 }
