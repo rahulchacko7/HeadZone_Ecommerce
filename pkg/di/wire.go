@@ -8,6 +8,7 @@ import (
 	"HeadZone/pkg/api/handler"
 	config "HeadZone/pkg/config"
 	db "HeadZone/pkg/db"
+	"HeadZone/pkg/helper"
 	repository "HeadZone/pkg/repository"
 	usecase "HeadZone/pkg/usecase"
 
@@ -15,7 +16,30 @@ import (
 )
 
 func InitializeAPI(cfg config.Config) (*http.ServerHTTP, error) {
-	wire.Build(db.ConnectDatabase, repository.NewUserRepository, usecase.NewUserUseCase, handler.NewUserHandler, http.NewServerHTTP)
+	wire.Build(
+		db.ConnectDatabase,
+		repository.NewUserRepository,
+		usecase.NewUserUseCase,
+		handler.NewUserHandler,
+		helper.NewHelper,
+
+		handler.NewAdminHandler,
+		handler.NewInventoryHandler,
+		handler.NewOtpHandler,
+		handler.NewCategoryHandler,
+
+		usecase.NewAdminUseCase,
+		usecase.NewCategoryUseCase,
+		usecase.NewInventoryUseCase,
+		usecase.NewOtpUseCase,
+
+		repository.NewAdminRepository,
+		repository.NewCategoryRepository,
+		repository.NewOtpRepository,
+		repository.NewInventoryRepository,
+
+		http.NewServerHTTP,
+	)
 
 	return &http.ServerHTTP{}, nil
 }

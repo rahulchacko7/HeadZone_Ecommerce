@@ -2,71 +2,68 @@ package usecase
 
 import (
 	"HeadZone/pkg/config"
-	"HeadZone/pkg/helper"
-	"HeadZone/pkg/repository/interfaces"
+	helper "HeadZone/pkg/helper/interfaces"
+
+	"HeadZone/pkg/usecase/interfaces"
+
+	repo "HeadZone/pkg/repository/interfaces"
 	"HeadZone/pkg/utils/models"
 	"errors"
-	"fmt"
-
-	"github.com/jinzhu/copier"
-	"golang.org/x/crypto/bcrypt"
 )
 
 type userUseCase struct {
-	userRepo      interfaces.UserRepository
-	cfg           config.Config
-	otpRepository interfaces.OtpRepository
+	userRepo            repo.UserRepository
+	cfg                 config.Config
+	otpRepository       repo.OtpRepository
+	inventoryRepository repo.InventoryRepository
+	helper              helper.Helper
 }
 
-func NewUserUseCase(repo interfaces.UserRepository, cfg config.Config, otp interfaces.OtpRepository) *userUseCase {
+func NewUserUseCase(repo repo.UserRepository, cfg config.Config, otp repo.OtpRepository, inv repo.InventoryRepository, h helper.Helper) interfaces.UserUseCase {
 	return &userUseCase{
-		userRepo:      repo,
-		cfg:           cfg,
-		otpRepository: otp,
+		userRepo:            repo,
+		cfg:                 cfg,
+		otpRepository:       otp,
+		inventoryRepository: inv,
+		helper:              h,
 	}
 }
 
+var InternalError = "Internal Server Error"
+var ErrorHashingPassword = "Error In Hashing Password"
+
 func (u *userUseCase) UserSignUp(user models.UserDetails) (models.TokenUsers, error) {
-	fmt.Println("add users")
 	// Check whether the user already exist. If yes, show the error message, since this is signUp
 	userExist := u.userRepo.CheckUserAvailability(user.Email)
-	fmt.Println("user exists", userExist)
 	if userExist {
 		return models.TokenUsers{}, errors.New("user already exist, sign in")
 	}
-	fmt.Println(user)
 	if user.Password != user.ConfirmPassword {
 		return models.TokenUsers{}, errors.New("password does not match")
 	}
 
 	// Hash password since details are validated
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), 10)
+
+	hashedPassword, err := u.helper.PasswordHashing(user.Password)
 	if err != nil {
-		return models.TokenUsers{}, errors.New("internal server error")
+		return models.TokenUsers{}, errors.New(ErrorHashingPassword)
 	}
-	user.Password = string(hashedPassword)
+
+	user.Password = hashedPassword
 
 	// add user details to the database
 	userData, err := u.userRepo.UserSignUp(user)
 	if err != nil {
-		return models.TokenUsers{}, err
+		return models.TokenUsers{}, errors.New("could not add the user")
 	}
 
 	// crete a JWT token string for the user
-	tokenString, err := helper.GenerateTokenClients(userData)
+	tokenString, err := u.helper.GenerateTokenClients(userData)
 	if err != nil {
 		return models.TokenUsers{}, errors.New("could not create token due to some internal error")
 	}
-
-	// copies all the details except the password of the user
-	var userDetails models.UserDetailsResponse
-	err = copier.Copy(&userDetails, &userData)
-	if err != nil {
-		return models.TokenUsers{}, err
-	}
-
 	return models.TokenUsers{
-		Users: userDetails,
+		Users: userData,
 		Token: tokenString,
 	}, nil
 }
@@ -81,7 +78,7 @@ func (u *userUseCase) LoginHandler(user models.UserLogin) (models.TokenUsers, er
 
 	isBlocked, err := u.userRepo.UserBlockStatus(user.Email)
 	if err != nil {
-		return models.TokenUsers{}, err
+		return models.TokenUsers{}, errors.New(InternalError)
 	}
 
 	if isBlocked {
@@ -91,21 +88,22 @@ func (u *userUseCase) LoginHandler(user models.UserLogin) (models.TokenUsers, er
 	// Get the user details in order to check the password, in this case ( The same function can be reused in future )
 	user_details, err := u.userRepo.FindUserByEmail(user)
 	if err != nil {
-		return models.TokenUsers{}, err
+		return models.TokenUsers{}, errors.New(InternalError)
 	}
 
-	err = bcrypt.CompareHashAndPassword([]byte(user_details.Password), []byte(user.Password))
+	err = u.helper.CompareHashAndPassword(user_details.Password, user.Password)
 	if err != nil {
 		return models.TokenUsers{}, errors.New("password incorrect")
 	}
 
 	var userDetails models.UserDetailsResponse
-	err = copier.Copy(&userDetails, &user_details)
-	if err != nil {
-		return models.TokenUsers{}, err
-	}
 
-	tokenString, err := helper.GenerateTokenClients(userDetails)
+	userDetails.Id = int(user_details.Id)
+	userDetails.Name = user_details.Name
+	userDetails.Email = user_details.Email
+	userDetails.Phone = user_details.Phone
+
+	tokenString, err := u.helper.GenerateTokenClients(userDetails)
 	if err != nil {
 		return models.TokenUsers{}, errors.New("could not create token")
 	}

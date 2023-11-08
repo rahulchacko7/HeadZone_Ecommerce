@@ -2,24 +2,26 @@ package usecase
 
 import (
 	domain "HeadZone/pkg/domain"
-	helper "HeadZone/pkg/helper"
-	interfaces "HeadZone/pkg/repository/interfaces"
+
+	"HeadZone/pkg/helper/interfaces"
+	repo "HeadZone/pkg/repository/interfaces"
 	services "HeadZone/pkg/usecase/interfaces"
 	"HeadZone/pkg/utils/models"
 	"errors"
-	"fmt"
 
 	"github.com/jinzhu/copier"
 	"golang.org/x/crypto/bcrypt"
 )
 
 type adminUseCase struct {
-	adminRepository interfaces.AdminRepository
+	adminRepository repo.AdminRepository
+	helper          interfaces.Helper
 }
 
-func NewAdminUseCase(repo interfaces.AdminRepository) services.AdminUseCase {
+func NewAdminUseCase(repo repo.AdminRepository, h interfaces.Helper) services.AdminUseCase {
 	return &adminUseCase{
 		adminRepository: repo,
+		helper:          h,
 	}
 }
 
@@ -33,7 +35,6 @@ func (ad *adminUseCase) LoginHandler(adminDetails models.AdminLogin) (domain.Tok
 
 	// compare password from database and that provided from admins
 	err = bcrypt.CompareHashAndPassword([]byte(adminCompareDetails.Password), []byte(adminDetails.Password))
-	fmt.Println(err)
 	if err != nil {
 		return domain.TokenAdmin{}, err
 	}
@@ -46,15 +47,16 @@ func (ad *adminUseCase) LoginHandler(adminDetails models.AdminLogin) (domain.Tok
 		return domain.TokenAdmin{}, err
 	}
 
-	tokenString, err := helper.GenerateTokenAdmin(adminDetailsResponse)
+	access, refresh, err := ad.helper.GenerateTokenAdmin(adminDetailsResponse)
 
 	if err != nil {
 		return domain.TokenAdmin{}, err
 	}
 
 	return domain.TokenAdmin{
-		Admin: adminDetailsResponse,
-		Token: tokenString,
+		Admin:        adminDetailsResponse,
+		AccessToken:  access,
+		RefreshToken: refresh,
 	}, nil
 
 }
@@ -104,9 +106,9 @@ func (ad *adminUseCase) UnBlockUser(id string) error {
 
 }
 
-func (ad *adminUseCase) GetUsers(page int, count int) ([]models.UserDetailsAtAdmin, error) {
+func (ad *adminUseCase) GetUsers(page int) ([]models.UserDetailsAtAdmin, error) {
 
-	userDetails, err := ad.adminRepository.GetUsers(page, count)
+	userDetails, err := ad.adminRepository.GetUsers(page)
 	if err != nil {
 		return []models.UserDetailsAtAdmin{}, err
 	}

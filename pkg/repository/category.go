@@ -4,6 +4,7 @@ import (
 	"HeadZone/pkg/domain"
 	interfaces "HeadZone/pkg/repository/interfaces"
 	"errors"
+	"strconv"
 
 	"gorm.io/gorm"
 )
@@ -70,4 +71,19 @@ func (p *categoryRespository) UpdateCategory(current, new string) (domain.Catego
 	}
 
 	return newcat, nil
+}
+
+func (p *categoryRespository) DeleteCategory(catergoryID string) error {
+	id, err := strconv.Atoi(catergoryID)
+
+	if err != nil {
+		return errors.New("converting into integers is not happen")
+	}
+
+	result := p.DB.Exec("DELETE FROM categories WHERE id = ?", id)
+
+	if result.RowsAffected < 1 {
+		return errors.New("now rows with that id exist")
+	}
+	return nil
 }

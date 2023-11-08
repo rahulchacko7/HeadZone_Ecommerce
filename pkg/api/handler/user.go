@@ -1,7 +1,7 @@
 package handler
 
 import (
-	"HeadZone/pkg/usecase/interfaces"
+	services "HeadZone/pkg/usecase/interfaces"
 	"HeadZone/pkg/utils/models"
 	"HeadZone/pkg/utils/response"
 	"net/http"
@@ -11,7 +11,7 @@ import (
 )
 
 type UserHandler struct {
-	userUseCase interfaces.UserUseCase
+	userUseCase services.UserUseCase
 }
 
 type Response struct {
@@ -20,12 +20,11 @@ type Response struct {
 	Surname string `copier:"must"`
 }
 
-func NewUserHandler(usecase interfaces.UserUseCase) *UserHandler {
+func NewUserHandler(usecase services.UserUseCase) *UserHandler {
 	return &UserHandler{
 		userUseCase: usecase,
 	}
 }
-
 func (u *UserHandler) UserSignUp(c *gin.Context) {
 
 	var user models.UserDetails

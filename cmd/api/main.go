@@ -1,7 +1,7 @@
 package main
 
 import (
-	config "HeadZone/pkg/config"
+	"HeadZone/pkg/config"
 	"HeadZone/pkg/di"
 
 	"log"

@@ -11,7 +11,7 @@ type categoryUseCase struct {
 	repository interfaces.CategoryRepository
 }
 
-func NewCategoryUseCase(repo interfaces.CategoryRepository) services.CategoryUseCase {
+func NewCategoryUseCase(repo interfaces.CategoryRepository, inv interfaces.InventoryRepository) services.CategoryUseCase {
 	return &categoryUseCase{
 		repository: repo,
 	}
@@ -55,4 +55,13 @@ func (Cat *categoryUseCase) UpdateCategory(current string, new string) (domain.C
 	}
 
 	return newcat, err
+}
+
+func (Cat *categoryUseCase) DeleteCategory(categoryID string) error {
+
+	err := Cat.repository.DeleteCategory(categoryID)
+	if err != nil {
+		return err
+	}
+	return nil
 }

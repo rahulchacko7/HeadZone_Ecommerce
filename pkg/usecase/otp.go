@@ -1,26 +1,27 @@
 package usecase
 
 import (
-	config "HeadZone/pkg/config"
-	helper "HeadZone/pkg/helper"
-	interfaces "HeadZone/pkg/repository/interfaces"
+	"HeadZone/pkg/config"
+	"HeadZone/pkg/helper/interfaces"
+	repo "HeadZone/pkg/repository/interfaces"
 	services "HeadZone/pkg/usecase/interfaces"
 	"HeadZone/pkg/utils/models"
 	"errors"
-	"fmt"
 
 	"github.com/jinzhu/copier"
 )
 
 type otpUseCase struct {
 	cfg           config.Config
-	otpRepository interfaces.OtpRepository
+	otpRepository repo.OtpRepository
+	helper        interfaces.Helper
 }
 
-func NewOtpUseCase(cfg config.Config, repo interfaces.OtpRepository) services.OtpUseCase {
+func NewOtpUseCase(cfg config.Config, repo repo.OtpRepository, h interfaces.Helper) services.OtpUseCase {
 	return &otpUseCase{
 		cfg:           cfg,
 		otpRepository: repo,
+		helper:        h,
 	}
 }
 
@@ -31,10 +32,8 @@ func (ot *otpUseCase) SendOTP(phone string) error {
 		return errors.New("the user does not exist")
 	}
 
-	helper.TwilioSetup(ot.cfg.ACCOUNTSID, ot.cfg.AUTHTOKEN)
-	fmt.Println("accsid:", ot.cfg.ACCOUNTSID)
-	fmt.Println("auth:", ot.cfg.AUTHTOKEN)
-	_, err := helper.TwilioSendOTP(phone, ot.cfg.SERVICESID)
+	ot.helper.TwilioSetup(ot.cfg.ACCOUNTSID, ot.cfg.AUTHTOKEN)
+	_, err := ot.helper.TwilioSendOTP(phone, ot.cfg.SERVICESID)
 	if err != nil {
 		return errors.New("error ocurred while generating OTP")
 	}
@@ -45,8 +44,8 @@ func (ot *otpUseCase) SendOTP(phone string) error {
 
 func (ot *otpUseCase) VerifyOTP(code models.VerifyData) (models.TokenUsers, error) {
 
-	helper.TwilioSetup(ot.cfg.ACCOUNTSID, ot.cfg.AUTHTOKEN)
-	err := helper.TwilioVerifyOTP(ot.cfg.SERVICESID, code.Code, code.PhoneNumber)
+	ot.helper.TwilioSetup(ot.cfg.ACCOUNTSID, ot.cfg.AUTHTOKEN)
+	err := ot.helper.TwilioVerifyOTP(ot.cfg.SERVICESID, code.Code, code.PhoneNumber)
 	if err != nil {
 		//this guard clause catches the error code runs only until here
 		return models.TokenUsers{}, errors.New("error while verifying")
@@ -58,7 +57,7 @@ func (ot *otpUseCase) VerifyOTP(code models.VerifyData) (models.TokenUsers, erro
 		return models.TokenUsers{}, err
 	}
 
-	tokenString, err := helper.GenerateTokenClients(userDetails)
+	tokenString, err := ot.helper.GenerateTokenClients(userDetails)
 	if err != nil {
 		return models.TokenUsers{}, err
 	}

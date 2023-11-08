@@ -69,6 +69,19 @@ func (Cat *CategoryHandler) UpdateCategory(c *gin.Context) {
 		return
 	}
 
-	successRes := response.ClientResponse(http.StatusOK, "Sucessfully updated updated...", a, nil)
+	successRes := response.ClientResponse(http.StatusOK, "Sucessfully updated...", a, nil)
 	c.JSON(http.StatusOK, successRes)
+}
+
+func (Cat *CategoryHandler) DeleteCategory(c *gin.Context) {
+
+	categoryID := c.Query("id")
+	err := Cat.CategoryUseCase.DeleteCategory(categoryID)
+	if err != nil {
+		errRes := response.ClientResponse(http.StatusBadRequest, "Fields are not provided in wrong format", nil, err.Error())
+		c.JSON(http.StatusBadRequest, errRes)
+		return
+	}
+	SuccessRes := response.ClientResponse(http.StatusOK, "Sucessfully updated...", nil, nil)
+	c.JSON(http.StatusOK, SuccessRes)
 }

@@ -23,7 +23,7 @@ func AdminAuthMiddleware(c *gin.Context) {
 
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 
-		return []byte("comebuyheadphones"), nil
+		return []byte("accesssecret"), nil
 	})
 
 	if err != nil || !token.Valid {
