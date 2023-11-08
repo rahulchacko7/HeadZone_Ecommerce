@@ -1,13 +1,17 @@
 package handler
 
 import (
+	"HeadZone/pkg/helper"
 	services "HeadZone/pkg/usecase/interfaces"
 	models "HeadZone/pkg/utils/models"
 	response "HeadZone/pkg/utils/response"
+	"errors"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt"
 )
 
 type AdminHandler struct {
@@ -95,4 +99,35 @@ func (ad *AdminHandler) GetUsers(c *gin.Context) {
 	successRes := response.ClientResponse(http.StatusOK, "Successfully retrieved the users", users, nil)
 	c.JSON(http.StatusOK, successRes)
 
+}
+
+func (a *AdminHandler) ValidateRefreshTokenAndCreateNewAccess(c *gin.Context) {
+
+	refreshToken := c.Request.Header.Get("RefreshToken")
+
+	// Check if the refresh token is valid.
+	_, err := jwt.Parse(refreshToken, func(token *jwt.Token) (interface{}, error) {
+		return []byte("refreshsecret"), nil
+	})
+	if err != nil {
+		// The refresh token is invalid.
+		c.AbortWithError(401, errors.New("refresh token is invalid:user have to login again"))
+		return
+	}
+
+	claims := &helper.AuthCustomClaims{
+		Role: "admin",
+		StandardClaims: jwt.StandardClaims{
+			ExpiresAt: time.Now().Add(time.Minute).Unix(),
+			IssuedAt:  time.Now().Unix(),
+		},
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	newAccessToken, err := token.SignedString([]byte("accesssecret"))
+	if err != nil {
+		c.AbortWithError(500, errors.New("error in creating new access token"))
+	}
+
+	c.JSON(200, newAccessToken)
 }

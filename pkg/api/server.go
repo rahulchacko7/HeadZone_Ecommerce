@@ -3,6 +3,7 @@ package http
 import (
 	"HeadZone/pkg/api/handler"
 	"HeadZone/pkg/routes"
+	"log"
 
 	"github.com/gin-gonic/gin"
 )
@@ -16,6 +17,8 @@ func NewServerHTTP(userHandler *handler.UserHandler, adminHandler *handler.Admin
 
 	engine.Use(gin.Logger())
 
+	engine.GET("/validate-token", adminHandler.ValidateRefreshTokenAndCreateNewAccess)
+
 	routes.UserRoutes(engine.Group("/user"), userHandler, otpHandler)
 	routes.AdminRoutes(engine.Group("/admin"), adminHandler, categoryHandler, inventoryHandler)
 
@@ -23,5 +26,8 @@ func NewServerHTTP(userHandler *handler.UserHandler, adminHandler *handler.Admin
 }
 
 func (sh *ServerHTTP) Start() {
-	sh.engine.Run(":3000")
+	err := sh.engine.Run(":3000")
+	if err != nil {
+		log.Fatal("gin engine couldn't start")
+	}
 }
