@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"HeadZone/pkg/domain"
 	"HeadZone/pkg/repository/interfaces"
 	"HeadZone/pkg/utils/models"
 	"errors"
@@ -66,5 +67,102 @@ func (c *userDatabase) FindUserByEmail(user models.UserLogin) (models.UserSignIn
 	}
 
 	return user_details, nil
+
+}
+
+func (ad *userDatabase) GetUserDetails(id int) (models.UserDetailsResponse, error) {
+
+	var details models.UserDetailsResponse
+
+	if err := ad.DB.Raw("select id,name,email,phone from users where id=?", id).Scan(&details).Error; err != nil {
+		return models.UserDetailsResponse{}, errors.New("could not get user details")
+	}
+
+	return details, nil
+
+}
+
+func (c *userDatabase) CheckIfFirstAddress(id int) bool {
+
+	var count int
+	// query := fmt.Sprintf("select count(*) from addresses where user_id='%s'", id)
+	if err := c.DB.Raw("select count(*) from addresses where user_id=$1", id).Scan(&count).Error; err != nil {
+		return false
+	}
+	// if count is greater than 0 that means the user already exist
+	return count > 0
+
+}
+
+func (i *userDatabase) AddAddress(id int, address models.AddAddress, result bool) error {
+	err := i.DB.Exec(`
+		INSERT INTO addresses (user_id, name, house_name, street, city, state, phone, pin,"default")
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9 )`,
+		id, address.Name, address.HouseName, address.Street, address.City, address.State, address.Phone, address.Pin, result).Error
+	if err != nil {
+		return errors.New("could not add address")
+	}
+
+	return nil
+}
+
+func (ad *userDatabase) GetAddresses(id int) ([]domain.Address, error) {
+
+	var addresses []domain.Address
+
+	if err := ad.DB.Raw("select * from addresses where user_id=?", id).Scan(&addresses).Error; err != nil {
+		return []domain.Address{}, errors.New("error in getting addresses")
+	}
+
+	return addresses, nil
+
+}
+
+func (i *userDatabase) EditName(id int, name string) error {
+	err := i.DB.Exec(`update users set name=$1 where id=$2`, name, id).Error
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (i *userDatabase) EditEmail(id int, email string) error {
+	err := i.DB.Exec(`update users set email=$1 where id=$2`, email, id).Error
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (i *userDatabase) EditPhone(id int, phone string) error {
+	err := i.DB.Exec(`update users set phone=$1 where id=$2`, phone, id).Error
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (i *userDatabase) ChangePassword(id int, password string) error {
+
+	err := i.DB.Exec("UPDATE users SET password=$1 WHERE id=$2", password, id).Error
+	if err != nil {
+		return err
+	}
+
+	return nil
+
+}
+
+func (i *userDatabase) GetPassword(id int) (string, error) {
+
+	var userPassword string
+	err := i.DB.Raw("select password from users where id = ?", id).Scan(&userPassword).Error
+	if err != nil {
+		return "", err
+	}
+	return userPassword, nil
 
 }

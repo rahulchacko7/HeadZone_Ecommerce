@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"HeadZone/pkg/config"
+	domain "HeadZone/pkg/domain"
 	helper "HeadZone/pkg/helper/interfaces"
 
 	"HeadZone/pkg/usecase/interfaces"
@@ -112,5 +113,105 @@ func (u *userUseCase) LoginHandler(user models.UserLogin) (models.TokenUsers, er
 		Users: userDetails,
 		Token: tokenString,
 	}, nil
+
+}
+
+func (i *userUseCase) GetUserDetails(id int) (models.UserDetailsResponse, error) {
+
+	details, err := i.userRepo.GetUserDetails(id)
+	if err != nil {
+		return models.UserDetailsResponse{}, errors.New("error in getting details")
+	}
+
+	return details, nil
+
+}
+
+func (i *userUseCase) AddAddress(id int, address models.AddAddress) error {
+
+	rslt := i.userRepo.CheckIfFirstAddress(id)
+	var result bool
+
+	if !rslt {
+		result = true
+	} else {
+		result = false
+	}
+
+	err := i.userRepo.AddAddress(id, address, result)
+	if err != nil {
+		return errors.New("error in adding address")
+	}
+
+	return nil
+
+}
+
+func (i *userUseCase) GetAddresses(id int) ([]domain.Address, error) {
+
+	addresses, err := i.userRepo.GetAddresses(id)
+	if err != nil {
+		return []domain.Address{}, errors.New("error in getting addresses")
+	}
+
+	return addresses, nil
+
+}
+
+func (i *userUseCase) EditName(id int, name string) error {
+
+	err := i.userRepo.EditName(id, name)
+	if err != nil {
+		return errors.New("could not change")
+	}
+
+	return nil
+
+}
+
+func (i *userUseCase) EditEmail(id int, email string) error {
+
+	err := i.userRepo.EditEmail(id, email)
+	if err != nil {
+		return errors.New("could not change")
+	}
+
+	return nil
+
+}
+
+func (i *userUseCase) EditPhone(id int, phone string) error {
+
+	err := i.userRepo.EditPhone(id, phone)
+	if err != nil {
+		return errors.New("could not change")
+	}
+
+	return nil
+
+}
+
+func (i *userUseCase) ChangePassword(id int, old string, password string, repassword string) error {
+
+	userPassword, err := i.userRepo.GetPassword(id)
+	if err != nil {
+		return errors.New(InternalError)
+	}
+
+	err = i.helper.CompareHashAndPassword(userPassword, old)
+	if err != nil {
+		return errors.New("password incorrect")
+	}
+
+	if password != repassword {
+		return errors.New("passwords does not match")
+	}
+
+	newpassword, err := i.helper.PasswordHashing(password)
+	if err != nil {
+		return errors.New("error in hashing password")
+	}
+
+	return i.userRepo.ChangePassword(id, string(newpassword))
 
 }

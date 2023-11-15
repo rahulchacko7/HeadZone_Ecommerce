@@ -115,3 +115,23 @@ func (u *InventoryHandler) DeleteInventory(c *gin.Context) {
 	successRes := response.ClientResponse(http.StatusOK, "Sucessfully deleted the product", nil, nil)
 	c.JSON(http.StatusOK, successRes)
 }
+
+func (i *InventoryHandler) UpdateInventory(c *gin.Context) {
+
+	var p models.InventoryUpdate
+
+	if err := c.BindJSON(&p); err != nil {
+		errRes := response.ClientResponse(http.StatusBadRequest, "fileds are provided in wrong format", nil, err.Error())
+		c.JSON(http.StatusBadRequest, errRes)
+		return
+	}
+	a, err := i.InventoryUseCase.UpdateInventory(p.Productid, p.Stock)
+	if err != nil {
+		errRes := response.ClientResponse(http.StatusBadRequest, "Could  not update the inventory stock", nil, err.Error())
+		c.JSON(http.StatusBadRequest, errRes)
+		return
+	}
+
+	successRes := response.ClientResponse(http.StatusOK, "Sucessfully upadated inventory stock", a, nil)
+	c.JSON(http.StatusOK, successRes)
+}

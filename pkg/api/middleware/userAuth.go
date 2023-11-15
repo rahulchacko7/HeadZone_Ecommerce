@@ -17,15 +17,13 @@ func UserAuthMiddleware(c *gin.Context) {
 		return
 	}
 	tokenString = strings.TrimPrefix(tokenString, "Bearer ")
-	fmt.Println(tokenString)
 
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 
-		return []byte("accesssecret"), nil
+		return []byte("comebuyjersey"), nil
 	})
 
 	if err != nil || !token.Valid {
-		fmt.Println(1)
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid authorization token"})
 		c.Abort()
 		return
@@ -33,11 +31,12 @@ func UserAuthMiddleware(c *gin.Context) {
 
 	claims, ok := token.Claims.(jwt.MapClaims)
 	if !ok || !token.Valid {
-		fmt.Println(2)
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid authorization token"})
 		c.Abort()
 		return
 	}
+
+	fmt.Println("claims", claims)
 
 	role, ok := claims["role"].(string)
 	if !ok || role != "client" {
@@ -46,7 +45,15 @@ func UserAuthMiddleware(c *gin.Context) {
 		return
 	}
 
+	id, ok := claims["id"].(float64)
+	if !ok || id == 0 {
+		c.JSON(http.StatusForbidden, gin.H{"error": "error in retrieving id"})
+		c.Abort()
+		return
+	}
+
 	c.Set("role", role)
+	c.Set("id", int(id))
 
 	c.Next()
 }

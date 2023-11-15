@@ -6,6 +6,7 @@ import (
 	repo "HeadZone/pkg/repository/interfaces"
 	usecase "HeadZone/pkg/usecase/interfaces"
 	"HeadZone/pkg/utils/models"
+	"errors"
 )
 
 type inventoryUseCase struct {
@@ -37,12 +38,12 @@ func (i *inventoryUseCase) AddInventory(inventory models.AddInventories) (models
 
 }
 
-func (i *inventoryUseCase) ListProducts(pageNo, pageList int) ([]models.Inventory, error) {
+func (i *inventoryUseCase) ListProducts(pageNo, pageList int) ([]models.InventoryUserResponse, error) {
 
 	offset := (pageNo - 1) * pageList
 	productList, err := i.repository.ListProducts(pageList, offset)
 	if err != nil {
-		return []models.Inventory{}, err
+		return []models.InventoryUserResponse{}, err
 	}
 	return productList, nil
 }
@@ -62,4 +63,23 @@ func (usecase *inventoryUseCase) DeleteInventory(inventoryID string) error {
 		return err
 	}
 	return nil
+}
+
+func (i inventoryUseCase) UpdateInventory(pid int, stock int) (models.InventoryResponse, error) {
+
+	result, err := i.repository.CheckInventory(pid)
+	if err != nil {
+		return models.InventoryResponse{}, err
+	}
+
+	if !result {
+		return models.InventoryResponse{}, errors.New("There is no inventory as you mentioned")
+	}
+
+	newcat, err := i.repository.UpdateInventory(pid, stock)
+	if err != nil {
+		return models.InventoryResponse{}, err
+	}
+
+	return newcat, err
 }

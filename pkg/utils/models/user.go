@@ -54,3 +54,35 @@ type UserDetailsAtAdmin struct {
 	Phone       string `json:"phone"`
 	BlockStatus bool   `json:"block_status"`
 }
+
+type Search struct {
+	Key string `json:"searchkey"`
+}
+
+type AddAddress struct {
+	Name      string `json:"name" validate:"required"`
+	HouseName string `json:"house_name" validate:"required"`
+	Street    string `json:"street" validate:"required"`
+	City      string `json:"city" validate:"required"`
+	State     string `json:"state" validate:"required"`
+	Phone     string `json:"phone" validate:"require"`
+	Pin       string `json:"pin" validate:"required"`
+}
+
+type EditName struct {
+	Name string `json:"name"`
+}
+
+type EditEmail struct {
+	Email string `json:"email"`
+}
+
+type EditPhone struct {
+	Phone string `json:"phone"`
+}
+
+type ChangePassword struct {
+	Oldpassword string `json:"old_password"`
+	Password    string `json:"password"`
+	Repassword  string `json:"re_password"`
+}

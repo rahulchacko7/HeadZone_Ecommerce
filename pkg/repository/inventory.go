@@ -38,16 +38,16 @@ func (i *inventoryRepository) AddInventory(inventory models.AddInventories) (mod
 
 }
 
-func (prod *inventoryRepository) ListProducts(pageList, offset int) ([]models.Inventory, error) {
+func (prod *inventoryRepository) ListProducts(pageList, offset int) ([]models.InventoryUserResponse, error) {
 
-	var product_list []models.Inventory
+	var product_list []models.InventoryUserResponse
 
-	query := "select id,category_id,product_name,color,stock,price from inventories limit $1 offset $2"
+	query := "select id,category_id,product_name,color,price from inventories limit $1 offset $2"
 	fmt.Println(pageList, offset)
 	err := prod.DB.Raw(query, pageList, offset).Scan(&product_list).Error
 
 	if err != nil {
-		return []models.Inventory{}, errors.New("error checking user details")
+		return []models.InventoryUserResponse{}, errors.New("error checking user details")
 	}
 	fmt.Println("product list", product_list)
 	return product_list, nil
@@ -83,4 +83,36 @@ func (i *inventoryRepository) DeleteInventory(inventoryID string) error {
 	}
 
 	return nil
+}
+
+func (i *inventoryRepository) CheckInventory(pid int) (bool, error) {
+	var k int
+	err := i.DB.Raw("SELECT * FROM inventories WHERE id=?", pid).Scan(&k).Error
+	if err != nil {
+		return false, err
+	}
+	if k == 0 {
+		return false, err
+	}
+	return true, err
+}
+
+func (i *inventoryRepository) UpdateInventory(pid int, stock int) (models.InventoryResponse, error) {
+	if i.DB == nil {
+		return models.InventoryResponse{}, errors.New("database connection is nil")
+	}
+
+	if err := i.DB.Exec("UPDATE inventories SET stock = stock + $1 WHERER is = $2", stock, pid).Error; err != nil {
+		return models.InventoryResponse{}, err
+	}
+
+	var newdetails models.InventoryResponse
+	var newstock int
+	if err := i.DB.Raw("SELECT stock FROM inventories WHRER id=?", pid).Scan(&newstock).Error; err != nil {
+		return models.InventoryResponse{}, err
+	}
+	newdetails.ProductID = pid
+	newdetails.Stock = newstock
+
+	return newdetails, nil
 }

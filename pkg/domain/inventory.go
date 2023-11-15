@@ -1,5 +1,10 @@
 package domain
 
+type InventoryUpdate struct {
+	Productid int `json:"product_id"`
+	Stock     int `json:"stock"`
+}
+
 type Category struct {
 	ID       uint   `json:"id" gorm:"primaryKey"`
 	Category string `json:"category"`
