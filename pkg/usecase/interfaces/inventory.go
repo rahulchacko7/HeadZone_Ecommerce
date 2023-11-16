@@ -11,4 +11,5 @@ type InventoryUseCase interface {
 	EditInventory(domain.Inventory, int) (domain.Inventory, error)
 	DeleteInventory(id string) error
 	UpdateInventory(productID int, stock int) (models.InventoryResponse, error)
+	ShowIndividualProducts(id string) (models.InventoryUserResponse, error)
 }

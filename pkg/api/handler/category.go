@@ -82,6 +82,6 @@ func (Cat *CategoryHandler) DeleteCategory(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, errRes)
 		return
 	}
-	SuccessRes := response.ClientResponse(http.StatusOK, "Sucessfully updated...", nil, nil)
+	SuccessRes := response.ClientResponse(http.StatusOK, "Sucessfully Deleted...", nil, nil)
 	c.JSON(http.StatusOK, SuccessRes)
 }

@@ -83,3 +83,13 @@ func (i inventoryUseCase) UpdateInventory(pid int, stock int) (models.InventoryR
 
 	return newcat, err
 }
+
+func (i *inventoryUseCase) ShowIndividualProducts(id string) (models.InventoryUserResponse, error) {
+
+	product, err := i.repository.ShowIndividualProducts(id)
+	if err != nil {
+		return models.InventoryUserResponse{}, err
+	}
+
+	return product, nil
+}

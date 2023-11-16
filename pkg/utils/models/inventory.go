@@ -58,3 +58,8 @@ type InventoryUserResponse struct {
 	//	IfPresentAtCart bool    `json:"if_present_at_cart"`
 	//	DiscountedPrice float64 `json:"discounted_price"`
 }
+
+type AddToCart struct {
+	UserID      int `json:"user_id"`
+	InventoryID int `json:"inventory_id"`
+}

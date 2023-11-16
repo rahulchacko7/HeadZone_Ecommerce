@@ -135,3 +135,18 @@ func (i *InventoryHandler) UpdateInventory(c *gin.Context) {
 	successRes := response.ClientResponse(http.StatusOK, "Sucessfully upadated inventory stock", a, nil)
 	c.JSON(http.StatusOK, successRes)
 }
+
+func (i *InventoryHandler) ShowIndividualProducts(c *gin.Context) {
+
+	id := c.Query("id")
+	product, err := i.InventoryUseCase.ShowIndividualProducts(id)
+
+	if err != nil {
+		errorRes := response.ClientResponse(http.StatusBadRequest, "path variables in wrong format", nil, err.Error())
+		c.JSON(http.StatusBadRequest, errorRes)
+		return
+	}
+
+	successRes := response.ClientResponse(http.StatusOK, "Product details retrieved successfully", product, nil)
+	c.JSON(http.StatusOK, successRes)
+}
