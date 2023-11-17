@@ -45,7 +45,25 @@ func UserRoutes(engine *gin.RouterGroup, userHandler *handler.UserHandler, otpHa
 			home.GET("/products", inventoryHandler.ListProducts)
 			home.GET("/product/details", inventoryHandler.ShowIndividualProducts)
 			home.POST("/add-to-cart", cartHandler.AddToCart)
-			//home.POST("/whishlist/add", whislisthandler.AddWishlist)
+		}
+		cart := engine.Group("/cart")
+		{
+			cart.GET("/view-cart-items", userHandler.GetCart)
+			cart.DELETE("/remove-cart-item", userHandler.RemoveFromCart)
+			cart.PUT("/Add/Quantity", userHandler.UpdateQuantityAdd)
+			cart.PUT("/Reduce/Quantity", userHandler.UpdateQuantityLess)
+
+		}
+		// order := engine.Group("/order")
+		// {
+		// 	order.POST("", orderHandler.GetOrders)
+		// 	order.DELETE("", orderHandler.CancelOrder)
+		// }
+
+		checkout := engine.Group("/check-out")
+		{
+			checkout.GET("/check-out-product", cartHandler.CheckOut)
+			//checkout.POST("/order", orderHandler.OrderItemsFromCart)
 		}
 
 	}

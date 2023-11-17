@@ -9,6 +9,7 @@ type UserUseCase interface {
 	UserSignUp(models.UserDetails) (models.TokenUsers, error)
 	LoginHandler(models.UserLogin) (models.TokenUsers, error)
 	GetUserDetails(id int) (models.UserDetailsResponse, error)
+	GetCart(id int) (models.GetCartResponse, error)
 	AddAddress(id int, address models.AddAddress) error
 	GetAddresses(id int) ([]domain.Address, error)
 
@@ -17,4 +18,8 @@ type UserUseCase interface {
 	EditPhone(id int, phone string) error
 
 	ChangePassword(id int, old string, password string, repassword string) error
+
+	RemoveFromCart(cart, inventory int) error
+	UpdateQuantityAdd(id, inv_id int) error
+	UpdateQuantityLess(id, inv_id int) error
 }

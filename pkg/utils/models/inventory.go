@@ -11,8 +11,12 @@ type SetNewName struct {
 }
 
 type InventoryResponse struct {
-	ProductID int
-	Stock     int
+	ProductID   int    `json:"id"`
+	CategoryID  int    `json:"category_id"`
+	ProductName string `json:"productname"`
+	Color       string `json:"color"`
+	Stock       int    `json:"stock"`
+	Price       int    `json:"price"`
 }
 
 type InventoryUpdate struct {
@@ -62,4 +66,18 @@ type InventoryUserResponse struct {
 type AddToCart struct {
 	UserID      int `json:"user_id"`
 	InventoryID int `json:"inventory_id"`
+}
+
+type InventoryDetails struct {
+	Price    float64 `json:"price"`
+	Quantity uint    `json:"quantity"`
+}
+
+type MakeOrder struct {
+	UserID    int `json:"user_id"`
+	AddressID int `json:"address_id"`
+}
+type Order struct {
+	UserID    int `json:"user_id"`
+	AddressID int `json:"address_id"`
 }

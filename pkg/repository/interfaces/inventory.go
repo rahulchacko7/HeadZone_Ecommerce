@@ -14,4 +14,5 @@ type InventoryRepository interface {
 	UpdateInventory(pid int, stock int) (models.InventoryResponse, error)
 	ShowIndividualProducts(id string) (models.InventoryUserResponse, error)
 	CheckStock(inventory_id int) (int, error)
+	FetchProductDetails(productId uint) (models.Inventory, error)
 }

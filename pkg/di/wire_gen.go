@@ -26,25 +26,22 @@ func InitializeAPI(cfg config.Config) (*http.ServerHTTP, error) {
 	userRepository := repository.NewUserRepository(gormDB)
 	otpRepository := repository.NewOtpRepository(gormDB)
 	inventoryRepository := repository.NewInventoryRepository(gormDB)
-
 	interfacesHelper := helper.NewHelper(cfg)
 	userUseCase := usecase.NewUserUseCase(userRepository, cfg, otpRepository, inventoryRepository, interfacesHelper)
 	userHandler := handler.NewUserHandler(userUseCase)
-
 	adminRepository := repository.NewAdminRepository(gormDB)
 	adminUseCase := usecase.NewAdminUseCase(adminRepository, interfacesHelper)
 	adminHandler := handler.NewAdminHandler(adminUseCase)
-
 	otpUseCase := usecase.NewOtpUseCase(cfg, otpRepository, interfacesHelper)
 	otpHandler := handler.NewOtpHandler(otpUseCase)
-
 	categoryRepository := repository.NewCategoryRepository(gormDB)
 	categoryUseCase := usecase.NewCategoryUseCase(categoryRepository, inventoryRepository)
 	categoryHandler := handler.NewCategoryHandler(categoryUseCase)
-
 	inventoryUseCase := usecase.NewInventoryUseCase(inventoryRepository, interfacesHelper)
 	inventoryHandler := handler.NewInventoryHandler(inventoryUseCase)
-	
-	serverHTTP := http.NewServerHTTP(userHandler, adminHandler, otpHandler, categoryHandler, inventoryHandler)
+	cartRepository := repository.NewCartRepository(gormDB)
+	cartUseCase := usecase.NewCartUseCase(cartRepository, inventoryRepository, userUseCase)
+	cartHandler := handler.NewCartHandler(cartUseCase)
+	serverHTTP := http.NewServerHTTP(userHandler, adminHandler, otpHandler, categoryHandler, inventoryHandler, cartHandler)
 	return serverHTTP, nil
 }

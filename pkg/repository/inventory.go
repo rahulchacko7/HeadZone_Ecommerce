@@ -30,7 +30,12 @@ func (i *inventoryRepository) AddInventory(inventory models.AddInventories) (mod
 		return models.InventoryResponse{}, errors.New("product already exists in the database")
 	}
 
-	// If the product doesn't exist, proceed with inserting it into the database
+	// Check for negative stock or price values
+	if inventory.Stock < 0 || inventory.Price < 0 {
+		return models.InventoryResponse{}, errors.New("stock and price cannot be negative")
+	}
+
+	// If the product doesn't exist and values are valid, proceed with inserting it into the database
 	query := `
         INSERT INTO inventories (category_id, product_name, color, stock, price)
         VALUES (?, ?, ?, ?, ?);
@@ -160,4 +165,10 @@ func (i *inventoryRepository) CheckStock(pid int) (int, error) {
 		return 0, err
 	}
 	return k, nil
+}
+
+func (c *inventoryRepository) FetchProductDetails(productId uint) (models.Inventory, error) {
+	var product models.Inventory
+	err := c.DB.Raw(`SELECT price,stock FROM inventories WHERE id=?`, productId).Scan(&product).Error
+	return product, err
 }

@@ -5,6 +5,7 @@ import (
 	"HeadZone/pkg/utils/models"
 	"HeadZone/pkg/utils/response"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator"
@@ -231,4 +232,94 @@ func (i *UserHandler) ChangePassword(c *gin.Context) {
 	successRes := response.ClientResponse(http.StatusOK, "password changed Successfully ", nil, nil)
 	c.JSON(http.StatusOK, successRes)
 
+}
+
+func (i *UserHandler) GetCart(c *gin.Context) {
+	idString, _ := c.Get("id")
+	id, _ := idString.(int)
+
+	products, err := i.userUseCase.GetCart(id)
+	if err != nil {
+		errorRes := response.ClientResponse(http.StatusBadRequest, "could not retrieve cart", nil, err.Error())
+		c.JSON(http.StatusBadRequest, errorRes)
+		return
+	}
+	successRes := response.ClientResponse(http.StatusOK, "Successfully got all products in cart", products, nil)
+	c.JSON(http.StatusOK, successRes)
+}
+
+func (i *UserHandler) RemoveFromCart(c *gin.Context) {
+
+	cartID, err := strconv.Atoi(c.Query("cart_id"))
+	if err != nil {
+		errorRes := response.ClientResponse(http.StatusBadRequest, "check parameters properly", nil, err.Error())
+		c.JSON(http.StatusBadRequest, errorRes)
+		return
+	}
+
+	InventoryID, err := strconv.Atoi(c.Query("inventory_id"))
+	if err != nil {
+		errorRes := response.ClientResponse(http.StatusBadRequest, "check parameters properly", nil, err.Error())
+		c.JSON(http.StatusBadRequest, errorRes)
+		return
+	}
+
+	if err := i.userUseCase.RemoveFromCart(cartID, InventoryID); err != nil {
+		errorRes := response.ClientResponse(http.StatusBadRequest, "could not remove from cart", nil, err.Error())
+		c.JSON(http.StatusBadRequest, errorRes)
+		return
+	}
+
+	successRes := response.ClientResponse(http.StatusOK, "Successfully Removed product from cart", nil, nil)
+	c.JSON(http.StatusOK, successRes)
+}
+
+func (i *UserHandler) UpdateQuantityAdd(c *gin.Context) {
+	id, err := strconv.Atoi(c.Query("id"))
+	if err != nil {
+		errorRes := response.ClientResponse(http.StatusBadRequest, "check parameters properly", nil, err.Error())
+		c.JSON(http.StatusBadRequest, errorRes)
+		return
+	}
+
+	inv, err := strconv.Atoi(c.Query("inventory"))
+	if err != nil {
+		errorRes := response.ClientResponse(http.StatusBadRequest, "check parameters properly", nil, err.Error())
+		c.JSON(http.StatusBadRequest, errorRes)
+		return
+	}
+
+	if err := i.userUseCase.UpdateQuantityAdd(id, inv); err != nil {
+		errorRes := response.ClientResponse(http.StatusBadRequest, "could not Add the quantity", nil, err.Error())
+		c.JSON(http.StatusBadRequest, errorRes)
+		return
+	}
+
+	successRes := response.ClientResponse(http.StatusOK, "Successfully added quantity", nil, nil)
+	c.JSON(http.StatusOK, successRes)
+}
+
+func (i *UserHandler) UpdateQuantityLess(c *gin.Context) {
+	id, err := strconv.Atoi(c.Query("id"))
+	if err != nil {
+		errorRes := response.ClientResponse(http.StatusBadRequest, "check parameters properly", nil, err.Error())
+		c.JSON(http.StatusBadRequest, errorRes)
+		return
+	}
+
+	inv, err := strconv.Atoi(c.Query("inventory"))
+	if err != nil {
+		errorRes := response.ClientResponse(http.StatusBadRequest, "check parameters properly", nil, err.Error())
+		c.JSON(http.StatusBadRequest, errorRes)
+		return
+	}
+
+	if err := i.userUseCase.UpdateQuantityLess(id, inv); err != nil {
+		errorRes := response.ClientResponse(http.StatusBadRequest, "could not  subtract quantity", nil, err.Error())
+		c.JSON(http.StatusBadRequest, errorRes)
+		return
+	}
+
+	successRes := response.ClientResponse(http.StatusOK, "Successfully subtracted quantity", nil, nil)
+	c.JSON(http.StatusOK, successRes)
 }

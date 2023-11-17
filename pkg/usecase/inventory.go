@@ -73,7 +73,7 @@ func (i inventoryUseCase) UpdateInventory(pid int, stock int) (models.InventoryR
 	}
 
 	if !result {
-		return models.InventoryResponse{}, errors.New("There is no inventory as you mentioned")
+		return models.InventoryResponse{}, errors.New("there is no inventory as you mentioned")
 	}
 
 	newcat, err := i.repository.UpdateInventory(pid, stock)

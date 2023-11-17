@@ -2,8 +2,9 @@ package handler
 
 import (
 	"HeadZone/pkg/usecase/interfaces"
-	"HeadZone/pkg/utils/models"
+	"strconv"
 
+	models "HeadZone/pkg/utils/models"
 	"HeadZone/pkg/utils/response"
 	"net/http"
 
@@ -37,4 +38,21 @@ func (i *CartHandler) AddToCart(c *gin.Context) {
 	successRes := response.ClientResponse(http.StatusOK, "Successfully added To cart", nil, nil)
 	c.JSON(http.StatusOK, successRes)
 
+}
+func (i *CartHandler) CheckOut(c *gin.Context) {
+	id, err := strconv.Atoi(c.Query("id"))
+	if err != nil {
+		errorRes := response.ClientResponse(http.StatusBadRequest, "user_id not in right format", nil, err.Error())
+		c.JSON(http.StatusBadRequest, errorRes)
+		return
+	}
+
+	products, err := i.usecase.CheckOut(id)
+	if err != nil {
+		errorRes := response.ClientResponse(http.StatusBadRequest, "could not open checkout", nil, err.Error())
+		c.JSON(http.StatusBadRequest, errorRes)
+		return
+	}
+	successRes := response.ClientResponse(http.StatusOK, "Successfully got all records", products, nil)
+	c.JSON(http.StatusOK, successRes)
 }

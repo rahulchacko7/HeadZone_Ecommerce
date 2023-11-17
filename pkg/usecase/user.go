@@ -215,3 +215,92 @@ func (i *userUseCase) ChangePassword(id int, old string, password string, repass
 	return i.userRepo.ChangePassword(id, string(newpassword))
 
 }
+
+func (u *userUseCase) GetCart(id int) (models.GetCartResponse, error) {
+	cart_id, err := u.userRepo.GetCartID(id)
+	if err != nil {
+		return models.GetCartResponse{}, errors.New(InternalError)
+	}
+
+	products, err := u.userRepo.GetProductsInCart(cart_id)
+	if err != nil {
+		return models.GetCartResponse{}, errors.New(InternalError)
+	}
+
+	var product_names []string
+	for i := range products {
+		product_name, err := u.userRepo.FindProductNames(products[i])
+		if err != nil {
+			return models.GetCartResponse{}, errors.New(InternalError)
+		}
+		product_names = append(product_names, product_name)
+	}
+
+	var quantity []int
+	for i := range products {
+		q, err := u.userRepo.FindCartQuantity(cart_id, products[i])
+		if err != nil {
+			return models.GetCartResponse{}, errors.New(InternalError)
+		}
+		quantity = append(quantity, q)
+	}
+
+	var categories []int
+	for i := range products {
+		c, err := u.userRepo.FindCategory(products[i])
+		if err != nil {
+			return models.GetCartResponse{}, errors.New(InternalError)
+		}
+		categories = append(categories, c)
+	}
+
+	var getcart []models.GetCart
+	for i := range product_names {
+		var get models.GetCart
+		get.ID = products[i]
+		get.ProductName = product_names[i]
+		get.Category_id = categories[i]
+		get.Quantity = quantity[i]
+		getcart = append(getcart, get)
+	}
+
+	var response models.GetCartResponse
+	response.ID = cart_id
+	response.Data = getcart
+
+	return response, nil
+
+}
+
+func (i *userUseCase) RemoveFromCart(cart, inventory int) error {
+
+	err := i.userRepo.RemoveFromCart(cart, inventory)
+	if err != nil {
+		return err
+	}
+
+	return nil
+
+}
+
+func (i *userUseCase) UpdateQuantityAdd(id, inv int) error {
+
+	err := i.userRepo.UpdateQuantityAdd(id, inv)
+	if err != nil {
+		return err
+	}
+
+	return nil
+
+}
+
+func (i *userUseCase) UpdateQuantityLess(id, inv int) error {
+
+	err := i.userRepo.UpdateQuantityLess(id, inv)
+	if err != nil {
+		return err
+	}
+
+	return nil
+
+}

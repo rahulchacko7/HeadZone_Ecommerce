@@ -166,3 +166,102 @@ func (i *userDatabase) GetPassword(id int) (string, error) {
 	return userPassword, nil
 
 }
+
+func (ad *userDatabase) GetCartID(id int) (int, error) {
+
+	var cart_id int
+
+	if err := ad.DB.Raw("select id from carts where user_id=?", id).Scan(&cart_id).Error; err != nil {
+		return 0, err
+	}
+
+	return cart_id, nil
+
+}
+
+func (ad *userDatabase) GetProductsInCart(cart_id int) ([]int, error) {
+
+	var cart_products []int
+
+	if err := ad.DB.Raw("select inventory_id from line_items where cart_id=?", cart_id).Scan(&cart_products).Error; err != nil {
+		return []int{}, err
+	}
+
+	return cart_products, nil
+
+}
+
+func (ad *userDatabase) FindProductNames(inventory_id int) (string, error) {
+
+	var product_name string
+
+	if err := ad.DB.Raw("select product_name from inventories where id=?", inventory_id).Scan(&product_name).Error; err != nil {
+		return "", err
+	}
+
+	return product_name, nil
+
+}
+
+func (ad *userDatabase) FindCartQuantity(cart_id, inventory_id int) (int, error) {
+
+	var quantity int
+
+	if err := ad.DB.Raw("select quantity from line_items where cart_id=$1 and inventory_id=$2", cart_id, inventory_id).Scan(&quantity).Error; err != nil {
+		return 0, err
+	}
+
+	return quantity, nil
+
+}
+
+func (ad *userDatabase) FindCategory(inventory_id int) (int, error) {
+
+	var category int
+
+	if err := ad.DB.Raw("select category_id from inventories where id=?", inventory_id).Scan(&category).Error; err != nil {
+		return 0, err
+	}
+
+	return category, nil
+
+}
+
+func (ad *userDatabase) RemoveFromCart(cart, inventory int) error {
+
+	if err := ad.DB.Exec(`DELETE FROM line_items WHERE cart_id = $1 AND inventory_id = $2`, cart, inventory).Error; err != nil {
+		return err
+	}
+
+	return nil
+
+}
+
+func (ad *userDatabase) UpdateQuantityAdd(id, inv_id int) error {
+
+	query := `
+		UPDATE line_items
+		SET quantity = quantity + 1
+		WHERE cart_id=$1 AND inventory_id=$2
+	`
+
+	result := ad.DB.Exec(query, id, inv_id)
+	if result.Error != nil {
+		return result.Error
+	}
+
+	return nil
+}
+
+func (ad *userDatabase) UpdateQuantityLess(id, inv_id int) error {
+
+	if err := ad.DB.Exec(`UPDATE line_items
+	SET quantity = quantity - 1
+	WHERE cart_id = $1 AND inventory_id=$2;
+	`, id, inv_id).Error; err != nil {
+		return err
+	}
+
+	return nil
+
+}
