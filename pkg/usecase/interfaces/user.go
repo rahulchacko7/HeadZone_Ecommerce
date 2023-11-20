@@ -13,13 +13,10 @@ type UserUseCase interface {
 	AddAddress(id int, address models.AddAddress) error
 	GetAddresses(id int) ([]domain.Address, error)
 
-	EditName(id int, name string) error
-	EditEmail(id int, email string) error
-	EditPhone(id int, phone string) error
+	EditDetails(int, models.EditDetailsResponse) (models.EditDetailsResponse, error)
 
 	ChangePassword(id int, old string, password string, repassword string) error
 
 	RemoveFromCart(cart, inventory int) error
-	UpdateQuantityAdd(id, inv_id int) error
-	UpdateQuantityLess(id, inv_id int) error
+	UpdateQuantity(id, inv_id, qty int) error
 }

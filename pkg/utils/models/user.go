@@ -69,15 +69,10 @@ type AddAddress struct {
 	Pin       string `json:"pin" validate:"required"`
 }
 
-type EditName struct {
-	Name string `json:"name"`
-}
-
-type EditEmail struct {
-	Email string `json:"email"`
-}
-
-type EditPhone struct {
+type EditDetailsResponse struct {
+	//	Id    int    `json:"id"`
+	Name  string `json:"name"`
+	Email string `json:"email" validate:"email"`
 	Phone string `json:"phone"`
 }
 
@@ -88,12 +83,11 @@ type ChangePassword struct {
 }
 
 type GetCart struct {
-	ID          int    `json:"product_id"`
-	ProductName string `json:"product_name"`
-	Category_id int    `json:"category_id"`
-	Quantity    int    `json:"quantity"`
-	//	StockAvailable int     `json:"stock"`
-	Price int `json:"price"`
+	ID          int     `json:"product_id"`
+	ProductName string  `json:"product_name"`
+	Category_id int     `json:"category_id"`
+	Quantity    int     `json:"quantity"`
+	Total       float64 `json:"total_price"`
 }
 
 type CheckOut struct {

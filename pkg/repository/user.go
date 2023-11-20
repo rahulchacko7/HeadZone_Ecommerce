@@ -118,34 +118,52 @@ func (ad *userDatabase) GetAddresses(id int) ([]domain.Address, error) {
 
 }
 
-func (i *userDatabase) EditName(id int, name string) error {
-	err := i.DB.Exec(`update users set name=$1 where id=$2`, name, id).Error
-	if err != nil {
-		return err
+func (i *userDatabase) EditDetails(id int, user models.EditDetailsResponse) (models.EditDetailsResponse, error) {
+
+	var body models.EditDetailsResponse
+
+	args := []interface{}{}
+	query := "update users set"
+
+	if user.Email != "" {
+		query += " email = $1,"
+
+		args = append(args, user.Email)
 	}
 
-	return nil
-}
-
-func (i *userDatabase) EditEmail(id int, email string) error {
-	err := i.DB.Exec(`update users set email=$1 where id=$2`, email, id).Error
-	if err != nil {
-		return err
+	if user.Name != "" {
+		query += " name = $2,"
+		args = append(args, user.Name)
 	}
 
-	return nil
-}
+	if user.Phone != "" {
+		query += " phone = $3,"
 
-func (i *userDatabase) EditPhone(id int, phone string) error {
-	err := i.DB.Exec(`update users set phone=$1 where id=$2`, phone, id).Error
-	if err != nil {
-		return err
+		args = append(args, user.Phone)
 	}
 
-	return nil
+	query = query[:len(query)-1] + " where id = $4"
+
+	args = append(args, id)
+	// fmt.Println(query, args)
+	err := i.DB.Exec(query, args...).Error
+	if err != nil {
+		return models.EditDetailsResponse{}, err
+	}
+	query2 := "select * from users where id = ?"
+	if err := i.DB.Raw(query2, id).Scan(&body).Error; err != nil {
+		return models.EditDetailsResponse{}, err
+	}
+
+	return body, nil
+
 }
 
 func (i *userDatabase) ChangePassword(id int, password string) error {
+
+	if id <= 0 {
+		return errors.New("negative or zero values are not allowed")
+	}
 
 	err := i.DB.Exec("UPDATE users SET password=$1 WHERE id=$2", password, id).Error
 	if err != nil {
@@ -158,6 +176,10 @@ func (i *userDatabase) ChangePassword(id int, password string) error {
 
 func (i *userDatabase) GetPassword(id int) (string, error) {
 
+	if id <= 0 {
+		return "", errors.New("negative or zero values are not allowed")
+	}
+
 	var userPassword string
 	err := i.DB.Raw("select password from users where id = ?", id).Scan(&userPassword).Error
 	if err != nil {
@@ -168,6 +190,10 @@ func (i *userDatabase) GetPassword(id int) (string, error) {
 }
 
 func (ad *userDatabase) GetCartID(id int) (int, error) {
+
+	if id <= 0 {
+		return 0, errors.New("negative or zero values are not allowed")
+	}
 
 	var cart_id int
 
@@ -181,6 +207,10 @@ func (ad *userDatabase) GetCartID(id int) (int, error) {
 
 func (ad *userDatabase) GetProductsInCart(cart_id int) ([]int, error) {
 
+	if cart_id <= 0 {
+		return nil, errors.New("negative or zero values are not allowed")
+	}
+
 	var cart_products []int
 
 	if err := ad.DB.Raw("select inventory_id from line_items where cart_id=?", cart_id).Scan(&cart_products).Error; err != nil {
@@ -192,6 +222,10 @@ func (ad *userDatabase) GetProductsInCart(cart_id int) ([]int, error) {
 }
 
 func (ad *userDatabase) FindProductNames(inventory_id int) (string, error) {
+
+	if inventory_id <= 0 {
+		return "", errors.New("negative or zero values are not allowed")
+	}
 
 	var product_name string
 
@@ -205,6 +239,10 @@ func (ad *userDatabase) FindProductNames(inventory_id int) (string, error) {
 
 func (ad *userDatabase) FindCartQuantity(cart_id, inventory_id int) (int, error) {
 
+	if cart_id <= 0 || inventory_id <= 0 {
+		return 0, errors.New("negative or zero values are not allowed")
+	}
+
 	var quantity int
 
 	if err := ad.DB.Raw("select quantity from line_items where cart_id=$1 and inventory_id=$2", cart_id, inventory_id).Scan(&quantity).Error; err != nil {
@@ -215,19 +253,47 @@ func (ad *userDatabase) FindCartQuantity(cart_id, inventory_id int) (int, error)
 
 }
 
-func (ad *userDatabase) FindCategory(inventory_id int) (int, error) {
+func (ad *userDatabase) FindPrice(inventory_id int) (float64, error) {
 
-	var category int
+	var price float64
 
-	if err := ad.DB.Raw("select category_id from inventories where id=?", inventory_id).Scan(&category).Error; err != nil {
+	if err := ad.DB.Raw("select price from inventories where id=?", inventory_id).Scan(&price).Error; err != nil {
 		return 0, err
 	}
 
-	return category, nil
+	return price, nil
 
 }
 
+func (ad *userDatabase) FindCategory(inventoryID int) (int, error) {
+	if inventoryID <= 0 {
+		return 0, errors.New("negative or zero values are not allowed")
+	}
+
+	var categoryID int
+
+	if err := ad.DB.Raw("SELECT category_id FROM inventories WHERE id = ?", inventoryID).Scan(&categoryID).Error; err != nil {
+		return 0, err
+	}
+
+	return categoryID, nil
+}
+
+func (i *userDatabase) FindStock(id int) (int, error) {
+	var stock int
+	err := i.DB.Raw("SELECT stock FROM inventories WHERE id = ?", id).Scan(&stock).Error
+	if err != nil {
+		return 0, err
+	}
+
+	return stock, nil
+}
+
 func (ad *userDatabase) RemoveFromCart(cart, inventory int) error {
+
+	if cart <= 0 || inventory <= 0 {
+		return errors.New("negative or zero values are not allowed")
+	}
 
 	if err := ad.DB.Exec(`DELETE FROM line_items WHERE cart_id = $1 AND inventory_id = $2`, cart, inventory).Error; err != nil {
 		return err
@@ -236,32 +302,28 @@ func (ad *userDatabase) RemoveFromCart(cart, inventory int) error {
 	return nil
 
 }
+func (ad *userDatabase) UpdateQuantity(id, invID, qty int) error {
 
-func (ad *userDatabase) UpdateQuantityAdd(id, inv_id int) error {
+	if id <= 0 || invID <= 0 || qty <= 0 {
+		return errors.New("negative or zero values are not allowed")
+	}
 
-	query := `
-		UPDATE line_items
-		SET quantity = quantity + 1
-		WHERE cart_id=$1 AND inventory_id=$2
-	`
+	if qty >= 25 {
+		return errors.New("choose number of items below 25")
+	}
 
-	result := ad.DB.Exec(query, id, inv_id)
-	if result.Error != nil {
-		return result.Error
+	if qty >= 0 {
+		query := `
+			UPDATE line_items
+			SET quantity = $1
+			WHERE cart_id = $2 AND inventory_id = $3
+		`
+
+		result := ad.DB.Exec(query, qty, id, invID)
+		if result.Error != nil {
+			return result.Error
+		}
 	}
 
 	return nil
-}
-
-func (ad *userDatabase) UpdateQuantityLess(id, inv_id int) error {
-
-	if err := ad.DB.Exec(`UPDATE line_items
-	SET quantity = quantity - 1
-	WHERE cart_id = $1 AND inventory_id=$2;
-	`, id, inv_id).Error; err != nil {
-		return err
-	}
-
-	return nil
-
 }

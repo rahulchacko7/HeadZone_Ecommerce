@@ -158,36 +158,14 @@ func (i *userUseCase) GetAddresses(id int) ([]domain.Address, error) {
 
 }
 
-func (i *userUseCase) EditName(id int, name string) error {
+func (i *userUseCase) EditDetails(id int, user models.EditDetailsResponse) (models.EditDetailsResponse, error) {
 
-	err := i.userRepo.EditName(id, name)
+	body, err := i.userRepo.EditDetails(id, user)
 	if err != nil {
-		return errors.New("could not change")
+		return models.EditDetailsResponse{}, err
 	}
 
-	return nil
-
-}
-
-func (i *userUseCase) EditEmail(id int, email string) error {
-
-	err := i.userRepo.EditEmail(id, email)
-	if err != nil {
-		return errors.New("could not change")
-	}
-
-	return nil
-
-}
-
-func (i *userUseCase) EditPhone(id int, phone string) error {
-
-	err := i.userRepo.EditPhone(id, phone)
-	if err != nil {
-		return errors.New("could not change")
-	}
-
-	return nil
+	return body, nil
 
 }
 
@@ -217,16 +195,18 @@ func (i *userUseCase) ChangePassword(id int, old string, password string, repass
 }
 
 func (u *userUseCase) GetCart(id int) (models.GetCartResponse, error) {
+
+	//find cart id
 	cart_id, err := u.userRepo.GetCartID(id)
 	if err != nil {
 		return models.GetCartResponse{}, errors.New(InternalError)
 	}
-
+	//find products inide cart
 	products, err := u.userRepo.GetProductsInCart(cart_id)
 	if err != nil {
 		return models.GetCartResponse{}, errors.New(InternalError)
 	}
-
+	//find product names
 	var product_names []string
 	for i := range products {
 		product_name, err := u.userRepo.FindProductNames(products[i])
@@ -236,6 +216,7 @@ func (u *userUseCase) GetCart(id int) (models.GetCartResponse, error) {
 		product_names = append(product_names, product_name)
 	}
 
+	//find quantity
 	var quantity []int
 	for i := range products {
 		q, err := u.userRepo.FindCartQuantity(cart_id, products[i])
@@ -243,6 +224,15 @@ func (u *userUseCase) GetCart(id int) (models.GetCartResponse, error) {
 			return models.GetCartResponse{}, errors.New(InternalError)
 		}
 		quantity = append(quantity, q)
+	}
+
+	var price []float64
+	for i := range products {
+		q, err := u.userRepo.FindPrice(products[i])
+		if err != nil {
+			return models.GetCartResponse{}, errors.New(InternalError)
+		}
+		price = append(price, q)
 	}
 
 	var categories []int
@@ -261,12 +251,16 @@ func (u *userUseCase) GetCart(id int) (models.GetCartResponse, error) {
 		get.ProductName = product_names[i]
 		get.Category_id = categories[i]
 		get.Quantity = quantity[i]
+		get.Total = (price[i]) * float64(quantity[i])
+
 		getcart = append(getcart, get)
 	}
 
 	var response models.GetCartResponse
 	response.ID = cart_id
 	response.Data = getcart
+
+	//then return in appropriate format
 
 	return response, nil
 
@@ -283,20 +277,9 @@ func (i *userUseCase) RemoveFromCart(cart, inventory int) error {
 
 }
 
-func (i *userUseCase) UpdateQuantityAdd(id, inv int) error {
+func (i *userUseCase) UpdateQuantity(id, inv, qty int) error {
 
-	err := i.userRepo.UpdateQuantityAdd(id, inv)
-	if err != nil {
-		return err
-	}
-
-	return nil
-
-}
-
-func (i *userUseCase) UpdateQuantityLess(id, inv int) error {
-
-	err := i.userRepo.UpdateQuantityLess(id, inv)
+	err := i.userRepo.UpdateQuantity(id, inv, qty)
 	if err != nil {
 		return err
 	}

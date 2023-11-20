@@ -16,9 +16,7 @@ type UserRepository interface {
 	AddAddress(id int, address models.AddAddress, result bool) error
 	GetAddresses(id int) ([]domain.Address, error)
 
-	EditName(id int, name string) error
-	EditEmail(id int, email string) error
-	EditPhone(id int, phone string) error
+	EditDetails(id int, user models.EditDetailsResponse) (models.EditDetailsResponse, error)
 
 	ChangePassword(id int, password string) error
 	GetPassword(id int) (string, error)
@@ -27,9 +25,10 @@ type UserRepository interface {
 	GetProductsInCart(cart_id int) ([]int, error)
 	FindProductNames(inventory_id int) (string, error)
 	FindCartQuantity(cart_id, inventory_id int) (int, error)
+	FindPrice(inventory_id int) (float64, error)
+	FindStock(id int) (int, error)
 	FindCategory(inventory_id int) (int, error)
 
 	RemoveFromCart(cart, inventory int) error
-	UpdateQuantityAdd(id, inv_id int) error
-	UpdateQuantityLess(id, inv_id int) error
+	UpdateQuantity(id, inv_id, qty int) error
 }

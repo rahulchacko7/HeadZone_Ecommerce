@@ -15,22 +15,20 @@ func UserRoutes(engine *gin.RouterGroup, userHandler *handler.UserHandler, otpHa
 	engine.POST("/otplogin", otpHandler.SendOTP)
 	engine.POST("/verifyotp", otpHandler.VerifyOTP)
 
-	engine.GET("/viewproducts", inventoryHandler.ListProducts)
+	engine.GET("", inventoryHandler.ListProducts)
 
 	engine.Use(middleware.UserAuthMiddleware)
 	{
 
 		profile := engine.Group("/profile")
 		{
-			profile.GET("/userdetails", userHandler.GetUserDetails)
-			profile.GET("/view", userHandler.GetAddresses)
-			profile.POST("/address/add", userHandler.AddAddress)
+			profile.GET("", userHandler.GetUserDetails)
+			profile.GET("/address", userHandler.GetAddresses)
+			profile.POST("", userHandler.AddAddress)
 
 			edit := profile.Group("/edit")
 			{
-				edit.PUT("/name", userHandler.EditName)
-				edit.PUT("/email", userHandler.EditEmail)
-				edit.PUT("/phone", userHandler.EditPhone)
+				edit.PUT("", userHandler.EditDetails)
 			}
 
 			security := profile.Group("/security")
@@ -43,27 +41,19 @@ func UserRoutes(engine *gin.RouterGroup, userHandler *handler.UserHandler, otpHa
 		home := engine.Group("/home")
 		{
 			home.GET("/products", inventoryHandler.ListProducts)
-			home.GET("/product/details", inventoryHandler.ShowIndividualProducts)
-			home.POST("/add-to-cart", cartHandler.AddToCart)
 		}
+
 		cart := engine.Group("/cart")
 		{
-			cart.GET("/view-cart-items", userHandler.GetCart)
-			cart.DELETE("/remove-cart-item", userHandler.RemoveFromCart)
-			cart.PUT("/Add/Quantity", userHandler.UpdateQuantityAdd)
-			cart.PUT("/Reduce/Quantity", userHandler.UpdateQuantityLess)
-
+			cart.POST("", cartHandler.AddToCart)
+			cart.GET("", userHandler.GetCart)
+			cart.DELETE("", userHandler.RemoveFromCart)
+			cart.PUT("", userHandler.UpdateQuantity)
 		}
-		// order := engine.Group("/order")
-		// {
-		// 	order.POST("", orderHandler.GetOrders)
-		// 	order.DELETE("", orderHandler.CancelOrder)
-		// }
 
 		checkout := engine.Group("/check-out")
 		{
-			checkout.GET("/check-out-product", cartHandler.CheckOut)
-			//checkout.POST("/order", orderHandler.OrderItemsFromCart)
+			checkout.GET("", cartHandler.CheckOut)
 		}
 
 	}
