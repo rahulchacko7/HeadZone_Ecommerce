@@ -4,6 +4,7 @@ import (
 	domain "HeadZone/pkg/domain"
 	interfaces "HeadZone/pkg/repository/interfaces"
 	services "HeadZone/pkg/usecase/interfaces"
+	"errors"
 	"fmt"
 )
 
@@ -56,3 +57,29 @@ func (i *orderUseCase) GetOrders(orderId int) (domain.OrderResponse, error) {
 	}
 	return orders, err
 }
+
+func (i *orderUseCase) CancelOrder(orderID int) error {
+	orderStatus, err := i.orderRepository.CheckOrderStatusByID(orderID)
+	if err != nil {
+		return err
+	}
+
+	if orderStatus != "PENDING" {
+		return errors.New("order cannot be canceled, kindly return the product if accidentally booked")
+	}
+
+	err = i.orderRepository.CancelOrder(orderID)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// func (i *orderUseCase) GetOrderDetails(userId int, page int, count int) (models.AllOrderResponse, error) {
+// 	allorder, err := i.orderRepository.GetAllOrders(userId, page, count)
+// 	if err != nil {
+// 		return models.AllOrderResponse{}, err
+// 	}
+// 	return allorder, err
+// }

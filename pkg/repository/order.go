@@ -70,3 +70,58 @@ func (i *orderRepository) GetOrders(orderID int) (domain.OrderResponse, error) {
 
 	return order, nil
 }
+
+func (o *orderRepository) CheckOrderStatusByID(id int) (string, error) {
+
+	var status string
+	err := o.DB.Raw("select order_status from orders where id = ?", id).Scan(&status).Error
+	if err != nil {
+		return "", err
+	}
+
+	return status, nil
+}
+
+func (i *orderRepository) CancelOrder(id int) error {
+
+	if err := i.DB.Exec("update orders set order_status='CANCELED' where id=$1", id).Error; err != nil {
+		return err
+	}
+
+	return nil
+
+}
+
+// func (i *orderRepository) GetOrderDetails(userID, page, count int) ([]models.AllOrderResponse, error) {
+// 	if userID <= 0 || page <= 0 || count <= 0 {
+// 		return nil, errors.New("please provide positive numbers only")
+// 	}
+
+// 	if page == 0 {
+// 		page = 1
+// 	}
+// 	offset := (page - 1) * count
+
+// 	var orders []models.AllOrderResponse
+
+// 	// Fetch orders for the given user within the provided pagination limits
+// 	i.DB.Raw("SELECT id as order_id, final_price, shipment_status, payment_status FROM orders WHERE user_id = ? LIMIT ? OFFSET ?", userID, count, offset).Scan(&orders)
+
+// 	// Iterate over the fetched orders and retrieve their associated order items
+// 	for idx := range orders {
+// 		var orderItems []models.AllOrderResponse
+// 		i.DB.Raw(`SELECT
+// 			order_items.order_id,
+// 			order_items.inventory_id,
+// 			order_items.quantity,
+// 			order_items.total_price
+// 		FROM
+// 			order_items
+// 		WHERE
+// 			order_items.order_id = ?`, orders[idx].OrderDetails.ID).Scan(&orderItems)
+
+// 		orders[idx].AllOrderResponse = orderItems
+// 	}
+
+// 	return orders, nil
+// }

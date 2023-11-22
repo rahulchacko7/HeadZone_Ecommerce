@@ -59,18 +59,55 @@ func (i *OrderHandler) GetOrders(c *gin.Context) {
 
 }
 
-func (i *OrderHandler) GetAllOrders(c *gin.Context) {
+func (i OrderHandler) CancelOrder(c *gin.Context) {
+	idString := c.Query("order_id")
+	orderID, err := strconv.Atoi(idString)
 
-	idString, _ := c.Get("id")
-	id, _ := idString.(int)
-
-	orders, err := i.orderUseCase.GetAllOrders(id)
 	if err != nil {
-		errorRes := response.ClientResponse(http.StatusBadRequest, "could not retrieve orders", nil, err.Error())
+		errorRes := response.ClientResponse(http.StatusBadRequest, "check your id again", nil, err.Error())
 		c.JSON(http.StatusBadRequest, errorRes)
 		return
 	}
-	successRes := response.ClientResponse(http.StatusOK, "Successfully retrieved all orders", orders, nil)
-	c.JSON(http.StatusOK, successRes)
 
+	err = i.orderUseCase.CancelOrder(orderID)
+	if err != nil {
+		errorRes := response.ClientResponse(http.StatusBadRequest, "could not cancel the order", nil, err.Error())
+		c.JSON(http.StatusBadRequest, errorRes)
+		return
+	}
+
+	successRes := response.ClientResponse(http.StatusOK, "Order successfully canceled", nil, nil)
+	c.JSON(http.StatusOK, successRes)
 }
+
+// func (i *OrderHandler) GetAllOrders(c *gin.Context) {
+
+// 	pageStr := c.DefaultQuery("page", "1")
+// 	page, err := strconv.Atoi(pageStr)
+// 	if err != nil {
+// 		errs := response.ClientResponse(http.StatusBadRequest, "page number not in correct format", nil, err.Error())
+// 		c.JSON(http.StatusBadRequest, errs)
+// 		return
+// 	}
+
+// 	pageSize, err := strconv.Atoi(c.DefaultQuery("count", "10"))
+// 	if err != nil {
+// 		errs := response.ClientResponse(http.StatusBadRequest, "page count not in right format", nil, err.Error())
+// 		c.JSON(http.StatusBadRequest, errs)
+// 		return
+// 	}
+
+// 	id, _ := c.Get("user_id")
+// 	UserID := id.(int)
+
+// 	orders, err := i.orderUseCase.GetAllOrders(UserID, page, pageSize)
+
+// 	if err != nil {
+// 		errorRes := response.ClientResponse(http.StatusBadRequest, "could not retrieve orders", nil, err.Error())
+// 		c.JSON(http.StatusBadRequest, errorRes)
+// 		return
+// 	}
+// 	successRes := response.ClientResponse(http.StatusOK, "Successfully retrieved all orders", orders, nil)
+// 	c.JSON(http.StatusOK, successRes)
+
+// }
