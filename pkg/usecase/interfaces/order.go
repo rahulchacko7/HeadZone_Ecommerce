@@ -2,11 +2,12 @@ package interfaces
 
 import (
 	"HeadZone/pkg/domain"
+	"HeadZone/pkg/utils/models"
 )
 
 type OrderUseCase interface {
 	OrderItemsFromCart(userid int, addressid int, paymentid int) error
 	GetOrders(orderId int) (domain.OrderResponse, error)
-	// GetOrderDetails(userId int, page int, count int) (models.AllOrderResponse, error)
+	GetAllOrders(userId, page, pageSize int) ([]models.OrderDetails, error)
 	CancelOrder(orderId int) error
 }

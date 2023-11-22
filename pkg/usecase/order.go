@@ -4,6 +4,7 @@ import (
 	domain "HeadZone/pkg/domain"
 	interfaces "HeadZone/pkg/repository/interfaces"
 	services "HeadZone/pkg/usecase/interfaces"
+	"HeadZone/pkg/utils/models"
 	"errors"
 	"fmt"
 )
@@ -55,7 +56,7 @@ func (i *orderUseCase) GetOrders(orderId int) (domain.OrderResponse, error) {
 	if err != nil {
 		return domain.OrderResponse{}, err
 	}
-	return orders, err
+	return orders, nil
 }
 
 func (i *orderUseCase) CancelOrder(orderID int) error {
@@ -76,10 +77,11 @@ func (i *orderUseCase) CancelOrder(orderID int) error {
 	return nil
 }
 
-// func (i *orderUseCase) GetOrderDetails(userId int, page int, count int) (models.AllOrderResponse, error) {
-// 	allorder, err := i.orderRepository.GetAllOrders(userId, page, count)
-// 	if err != nil {
-// 		return models.AllOrderResponse{}, err
-// 	}
-// 	return allorder, err
-// }
+func (i *orderUseCase) GetAllOrders(userId, page, pageSize int) ([]models.OrderDetails, error) {
+	fmt.Println("dddd", userId)
+	allorder, err := i.orderRepository.GetAllOrders(userId, page, pageSize)
+	if err != nil {
+		return []models.OrderDetails{}, err
+	}
+	return allorder, nil
+}

@@ -92,36 +92,17 @@ func (i *orderRepository) CancelOrder(id int) error {
 
 }
 
-// func (i *orderRepository) GetOrderDetails(userID, page, count int) ([]models.AllOrderResponse, error) {
-// 	if userID <= 0 || page <= 0 || count <= 0 {
-// 		return nil, errors.New("please provide positive numbers only")
-// 	}
+func (i *orderRepository) GetAllOrders(userID, page, pageSize int) ([]models.OrderDetails, error) {
+	if page == 0 {
+		page = 1
+	}
+	offset := (page - 1) * pageSize
+	var order []models.OrderDetails
 
-// 	if page == 0 {
-// 		page = 1
-// 	}
-// 	offset := (page - 1) * count
-
-// 	var orders []models.AllOrderResponse
-
-// 	// Fetch orders for the given user within the provided pagination limits
-// 	i.DB.Raw("SELECT id as order_id, final_price, shipment_status, payment_status FROM orders WHERE user_id = ? LIMIT ? OFFSET ?", userID, count, offset).Scan(&orders)
-
-// 	// Iterate over the fetched orders and retrieve their associated order items
-// 	for idx := range orders {
-// 		var orderItems []models.AllOrderResponse
-// 		i.DB.Raw(`SELECT
-// 			order_items.order_id,
-// 			order_items.inventory_id,
-// 			order_items.quantity,
-// 			order_items.total_price
-// 		FROM
-// 			order_items
-// 		WHERE
-// 			order_items.order_id = ?`, orders[idx].OrderDetails.ID).Scan(&orderItems)
-
-// 		orders[idx].AllOrderResponse = orderItems
-// 	}
-
-// 	return orders, nil
-// }
+	err := i.DB.Raw("SELECT id as order_id, address_id, payment_method_id, final_price as price, order_status, payment_status FROM orders WHERE user_id = ? OFFSET ? LIMIT ?", userID, offset, pageSize).Scan(&order).Error
+	if err != nil {
+		return nil, err
+	}
+	fmt.Println("Retrieved orders:", order)
+	return order, nil
+}

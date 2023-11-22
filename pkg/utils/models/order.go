@@ -1,11 +1,12 @@
 package models
 
 type OrderDetails struct {
-	ID            int     `json:"order_id"`
-	UserName      string  `json:"name"`
-	AddressID     int     `json:"address_id"`
-	PaymentMethod string  `json:"payment_method"`
-	Amount        float64 `json:"amount"`
+	OrderID         int     `json:"order_id" gorm:"column:id"`
+	AddressID       int     `json:"address_id" gorm:"column:address_id"`
+	PaymentMethodID int     `json:"payment_method_id" gorm:"column:payment_method_id"`
+	Price           float64 `json:"price" gorm:"column:price"`
+	OrderStatus     string  `json:"order_status" gorm:"column:order_status"`
+	PaymentStatus   string  `json:"payment_status" gorm:"column:payment_status"`
 }
 
 type PaymentMethodResponse struct {
@@ -13,10 +14,9 @@ type PaymentMethodResponse struct {
 	Payment_Name string `json:"payment_name"`
 }
 
-type AllOrderResponse struct {
-	OrderDetails OrderDetails
-	Data         []Inventorories
-}
+// type AllOrderResponse struct {
+// 	OrderDetails OrderDetails
+// }
 
 type Inventorories struct {
 	ID          uint     `json:"id" gorm:"primaryKey"`
