@@ -11,13 +11,15 @@ type cartUseCase struct {
 	repo                interfaces.CartRepository
 	inventoryRepository interfaces.InventoryRepository
 	userUseCase         services.UserUseCase
+	adrepo              interfaces.AdminRepository
 }
 
-func NewCartUseCase(repo interfaces.CartRepository, inventoryRepo interfaces.InventoryRepository, userUseCase services.UserUseCase) services.CartUseCase {
+func NewCartUseCase(repo interfaces.CartRepository, inventoryRepo interfaces.InventoryRepository, userUseCase services.UserUseCase, adrepo interfaces.AdminRepository) services.CartUseCase {
 	return &cartUseCase{
 		repo:                repo,
 		inventoryRepository: inventoryRepo,
 		userUseCase:         userUseCase,
+		adrepo:              adrepo,
 	}
 }
 
@@ -67,6 +69,11 @@ func (i *cartUseCase) CheckOut(id int) (models.CheckOut, error) {
 		return models.CheckOut{}, err
 	}
 
+	paymethods, err := i.adrepo.GetPaymentMethod()
+	if err != nil {
+		return models.CheckOut{}, err
+	}
+
 	products, err := i.userUseCase.GetCart(id)
 	if err != nil {
 		return models.CheckOut{}, err
@@ -76,6 +83,7 @@ func (i *cartUseCase) CheckOut(id int) (models.CheckOut, error) {
 	checkout.CartID = products.ID
 	checkout.Addresses = address
 	checkout.Products = products.Data
+	checkout.PaymentMethod = paymethods
 
 	return checkout, err
 }

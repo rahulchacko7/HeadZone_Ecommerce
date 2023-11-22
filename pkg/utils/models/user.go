@@ -3,7 +3,7 @@ package models
 type UserDetails struct {
 	Name            string `json:"name"`
 	Email           string `json:"email" validate:"email"`
-	Phone           string `json:"phone"`
+	Phone           string `json:"phone" validate:"required"`
 	Password        string `json:"password"`
 	ConfirmPassword string `json:"confirmpassword"`
 }
@@ -30,7 +30,7 @@ type UserDetailsResponse struct {
 	Id    int    `json:"id"`
 	Name  string `json:"name"`
 	Email string `json:"email"`
-	Phone string `json:"phone"`
+	Phone string `json:"phone" validate:"required"`
 }
 
 type UserLogin struct {
@@ -43,7 +43,7 @@ type UserSignInResponse struct {
 	UserID   uint   `json:"user_id"`
 	Name     string `json:"name"`
 	Email    string `json:"email" validate:"email"`
-	Phone    string `json:"phone"`
+	Phone    string `json:"phone" validate:"required"`
 	Password string `json:"password"`
 }
 
@@ -51,7 +51,7 @@ type UserDetailsAtAdmin struct {
 	Id          int    `json:"id"`
 	Name        string `json:"name"`
 	Email       string `json:"email"`
-	Phone       string `json:"phone"`
+	Phone       string `json:"phone" validate:"required"`
 	BlockStatus bool   `json:"block_status"`
 }
 
@@ -65,7 +65,7 @@ type AddAddress struct {
 	Street    string `json:"street" validate:"required"`
 	City      string `json:"city" validate:"required"`
 	State     string `json:"state" validate:"required"`
-	Phone     string `json:"phone" validate:"require"`
+	Phone     string `json:"phone" validate:"required"`
 	Pin       string `json:"pin" validate:"required"`
 }
 
@@ -87,13 +87,15 @@ type GetCart struct {
 	ProductName string  `json:"product_name"`
 	Category_id int     `json:"category_id"`
 	Quantity    int     `json:"quantity"`
+	Price       int     `json:"price"`
 	Total       float64 `json:"total_price"`
 }
 
 type CheckOut struct {
-	CartID    int
-	Addresses []Address
-	Products  []GetCart
+	CartID        int
+	Addresses     []Address
+	Products      []GetCart
+	PaymentMethod []PaymentMethodResponse
 }
 
 type GetCartResponse struct {

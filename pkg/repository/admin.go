@@ -83,3 +83,52 @@ func (ad *adminRepository) GetUsers(page int) ([]models.UserDetailsAtAdmin, erro
 	return userDetails, nil
 
 }
+
+func (i *adminRepository) NewPaymentMethod(pay string) error {
+
+	if err := i.DB.Exec("insert into payment_methods(payment_name)values($1)", pay).Error; err != nil {
+		return err
+	}
+
+	return nil
+
+}
+
+func (a *adminRepository) ListPaymentMethods() ([]domain.PaymentMethod, error) {
+	var model []domain.PaymentMethod
+	err := a.DB.Raw("SELECT * FROM payment_methods where is_deleted = false").Scan(&model).Error
+	if err != nil {
+		return []domain.PaymentMethod{}, err
+	}
+
+	return model, nil
+}
+
+func (a *adminRepository) CheckIfPaymentMethodAlreadyExists(payment string) (bool, error) {
+	var count int64
+	err := a.DB.Raw("SELECT COUNT(*) FROM payment_methods WHERE payment_name = $1 and is_deleted = false", payment).Scan(&count).Error
+	if err != nil {
+		return false, err
+	}
+
+	return count > 0, nil
+}
+
+func (a *adminRepository) DeletePaymentMethod(id int) error {
+	err := a.DB.Exec("UPDATE payment_methods SET is_deleted = true WHERE id = $1 ", id).Error
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (a *adminRepository) GetPaymentMethod() ([]models.PaymentMethodResponse, error) {
+	var model []models.PaymentMethodResponse
+	err := a.DB.Raw("SELECT * FROM payment_methods").Scan(&model).Error
+	if err != nil {
+		return []models.PaymentMethodResponse{}, err
+	}
+
+	return model, nil
+}

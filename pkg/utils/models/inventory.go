@@ -74,10 +74,15 @@ type InventoryDetails struct {
 }
 
 type MakeOrder struct {
-	UserID    int `json:"user_id"`
-	AddressID int `json:"address_id"`
+	UserID          int       `json:"user_id"`
+	Products        []GetCart `json:"products"`
+	AddressID       int       `json:"address_id"`
+	PaymentMethodID int       `json:"payment_id"`
+	FinalPrice      float64   `json:"final_price"`
 }
+
 type Order struct {
-	UserID    int `json:"user_id"`
-	AddressID int `json:"address_id"`
+	UserID          int `json:"user_id"`
+	AddressID       int `json:"address_id"`
+	PaymentMethodID int `json:"payment_id"`
 }

@@ -131,3 +131,59 @@ func (a *AdminHandler) ValidateRefreshTokenAndCreateNewAccess(c *gin.Context) {
 
 	c.JSON(200, newAccessToken)
 }
+
+func (i *AdminHandler) NewPaymentMethod(c *gin.Context) {
+
+	var method models.NewPaymentMethod
+	if err := c.BindJSON(&method); err != nil {
+		errorRes := response.ClientResponse(http.StatusBadRequest, "fields provided are in wrong format", nil, err.Error())
+		c.JSON(http.StatusBadRequest, errorRes)
+		return
+	}
+
+	err := i.adminUseCase.NewPaymentMethod(method.PaymentMethod)
+	if err != nil {
+		errorRes := response.ClientResponse(http.StatusBadRequest, "Could not add the payment method", nil, err.Error())
+		c.JSON(http.StatusBadRequest, errorRes)
+		return
+	}
+
+	successRes := response.ClientResponse(http.StatusOK, "Successfully added Payment Method", nil, nil)
+	c.JSON(http.StatusOK, successRes)
+
+}
+
+func (a *AdminHandler) ListPaymentMethods(c *gin.Context) {
+
+	categories, err := a.adminUseCase.ListPaymentMethods()
+	if err != nil {
+		errorRes := response.ClientResponse(http.StatusInternalServerError, "fields provided are in wrong format", nil, err.Error())
+		c.JSON(http.StatusBadRequest, errorRes)
+		return
+	}
+
+	successRes := response.ClientResponse(http.StatusOK, "Successfully got all payment methods", categories, nil)
+	c.JSON(http.StatusOK, successRes)
+
+}
+
+func (a *AdminHandler) DeletePaymentMethod(c *gin.Context) {
+
+	id, err := strconv.Atoi(c.Query("id"))
+	if err != nil {
+		errorRes := response.ClientResponse(http.StatusBadRequest, "fields provided are in wrong format", nil, err.Error())
+		c.JSON(http.StatusBadRequest, errorRes)
+		return
+	}
+
+	err = a.adminUseCase.DeletePaymentMethod(id)
+	if err != nil {
+		errorRes := response.ClientResponse(http.StatusInternalServerError, "error in deleting data", nil, err.Error())
+		c.JSON(http.StatusBadRequest, errorRes)
+		return
+	}
+
+	successRes := response.ClientResponse(http.StatusOK, "Successfully deleted the Category", nil, nil)
+	c.JSON(http.StatusOK, successRes)
+
+}

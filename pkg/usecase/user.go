@@ -52,6 +52,12 @@ func (u *userUseCase) UserSignUp(user models.UserDetails) (models.TokenUsers, er
 
 	user.Password = hashedPassword
 
+	// countPhone := len(user.Phone)
+
+	// if countPhone != 10 {
+	// 	return models.TokenUsers{}, errors.New("invalid phone number")
+	// }
+
 	// add user details to the database
 	userData, err := u.userRepo.UserSignUp(user)
 	if err != nil {
@@ -251,6 +257,7 @@ func (u *userUseCase) GetCart(id int) (models.GetCartResponse, error) {
 		get.ProductName = product_names[i]
 		get.Category_id = categories[i]
 		get.Quantity = quantity[i]
+		get.Price = int(price[i])
 		get.Total = (price[i]) * float64(quantity[i])
 
 		getcart = append(getcart, get)

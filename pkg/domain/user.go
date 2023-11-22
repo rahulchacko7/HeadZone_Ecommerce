@@ -2,10 +2,10 @@ package domain
 
 type Users struct {
 	ID       uint   `json:"id" gorm:"unique;not null"`
-	Name     string `json:"name"`
+	Name     string `json:"name" validate:"required"`
 	Email    string `json:"email" validate:"email"`
 	Password string `json:"password" validate:"min=8,max=20"`
-	Phone    string `json:"phone"`
+	Phone    string `json:"phone" validate:"required"`
 	Blocked  bool   `json:"blocked" gorm:"default:false"`
 	IsAdmin  bool   `json:"is_admin" gorm:"default:false"`
 }
@@ -19,7 +19,7 @@ type Address struct {
 	Street    string `json:"street" validate:"required"`
 	City      string `json:"city" validate:"required"`
 	State     string `json:"state" validate:"required"`
-	Phone     string `json:"phone" gorm:"phone"`
+	Phone     string `json:"phone" validate:"required"`
 	Pin       string `json:"pin" validate:"required"`
 	// Default   bool   `json:"default" gorm:"default:false"`
 }

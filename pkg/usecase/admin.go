@@ -116,3 +116,43 @@ func (ad *adminUseCase) GetUsers(page int) ([]models.UserDetailsAtAdmin, error) 
 	return userDetails, nil
 
 }
+
+func (i *adminUseCase) NewPaymentMethod(id string) error {
+
+	exists, err := i.adminRepository.CheckIfPaymentMethodAlreadyExists(id)
+	if err != nil {
+		return err
+	}
+
+	if exists {
+		return errors.New("payment method already exists")
+	}
+
+	err = i.adminRepository.NewPaymentMethod(id)
+	if err != nil {
+		return err
+	}
+
+	return nil
+
+}
+
+func (a *adminUseCase) ListPaymentMethods() ([]domain.PaymentMethod, error) {
+
+	categories, err := a.adminRepository.ListPaymentMethods()
+	if err != nil {
+		return []domain.PaymentMethod{}, err
+	}
+	return categories, nil
+
+}
+
+func (a *adminUseCase) DeletePaymentMethod(id int) error {
+
+	err := a.adminRepository.DeletePaymentMethod(id)
+	if err != nil {
+		return err
+	}
+	return nil
+
+}
