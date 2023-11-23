@@ -93,3 +93,33 @@ func (i *orderUseCase) GetAdminOrders(page int) ([]models.CombinedOrderDetails, 
 	}
 	return orderDetails, nil
 }
+
+func (i *orderUseCase) OrdersStatus(orderId string) error {
+	ok, err := i.orderRepository.CheckOrderStatus(orderId)
+
+	if !ok {
+		return err
+	}
+
+	shipmentStatus, err := i.orderRepository.GetShipmentStatus(orderId)
+
+	if err != nil {
+		return err
+	}
+	if shipmentStatus == "cancelled" {
+		return errors.New("cannot approove this order becasue this order is cancelled")
+	}
+	if shipmentStatus == "pending" {
+		return errors.New("cannot approove this order becasue this order is pending")
+	}
+	if shipmentStatus == "processing" {
+		err := i.orderRepository.ApproveOrder(orderId)
+
+		if err != nil {
+			return err
+		}
+
+		return nil
+	}
+	return nil
+}

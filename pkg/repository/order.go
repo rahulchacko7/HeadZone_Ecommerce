@@ -132,3 +132,33 @@ func (o *orderRepository) GetOrderDetailsBrief(page int) ([]models.CombinedOrder
 
 	return orderDetails, nil
 }
+
+func (i *orderRepository) CheckOrderStatus(orderId string) (bool, error) {
+	var count int
+	err := i.DB.Raw("SELECT COUNT(*) FROM orders WHERE id = ?", orderId).Scan(&count).Error
+	if err != nil {
+		return false, nil
+	}
+	return count > 0, nil
+}
+
+func (i *orderRepository) GetShipmentStatus(orderId string) (string, error) {
+	var shipmentStatus string
+
+	err := i.DB.Raw("SELECT order_status FROM orders WHERE id = ? ", orderId).Scan(&shipmentStatus).Error
+
+	if err != nil {
+		return "", nil
+	}
+
+	return shipmentStatus, nil
+}
+
+func (i *orderRepository) ApproveOrder(orderId string) error {
+	err := i.DB.Exec("update orders set order_status = 'order_placed' where id=?", orderId).Error
+
+	if err != nil {
+		return err
+	}
+	return nil
+}

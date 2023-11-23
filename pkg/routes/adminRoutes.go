@@ -48,6 +48,7 @@ func AdminRoutes(engine *gin.RouterGroup, adminHandler *handler.AdminHandler, ca
 		orders := engine.Group("/orders")
 		{
 			orders.GET("", orderHandler.GetAdminOrders)
+			orders.GET("/status", orderHandler.ApproveOrder)
 		}
 	}
 }

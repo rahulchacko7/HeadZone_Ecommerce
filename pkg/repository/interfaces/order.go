@@ -13,4 +13,7 @@ type OrderRepository interface {
 	CancelOrder(id int) error
 	GetAllOrders(userId, page, pageSize int) ([]models.OrderDetails, error)
 	GetOrderDetailsBrief(page int) ([]models.CombinedOrderDetails, error)
+	CheckOrderStatus(orderId string) (bool, error)
+	GetShipmentStatus(orderId string) (string, error)
+	ApproveOrder(orderId string) error
 }

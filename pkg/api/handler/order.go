@@ -134,3 +134,18 @@ func (i *OrderHandler) GetAdminOrders(c *gin.Context) {
 	c.JSON(http.StatusOK, successRes)
 
 }
+
+func (i *OrderHandler) ApproveOrder(c *gin.Context) {
+	orderId := c.Query("order_id")
+
+	err := i.orderUseCase.OrdersStatus(orderId)
+
+	if err != nil {
+		errorRes := response.ClientResponse(http.StatusBadRequest, "could not retrieve orders", nil, err.Error())
+		c.JSON(http.StatusBadRequest, errorRes)
+		return
+	}
+	successRes := response.ClientResponse(http.StatusOK, "Successfully retrieved all orders", nil, nil)
+	c.JSON(http.StatusOK, successRes)
+
+}
