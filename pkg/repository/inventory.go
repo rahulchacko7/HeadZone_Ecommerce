@@ -52,10 +52,14 @@ func (i *inventoryRepository) AddInventory(inventory models.AddInventories) (mod
 }
 
 func (prod *inventoryRepository) ListProducts(pageList, offset int) ([]models.InventoryUserResponse, error) {
-
 	var product_list []models.InventoryUserResponse
 
-	query := "select id,category_id,product_name,color,price from inventories limit $1 offset $2"
+	query := `
+		SELECT i.id, i.category_id, c.category, i.product_name, i.color, i.price 
+		FROM inventories i 
+		INNER JOIN categories c ON i.category_id = c.id 
+		LIMIT $1 OFFSET $2
+	`
 	fmt.Println(pageList, offset)
 	err := prod.DB.Raw(query, pageList, offset).Scan(&product_list).Error
 

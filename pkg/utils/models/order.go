@@ -27,3 +27,18 @@ type Inventorories struct {
 	Stock       int      `json:"stock"`
 	Price       float64  `json:"price"`
 }
+
+type CombinedOrderDetails struct {
+	OrderId       string  `json:"order_id"`
+	FinalPrice    float64 `json:"final_price"`
+	OrderStatus   string  `json:"order_status" gorm:"column:order_status"`
+	PaymentStatus string  `json:"payment_status"`
+	Name          string  `json:"name"`
+	Email         string  `json:"email"`
+	Phone         string  `json:"phone"`
+	HouseName     string  `json:"house_name" validate:"required"`
+	Street        string  `json:"street" validate:"required"`
+	City          string  `json:"city" validate:"required"`
+	State         string  `json:"state" validate:"required"`
+	Pin           string  `json:"pin" validate:"required"`
+}

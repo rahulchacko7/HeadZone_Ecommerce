@@ -78,10 +78,18 @@ func (i *orderUseCase) CancelOrder(orderID int) error {
 }
 
 func (i *orderUseCase) GetAllOrders(userId, page, pageSize int) ([]models.OrderDetails, error) {
-	fmt.Println("dddd", userId)
 	allorder, err := i.orderRepository.GetAllOrders(userId, page, pageSize)
 	if err != nil {
 		return []models.OrderDetails{}, err
 	}
 	return allorder, nil
+}
+
+func (i *orderUseCase) GetAdminOrders(page int) ([]models.CombinedOrderDetails, error) {
+
+	orderDetails, err := i.orderRepository.GetOrderDetailsBrief(page)
+	if err != nil {
+		return []models.CombinedOrderDetails{}, err
+	}
+	return orderDetails, nil
 }

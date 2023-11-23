@@ -55,6 +55,7 @@ type EditInventoryDetials struct {
 type InventoryUserResponse struct {
 	ID          uint   `json:"id"`
 	CategoryID  int    `json:"category_id"`
+	Category    string `json:"category" gorm:"unique;not null"`
 	ProductName string `json:"productname"`
 	Color       string `json:"color"`
 	Price       int    `json:"price"`

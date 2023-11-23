@@ -47,3 +47,11 @@ type OrderDetails struct {
 	OrderDetails  Order
 	PaymentMethod string
 }
+
+type OrdersDetails struct {
+	ID            int     `json:"id" gorm:"id"`
+	Username      string  `json:"name"`
+	Address       string  `json:"address"`
+	PaymentMethod string  `json:"payment_method" gorm:"payment_method"`
+	Total         float64 `json:"total"`
+}

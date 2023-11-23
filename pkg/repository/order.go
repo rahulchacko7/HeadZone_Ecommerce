@@ -106,3 +106,29 @@ func (i *orderRepository) GetAllOrders(userID, page, pageSize int) ([]models.Ord
 	fmt.Println("Retrieved orders:", order)
 	return order, nil
 }
+
+func (o *orderRepository) GetOrderDetailsBrief(page int) ([]models.CombinedOrderDetails, error) {
+
+	if page == 0 {
+		page = 1
+	}
+	offset := (page - 1) * 2
+
+	var orderDetails []models.CombinedOrderDetails
+
+	err := o.DB.Raw(`
+	SELECT orders.id AS order_id, orders.final_price, orders.order_status, orders.payment_status, 
+	users.name, users.email, users.phone, addresses.house_name, addresses.state, 
+	addresses.pin, addresses.street, addresses.city 
+	FROM orders 
+	INNER JOIN users ON orders.user_id = users.id 
+	INNER JOIN addresses ON users.id = addresses.user_id 
+	LIMIT ? OFFSET ?
+`, 2, offset).Scan(&orderDetails).Error
+
+	if err != nil {
+		return []models.CombinedOrderDetails{}, nil
+	}
+
+	return orderDetails, nil
+}
