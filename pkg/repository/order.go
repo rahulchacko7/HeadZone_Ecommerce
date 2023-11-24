@@ -55,6 +55,18 @@ func (i *orderRepository) AddOrderProducts(order_id int, cart []models.GetCart) 
 
 }
 
+func (i *orderRepository) ReduceInventoryQuantity(productName string, quantity int) error {
+	query := `
+        UPDATE inventories
+        SET stock = stock - ?
+        WHERE product_name = ?
+    `
+	if err := i.DB.Exec(query, quantity, productName).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
 func (i *orderRepository) GetOrders(orderID int) (domain.OrderResponse, error) {
 	if orderID <= 0 {
 		return domain.OrderResponse{}, errors.New("order ID should be a positive number")
@@ -133,32 +145,63 @@ func (o *orderRepository) GetOrderDetailsBrief(page int) ([]models.CombinedOrder
 	return orderDetails, nil
 }
 
-func (i *orderRepository) CheckOrderStatus(orderId string) (bool, error) {
-	var count int
-	err := i.DB.Raw("SELECT COUNT(*) FROM orders WHERE id = ?", orderId).Scan(&count).Error
+// CheckOrdersStatusByID retrieves the order status by ID
+func (o *orderRepository) CheckOrdersStatusByID(id string) (string, error) {
+	var status string
+	err := o.DB.Raw("SELECT order_status FROM orders WHERE id = ?", id).Scan(&status).Error
 	if err != nil {
-		return false, nil
+		return "", err
 	}
-	return count > 0, nil
+	return status, nil
 }
 
-func (i *orderRepository) GetShipmentStatus(orderId string) (string, error) {
+// GetShipmentStatus retrieves the shipment status by order ID
+func (i *orderRepository) GetShipmentStatus(orderID string) (string, error) {
 	var shipmentStatus string
-
-	err := i.DB.Raw("SELECT order_status FROM orders WHERE id = ? ", orderId).Scan(&shipmentStatus).Error
-
+	err := i.DB.Exec("UPDATE orders SET order_status = 'DELIVERED', payment_status = 'PAID' WHERE id = ?", orderID).Error
 	if err != nil {
-		return "", nil
+		return "", err
 	}
-
 	return shipmentStatus, nil
 }
 
-func (i *orderRepository) ApproveOrder(orderId string) error {
-	err := i.DB.Exec("update orders set order_status = 'order_placed' where id=?", orderId).Error
-
+// ApproveOrder updates the order status to 'order_placed' for the provided order ID
+func (i *orderRepository) ApproveOrder(orderID string) error {
+	err := i.DB.Exec("UPDATE orders SET order_status = 'order_placed' WHERE id = ?", orderID).Error
 	if err != nil {
 		return err
 	}
 	return nil
+}
+
+// ChangeOrderStatus updates the order status for the provided order ID
+func (i *orderRepository) ChangeOrderStatus(orderID, status string) error {
+	err := i.DB.Exec("UPDATE orders SET order_status = ? WHERE id = ?", status, orderID).Error
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (o *orderRepository) GetShipmentsStatus(orderID string) (string, error) {
+
+	var shipmentStatus string
+	err := o.DB.Raw("select order_status from orders where id = ?", orderID).Scan(&shipmentStatus).Error
+	if err != nil {
+		return "", err
+	}
+
+	return shipmentStatus, nil
+
+}
+
+func (o *orderRepository) ReturnOrder(shipmentStatus string, orderID string) error {
+
+	err := o.DB.Exec("update orders set order_status = ? where id = ?", shipmentStatus, orderID).Error
+	if err != nil {
+		return err
+	}
+
+	return nil
+
 }

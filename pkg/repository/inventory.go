@@ -169,6 +169,7 @@ func (i *inventoryRepository) CheckStock(pid int) (int, error) {
 		return 0, err
 	}
 	return k, nil
+
 }
 
 func (c *inventoryRepository) FetchProductDetails(productId uint) (models.Inventory, error) {

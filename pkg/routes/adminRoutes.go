@@ -9,7 +9,7 @@ import (
 
 func AdminRoutes(engine *gin.RouterGroup, adminHandler *handler.AdminHandler, categoryHandler *handler.CategoryHandler, inventoryHandler *handler.InventoryHandler, orderHandler *handler.OrderHandler) {
 
-	engine.POST("/adminlogin", adminHandler.LoginHandler)
+	engine.POST("", adminHandler.LoginHandler)
 
 	engine.Use(middleware.AdminAuthMiddleware)
 	{

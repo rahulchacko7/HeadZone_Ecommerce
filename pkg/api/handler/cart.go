@@ -4,7 +4,6 @@ import (
 	"HeadZone/pkg/usecase/interfaces"
 	"strconv"
 
-	models "HeadZone/pkg/utils/models"
 	"HeadZone/pkg/utils/response"
 	"net/http"
 
@@ -22,30 +21,36 @@ func NewCartHandler(usecase interfaces.CartUseCase) *CartHandler {
 }
 
 func (i *CartHandler) AddToCart(c *gin.Context) {
+	idString, _ := c.Get("id")
+	UserID, _ := idString.(int)
 
-	var model models.AddToCart
-	if err := c.BindJSON(&model); err != nil {
-		errorRes := response.ClientResponse(http.StatusBadRequest, "fields provided are in wrong format", nil, err.Error())
-		c.JSON(http.StatusBadRequest, errorRes)
-		return
-	}
-	if err := i.usecase.AddToCart(model.UserID, model.InventoryID); err != nil {
-		errorRes := response.ClientResponse(http.StatusBadRequest, "Could not add the Cart", nil, err.Error())
-		c.JSON(http.StatusBadRequest, errorRes)
-		return
-	}
-
-	successRes := response.ClientResponse(http.StatusOK, "Successfully added To cart", nil, nil)
-	c.JSON(http.StatusOK, successRes)
-
-}
-func (i *CartHandler) CheckOut(c *gin.Context) {
-	id, err := strconv.Atoi(c.Query("id"))
+	InventoryID, err := strconv.Atoi(c.Query("inventory_id"))
 	if err != nil {
-		errorRes := response.ClientResponse(http.StatusBadRequest, "user_id not in right format", nil, err.Error())
+		errorRes := response.ClientResponse(http.StatusBadRequest, "Inventory Id not in right format", nil, err.Error())
 		c.JSON(http.StatusBadRequest, errorRes)
 		return
 	}
+
+	qty, err := strconv.Atoi(c.Query("quantity"))
+	if err != nil {
+		errorRes := response.ClientResponse(http.StatusBadRequest, "check parameters properly", nil, err.Error())
+		c.JSON(http.StatusBadRequest, errorRes)
+		return
+	}
+
+	if err := i.usecase.AddToCart(UserID, InventoryID, qty); err != nil {
+		errorRes := response.ClientResponse(http.StatusBadRequest, "Could not add to the cart", nil, err.Error())
+		c.JSON(http.StatusBadRequest, errorRes)
+		return
+	}
+
+	successRes := response.ClientResponse(http.StatusOK, "Successfully added to cart", nil, nil)
+	c.JSON(http.StatusOK, successRes)
+}
+
+func (i *CartHandler) CheckOut(c *gin.Context) {
+	idString, _ := c.Get("id")
+	id, _ := idString.(int)
 
 	products, err := i.usecase.CheckOut(id)
 	if err != nil {

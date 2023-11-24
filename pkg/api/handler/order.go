@@ -136,16 +136,32 @@ func (i *OrderHandler) GetAdminOrders(c *gin.Context) {
 }
 
 func (i *OrderHandler) ApproveOrder(c *gin.Context) {
-	orderId := c.Query("order_id")
+	orderID := c.Query("order_id")
 
-	err := i.orderUseCase.OrdersStatus(orderId)
-
+	err := i.orderUseCase.OrdersStatus(orderID)
 	if err != nil {
-		errorRes := response.ClientResponse(http.StatusBadRequest, "could not retrieve orders", nil, err.Error())
+		errorRes := response.ClientResponse(http.StatusBadRequest, "could not approve order", nil, err.Error())
 		c.JSON(http.StatusBadRequest, errorRes)
 		return
 	}
-	successRes := response.ClientResponse(http.StatusOK, "Successfully retrieved all orders", nil, nil)
+
+	successRes := response.ClientResponse(http.StatusOK, "Successfully approved order", nil, nil)
+	c.JSON(http.StatusOK, successRes)
+}
+
+func (o *OrderHandler) ReturnOrder(c *gin.Context) {
+
+	orderID := c.Query("order_id")
+
+	err := o.orderUseCase.ReturnOrder(orderID)
+
+	if err != nil {
+		errRes := response.ClientResponse(http.StatusInternalServerError, "order could not be returned", nil, err)
+		c.JSON(http.StatusInternalServerError, errRes)
+		return
+	}
+
+	successRes := response.ClientResponse(http.StatusOK, "successfully returned", nil, nil)
 	c.JSON(http.StatusOK, successRes)
 
 }

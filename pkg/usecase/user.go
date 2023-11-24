@@ -266,7 +266,6 @@ func (u *userUseCase) GetCart(id int) (models.GetCartResponse, error) {
 	var response models.GetCartResponse
 	response.ID = cart_id
 	response.Data = getcart
-
 	//then return in appropriate format
 
 	return response, nil
@@ -285,12 +284,15 @@ func (i *userUseCase) RemoveFromCart(cart, inventory int) error {
 }
 
 func (i *userUseCase) UpdateQuantity(id, inv, qty int) error {
-
-	err := i.userRepo.UpdateQuantity(id, inv, qty)
+	stock, err := i.inventoryRepository.CheckStock(inv)
 	if err != nil {
 		return err
 	}
 
-	return nil
+	if qty > stock {
+		return errors.New("out of stock")
+	}
 
+	err = i.userRepo.UpdateQuantity(id, inv, qty)
+	return err
 }

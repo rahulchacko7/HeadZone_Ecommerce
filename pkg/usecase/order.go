@@ -41,6 +41,15 @@ func (i *orderUseCase) OrderItemsFromCart(userID, addressID, paymentID int) erro
 		return err
 	}
 
+	// Update inventory for each product in the cart after a successful order
+	for _, v := range cart.Data {
+		if err := i.orderRepository.ReduceInventoryQuantity(v.ProductName, v.Quantity); err != nil {
+			// Handle error if reducing inventory fails
+			return err
+		}
+	}
+
+	// Remove purchased items from the user's cart
 	for _, v := range cart.Data {
 		if err := i.userUseCase.RemoveFromCart(cart.ID, v.ID); err != nil {
 			return err
@@ -94,32 +103,54 @@ func (i *orderUseCase) GetAdminOrders(page int) ([]models.CombinedOrderDetails, 
 	return orderDetails, nil
 }
 
-func (i *orderUseCase) OrdersStatus(orderId string) error {
-	ok, err := i.orderRepository.CheckOrderStatus(orderId)
-
-	if !ok {
-		return err
-	}
-
-	shipmentStatus, err := i.orderRepository.GetShipmentStatus(orderId)
-
+func (i *orderUseCase) OrdersStatus(orderID string) error {
+	status, err := i.orderRepository.CheckOrdersStatusByID(orderID)
 	if err != nil {
 		return err
 	}
-	if shipmentStatus == "cancelled" {
-		return errors.New("cannot approove this order becasue this order is cancelled")
-	}
-	if shipmentStatus == "pending" {
-		return errors.New("cannot approove this order becasue this order is pending")
-	}
-	if shipmentStatus == "processing" {
-		err := i.orderRepository.ApproveOrder(orderId)
 
+	switch status {
+	case "CANCELED", "RETURNED", "DELIVERED":
+		return errors.New("cannot approve this order because it's in a processed or canceled state")
+	case "PENDING":
+		// For admin approval, change PENDING to SHIPPED
+		err := i.orderRepository.ChangeOrderStatus(orderID, "SHIPPED")
+		if err != nil {
+			return err
+		}
+	case "SHIPPED":
+		shipmentStatus, err := i.orderRepository.GetShipmentStatus(orderID)
 		if err != nil {
 			return err
 		}
 
-		return nil
+		if shipmentStatus == "CANCELLED" {
+			return errors.New("cannot approve this order because it's cancelled")
+		}
+
+		// For admin approval, change SHIPPED to DELIVERED
+		err = i.orderRepository.ChangeOrderStatus(orderID, "DELIVERED")
+		if err != nil {
+			return err
+		}
 	}
+
 	return nil
+}
+
+func (o *orderUseCase) ReturnOrder(orderID string) error {
+
+	// check the shipment status - if the status cancelled, don't approve it
+	shipmentStatus, err := o.orderRepository.GetShipmentsStatus(orderID)
+	if err != nil {
+		return err
+	}
+
+	if shipmentStatus == "DELIVERED" {
+		shipmentStatus = "RETURNED"
+		return o.orderRepository.ReturnOrder(shipmentStatus, orderID)
+	}
+
+	return errors.New("can't return order")
+
 }

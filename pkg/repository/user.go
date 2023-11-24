@@ -303,7 +303,6 @@ func (ad *userDatabase) RemoveFromCart(cart, inventory int) error {
 
 }
 func (ad *userDatabase) UpdateQuantity(id, invID, qty int) error {
-
 	if id <= 0 || invID <= 0 || qty <= 0 {
 		return errors.New("negative or zero values are not allowed")
 	}
@@ -314,10 +313,10 @@ func (ad *userDatabase) UpdateQuantity(id, invID, qty int) error {
 
 	if qty >= 0 {
 		query := `
-			UPDATE line_items
-			SET quantity = $1
-			WHERE cart_id = $2 AND inventory_id = $3
-		`
+        UPDATE line_items
+        SET quantity = $1
+        WHERE cart_id = $2 AND inventory_id = $3
+        `
 
 		result := ad.DB.Exec(query, qty, id, invID)
 		if result.Error != nil {
