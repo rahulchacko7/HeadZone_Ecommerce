@@ -177,3 +177,21 @@ func (c *inventoryRepository) FetchProductDetails(productId uint) (models.Invent
 	err := c.DB.Raw(`SELECT price,stock FROM inventories WHERE id=?`, productId).Scan(&product).Error
 	return product, err
 }
+
+func (i *inventoryRepository) GetInventory(prefix string) ([]models.InventoryUserResponse, error) {
+	var productDetails []models.InventoryUserResponse
+
+	query := `
+	SELECT i.*
+	FROM inventories i
+	LEFT JOIN categories c ON i.category_id = c.id
+	WHERE i.product_name ILIKE '%' || $1 || '%'
+    OR c.category ILIKE '%' || $1 || '%';
+
+`
+	if err := i.DB.Raw(query, prefix).Scan(&productDetails).Error; err != nil {
+		return []models.InventoryUserResponse{}, err
+	}
+
+	return productDetails, nil
+}

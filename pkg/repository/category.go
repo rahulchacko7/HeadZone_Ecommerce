@@ -74,7 +74,12 @@ func (p *categoryRespository) UpdateCategory(current, new string) (domain.Catego
 }
 
 func (p *categoryRespository) DeleteCategory(catergoryID string) error {
+
 	id, err := strconv.Atoi(catergoryID)
+
+	if err != nil || id <= 0 {
+		return errors.New("invalid category ID")
+	}
 
 	if err != nil {
 		return errors.New("converting into integers is not happen")

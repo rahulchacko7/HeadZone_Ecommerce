@@ -150,3 +150,24 @@ func (i *InventoryHandler) ShowIndividualProducts(c *gin.Context) {
 	successRes := response.ClientResponse(http.StatusOK, "Product details retrieved successfully", product, nil)
 	c.JSON(http.StatusOK, successRes)
 }
+
+func (i *InventoryHandler) SearchProducts(c *gin.Context) {
+
+	var prefix models.SearchItems
+
+	if err := c.ShouldBindJSON(&prefix); err != nil {
+		errRes := response.ClientResponse(http.StatusBadRequest, "fields are provided in wrong format", nil, err.Error())
+		c.JSON(http.StatusBadRequest, errRes)
+		return
+	}
+
+	productDetails, err := i.InventoryUseCase.SearchProductsOnPrefix(prefix.ProductName)
+
+	if err != nil {
+		errRes := response.ClientResponse(http.StatusInternalServerError, "could not retrive products by prefix search", nil, err.Error())
+		c.JSON(http.StatusInternalServerError, errRes)
+		return
+	}
+	successRes := response.ClientResponse(http.StatusOK, "Successfully retrived all details", productDetails, nil)
+	c.JSON(http.StatusOK, successRes)
+}

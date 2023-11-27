@@ -7,6 +7,7 @@ import (
 	usecase "HeadZone/pkg/usecase/interfaces"
 	"HeadZone/pkg/utils/models"
 	"errors"
+	"strings"
 )
 
 type inventoryUseCase struct {
@@ -23,19 +24,16 @@ func NewInventoryUseCase(repo repo.InventoryRepository, h interfaces.Helper) use
 
 func (i *inventoryUseCase) AddInventory(inventory models.AddInventories) (models.InventoryResponse, error) {
 
-	// url, err := i.helper.AddImageToS3(image)
-	// if err != nil {
-	// 	return models.InventoryResponse{}, err
-	// }
+	if inventory.Stock < 0 || inventory.Price < 0 || inventory.CategoryID < 0 {
+		return models.InventoryResponse{}, errors.New("negative values not allowed for stock, price, or category ID")
+	}
 
-	//send the url and save it in database
-	InventoryResponse, err := i.repository.AddInventory(inventory)
+	inventoryResponse, err := i.repository.AddInventory(inventory)
 	if err != nil {
 		return models.InventoryResponse{}, err
 	}
 
-	return InventoryResponse, nil
-
+	return inventoryResponse, nil
 }
 
 func (i *inventoryUseCase) ListProducts(pageNo, pageList int) ([]models.InventoryUserResponse, error) {
@@ -92,4 +90,27 @@ func (i *inventoryUseCase) ShowIndividualProducts(id string) (models.InventoryUs
 	}
 
 	return product, nil
+}
+
+func (i *inventoryUseCase) SearchProductsOnPrefix(prefix string) ([]models.InventoryUserResponse, error) {
+
+	inventoryList, err := i.repository.GetInventory(prefix)
+
+	if err != nil {
+		return nil, err
+	}
+
+	var filteredProducts []models.InventoryUserResponse
+
+	for _, product := range inventoryList {
+		if strings.HasPrefix(strings.ToLower(product.ProductName), strings.ToLower(prefix)) {
+			filteredProducts = append(filteredProducts, product)
+		}
+	}
+
+	if len(filteredProducts) == 0 {
+		return nil, errors.New("no items matching your keyword")
+	}
+
+	return filteredProducts, nil
 }

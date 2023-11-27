@@ -15,4 +15,5 @@ type InventoryRepository interface {
 	ShowIndividualProducts(id string) (models.InventoryUserResponse, error)
 	CheckStock(inventory_id int) (int, error)
 	FetchProductDetails(productId uint) (models.Inventory, error)
+	GetInventory(prefix string) ([]models.InventoryUserResponse, error)
 }

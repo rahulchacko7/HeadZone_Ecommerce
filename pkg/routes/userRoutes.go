@@ -38,10 +38,10 @@ func UserRoutes(engine *gin.RouterGroup, userHandler *handler.UserHandler, otpHa
 
 		}
 
-		// home := engine.Group("/home")
-		// {
-		// 	home.GET("/products", inventoryHandler.ListProducts)
-		// }
+		products := engine.Group("/products")
+		{
+			products.POST("/search", inventoryHandler.SearchProducts)
+		}
 
 		cart := engine.Group("/cart")
 		{

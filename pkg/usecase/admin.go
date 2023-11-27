@@ -2,6 +2,7 @@ package usecase
 
 import (
 	domain "HeadZone/pkg/domain"
+	"strconv"
 
 	"HeadZone/pkg/helper/interfaces"
 	repo "HeadZone/pkg/repository/interfaces"
@@ -63,6 +64,11 @@ func (ad *adminUseCase) LoginHandler(adminDetails models.AdminLogin) (domain.Tok
 
 func (ad *adminUseCase) BlockUser(id string) error {
 
+	parsedID, err := strconv.Atoi(id)
+	if err != nil || parsedID <= 0 {
+		return errors.New("invalid id")
+	}
+
 	user, err := ad.adminRepository.GetUserByID(id)
 	if err != nil {
 		return err
@@ -86,6 +92,11 @@ func (ad *adminUseCase) BlockUser(id string) error {
 // unblock user
 func (ad *adminUseCase) UnBlockUser(id string) error {
 
+	parsedID, err := strconv.Atoi(id)
+	if err != nil || parsedID <= 0 {
+		return errors.New("invalid id")
+	}
+
 	user, err := ad.adminRepository.GetUserByID(id)
 	if err != nil {
 		return err
@@ -108,6 +119,10 @@ func (ad *adminUseCase) UnBlockUser(id string) error {
 
 func (ad *adminUseCase) GetUsers(page int) ([]models.UserDetailsAtAdmin, error) {
 
+	if page <= 0 {
+		return []models.UserDetailsAtAdmin{}, errors.New("invalid page number")
+	}
+
 	userDetails, err := ad.adminRepository.GetUsers(page)
 	if err != nil {
 		return []models.UserDetailsAtAdmin{}, err
@@ -118,6 +133,11 @@ func (ad *adminUseCase) GetUsers(page int) ([]models.UserDetailsAtAdmin, error) 
 }
 
 func (i *adminUseCase) NewPaymentMethod(id string) error {
+
+	parsedID, err := strconv.Atoi(id)
+	if err != nil || parsedID <= 0 {
+		return errors.New("invalid id")
+	}
 
 	exists, err := i.adminRepository.CheckIfPaymentMethodAlreadyExists(id)
 	if err != nil {
@@ -148,6 +168,10 @@ func (a *adminUseCase) ListPaymentMethods() ([]domain.PaymentMethod, error) {
 }
 
 func (a *adminUseCase) DeletePaymentMethod(id int) error {
+
+	if id <= 0 {
+		return errors.New("invalid page number")
+	}
 
 	err := a.adminRepository.DeletePaymentMethod(id)
 	if err != nil {

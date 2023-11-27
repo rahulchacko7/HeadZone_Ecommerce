@@ -25,6 +25,10 @@ func NewCartUseCase(repo interfaces.CartRepository, inventoryRepo interfaces.Inv
 
 func (i *cartUseCase) AddToCart(userID, inventoryID, qty int) error {
 
+	if userID <= 0 || inventoryID <= 0 || qty <= 0 {
+		return errors.New("check the entred values again ")
+	}
+
 	stock, err := i.inventoryRepository.CheckStock(inventoryID)
 	if err != nil {
 		return err
@@ -63,6 +67,10 @@ func (i *cartUseCase) AddToCart(userID, inventoryID, qty int) error {
 }
 
 func (i *cartUseCase) CheckOut(id int) (models.CheckOut, error) {
+
+	if id <= 0 {
+		return models.CheckOut{}, errors.New("invalid id")
+	}
 
 	address, err := i.repo.GetAddresses(id)
 	if err != nil {
