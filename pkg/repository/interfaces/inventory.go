@@ -16,4 +16,5 @@ type InventoryRepository interface {
 	CheckStock(inventory_id int) (int, error)
 	FetchProductDetails(productId uint) (models.Inventory, error)
 	GetInventory(prefix string) ([]models.InventoryUserResponse, error)
+	FilterByCategory(CategoryIdInt int) ([]models.InventoryUserResponse, error)
 }

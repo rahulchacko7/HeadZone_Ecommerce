@@ -114,3 +114,13 @@ func (i *inventoryUseCase) SearchProductsOnPrefix(prefix string) ([]models.Inven
 
 	return filteredProducts, nil
 }
+
+func (i *inventoryUseCase) FilterByCategory(CategoryIdInt int) ([]models.InventoryUserResponse, error) {
+	product_list, err := i.repository.FilterByCategory(CategoryIdInt)
+
+	if err != nil {
+		return []models.InventoryUserResponse{}, err
+	}
+
+	return product_list, nil
+}

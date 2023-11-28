@@ -13,4 +13,5 @@ type InventoryUseCase interface {
 	UpdateInventory(productID int, stock int) (models.InventoryResponse, error)
 	ShowIndividualProducts(id string) (models.InventoryUserResponse, error)
 	SearchProductsOnPrefix(prefix string) ([]models.InventoryUserResponse, error)
+	FilterByCategory(CategoryIdInt int) ([]models.InventoryUserResponse, error)
 }

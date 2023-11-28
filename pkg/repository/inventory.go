@@ -195,3 +195,15 @@ func (i *inventoryRepository) GetInventory(prefix string) ([]models.InventoryUse
 
 	return productDetails, nil
 }
+
+func (i *inventoryRepository) FilterByCategory(CategoryIdInt int) ([]models.InventoryUserResponse, error) {
+	var product_list []models.InventoryUserResponse
+
+	query := `SELECT * FROM inventories WHERE category_id = ?`
+
+	if err := i.DB.Raw(query, CategoryIdInt).Scan(&product_list).Error; err != nil {
+		return nil, err
+	}
+
+	return product_list, nil
+}

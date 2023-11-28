@@ -171,3 +171,27 @@ func (i *InventoryHandler) SearchProducts(c *gin.Context) {
 	successRes := response.ClientResponse(http.StatusOK, "Successfully retrived all details", productDetails, nil)
 	c.JSON(http.StatusOK, successRes)
 }
+
+func (i *InventoryHandler) FilterCategory(c *gin.Context) {
+
+	CategoryId := c.Query("category_id")
+	CategoryIdInt, err := strconv.Atoi(CategoryId)
+
+	if err != nil {
+		errRes := response.ClientResponse(http.StatusBadRequest, "products Cannot be displayed", nil, err.Error())
+		c.JSON(http.StatusBadRequest, errRes)
+		return
+	}
+
+	product_list, err := i.InventoryUseCase.FilterByCategory(CategoryIdInt)
+	if err != nil {
+		errRes := response.ClientResponse(http.StatusBadRequest, "products cannot be displayed", nil, err.Error())
+		c.JSON(http.StatusBadRequest, errRes)
+		return
+	}
+
+	sucessRes := response.ClientResponse(http.StatusOK, "Products List", product_list, nil)
+	c.JSON(http.StatusOK, sucessRes)
+	return
+
+}
