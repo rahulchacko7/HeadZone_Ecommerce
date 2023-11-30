@@ -53,6 +53,9 @@ func ConnectDatabase(cfg config.Config) (*gorm.DB, error) {
 	if err := db.AutoMigrate(domain.PaymentMethod{}); err != nil {
 		return db, err
 	}
+	if err := db.AutoMigrate(domain.Payment{}); err != nil {
+		return db, err
+	}
 
 	CheckAndCreateAdmin(db)
 

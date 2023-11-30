@@ -20,4 +20,11 @@ type OrderRepository interface {
 	GetShipmentsStatus(orderID string) (string, error)
 	ReturnOrder(shipmentStatus string, orderID string) error
 	ReduceInventoryQuantity(productName string, quantity int) error
+	GetOrderDetailsByOrderId(orderID string) (models.CombinedOrderDetails, error)
+	AddRazorPayDetails(orderID string, razorPayOrderID string) error
+	GetOrder(int) (domain.Order, error)
+	GetOrdersDetailsByOrderId(orderID int) (models.CombinedOrderDetails, error)
+	PaymentMethodID(orderID int) (int, error)
+	PaymentAlreadyPaid(orderID int) (bool, error)
+	GetDetailedOrderThroughId(orderId int) (models.CombinedOrderDetails, error)
 }

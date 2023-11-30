@@ -205,3 +205,120 @@ func (o *orderRepository) ReturnOrder(shipmentStatus string, orderID string) err
 	return nil
 
 }
+
+func (o *orderRepository) GetOrderDetailsByOrderId(orderID string) (models.CombinedOrderDetails, error) {
+	var orderDetails models.CombinedOrderDetails
+
+	err := o.DB.Raw("SELECT orders.id, orders.final_price, orders.order_status, orders.payment_status, users.name, users.email, users.phone, addresses.house_name, addresses.state, addresses.pin, addresses.street, addresses.city "+
+		"FROM orders "+
+		"INNER JOIN users ON orders.user_id = users.id "+
+		"INNER JOIN addresses ON users.id = addresses.user_id "+
+		"WHERE orders.id = ?", orderID).Scan(&orderDetails).Error
+
+	if err != nil {
+		return models.CombinedOrderDetails{}, err
+	}
+
+	return orderDetails, nil
+}
+
+func (o *orderRepository) AddRazorPayDetails(orderID string, razorPayOrderID string) error {
+
+	err := o.DB.Exec("insert into razer_pays (order_id,razor_id) values (?,?)", orderID, razorPayOrderID).Error
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (repo *orderRepository) GetOrder(orderId int) (domain.Order, error) {
+	var body domain.Order
+	query := `
+		select * from orders
+		where id = $1
+	`
+	if err := repo.DB.Raw(query, orderId).Scan(&body).Error; err != nil {
+		return domain.Order{}, err
+	}
+	fmt.Println("amount", body.FinalPrice)
+	return body, nil
+}
+
+func (or *orderRepository) GetOrdersDetailsByOrderId(orderID int) (models.CombinedOrderDetails, error) {
+
+	var orderDetails models.CombinedOrderDetails
+	err := or.DB.Raw(`SELECT
+    orders.id as order_id,
+    orders.final_price,
+    orders.order_status,
+    orders.payment_status,
+    users.name,
+    users.email,
+    users.phone,
+    addresses.house_name,
+    addresses.state,
+    addresses.street,
+    addresses.city,
+    addresses.pin
+FROM
+    orders
+INNER JOIN
+    users ON orders.user_id = users.id
+INNER JOIN
+    addresses ON users.id = addresses.user_id
+WHERE
+    orders.id = ?`, orderID).Scan(&orderDetails).Error
+	if err != nil {
+		return models.CombinedOrderDetails{}, nil
+	}
+
+	return orderDetails, nil
+}
+
+func (or *orderRepository) PaymentMethodID(orderID int) (int, error) {
+	var paymentMethodID int
+	err := or.DB.Raw("SELECT payment_method_id FROM orders WHERE id = ?", orderID).Scan(&paymentMethodID).Error
+	if err != nil {
+		return 0, err
+	}
+	return paymentMethodID, nil
+}
+
+func (or *orderRepository) PaymentAlreadyPaid(orderID int) (bool, error) {
+	var a bool
+	err := or.DB.Raw("SELECT payment_status = 'paid' FROM orders WHERE id = ?", orderID).Scan(&a).Error
+	if err != nil {
+		return false, err
+	}
+	return a, nil
+}
+
+func (repo *orderRepository) GetDetailedOrderThroughId(orderId int) (models.CombinedOrderDetails, error) {
+	var body models.CombinedOrderDetails
+
+	query := `
+	SELECT 
+        o.id AS order_id,
+        o.final_price AS final_price,
+        o.order_status AS order_status,
+        o.payment_status AS payment_status,
+        u.name AS name,
+        u.email AS email,
+        u.phone AS phone,
+        a.house_name AS house_name,
+        a.state AS state,
+        a.pin AS pin,
+        a.street AS street,
+        a.city AS city
+	FROM orders o
+	JOIN users u ON o.user_id = u.id
+	JOIN addresses a ON o.address_id = a.id 
+	WHERE o.id = ?
+	`
+	if err := repo.DB.Raw(query, orderId).Scan(&body).Error; err != nil {
+		err = errors.New("error in getting detailed order through id in repository: " + err.Error())
+		return models.CombinedOrderDetails{}, err
+	}
+	fmt.Println("body in repo", body.OrderId)
+	return body, nil
+}

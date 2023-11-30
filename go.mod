@@ -14,6 +14,7 @@ require (
 	github.com/golang-jwt/jwt/v4 v4.5.0
 	github.com/google/wire v0.5.0
 	github.com/jinzhu/copier v0.4.0
+	github.com/razorpay/razorpay-go v1.2.0
 	github.com/spf13/viper v1.17.0
 	github.com/twilio/twilio-go v1.15.0
 	golang.org/x/crypto v0.14.0

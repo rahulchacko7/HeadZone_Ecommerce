@@ -154,3 +154,12 @@ func (o *orderUseCase) ReturnOrder(orderID string) error {
 	return errors.New("can't return order")
 
 }
+
+func (or *orderUseCase) PaymentMethodID(order_id int) (int, error) {
+	fmt.Println("mmmmmmmmmmmmmmmmm", order_id)
+	id, err := or.orderRepository.PaymentMethodID(order_id)
+	if err != nil {
+		return 0, err
+	}
+	return id, nil
+}
