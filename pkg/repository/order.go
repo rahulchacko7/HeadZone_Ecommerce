@@ -322,3 +322,43 @@ func (repo *orderRepository) GetDetailedOrderThroughId(orderId int) (models.Comb
 	fmt.Println("body in repo", body.OrderId)
 	return body, nil
 }
+
+func (i *orderRepository) CheckPaymentStatus(orderID int) (string, error) {
+	var status string
+
+	err := i.DB.Raw("SELECT payment_status FROM orders where id = ?", orderID).Scan(&status).Error
+	if err != nil {
+		return "", nil
+	}
+	return status, err
+}
+
+func (i *orderRepository) FindFinalPrice(orderID int) (int, error) {
+	var status int
+
+	err := i.DB.Raw("SELECT final_price FROM orders where id = ?", orderID).Scan(&status).Error
+	if err != nil {
+		return 0, nil
+	}
+	return status, err
+}
+
+func (i *orderRepository) FindUserID(orderID int) (int, error) {
+	var status int
+
+	err := i.DB.Raw("SELECT user_id FROM orders where id = ?", orderID).Scan(&status).Error
+	if err != nil {
+		return 0, nil
+	}
+	return status, err
+}
+
+func (i *orderRepository) UpdateOrder(orderID int) ([]models.CombinedOrderDetails, error) {
+	var body []models.CombinedOrderDetails
+
+	err := i.DB.Exec("UPDATE orders SET order_status ='CANCELED', payment_status = 'RETURNED TO WALLET' WHERE id = ?", orderID).Error
+	if err != nil {
+		return nil, err
+	}
+	return body, nil
+}

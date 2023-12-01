@@ -31,10 +31,21 @@ func (c *userDatabase) CheckUserAvailability(email string) bool {
 }
 
 func (c *userDatabase) UserSignUp(user models.UserDetails) (models.UserDetailsResponse, error) {
-
 	var userDetails models.UserDetailsResponse
-	err := c.DB.Raw("INSERT INTO users (name, email, password, phone) VALUES (?, ?, ?, ?) RETURNING id, name, email, phone", user.Name, user.Email, user.Password, user.Phone).Scan(&userDetails).Error
 
+	// Insert user details into the users table
+	err := c.DB.Raw("INSERT INTO users (name, email, password, phone) VALUES (?, ?, ?, ?) RETURNING id, name, email, phone", user.Name, user.Email, user.Password, user.Phone).Scan(&userDetails).Error
+	if err != nil {
+		return models.UserDetailsResponse{}, err
+	}
+
+	// Get the ID of the newly created user
+	newUserID := userDetails.Id
+
+	fmt.Println("userId at signup", newUserID)
+
+	// Create a wallet entry for the new user with an initial amount of 0
+	err = c.DB.Exec("INSERT INTO wallets (user_id, amount) VALUES (?, ?)", newUserID, 0).Error
 	if err != nil {
 		return models.UserDetailsResponse{}, err
 	}

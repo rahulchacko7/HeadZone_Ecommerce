@@ -10,14 +10,16 @@ import (
 )
 
 type orderUseCase struct {
-	orderRepository interfaces.OrderRepository
-	userUseCase     services.UserUseCase
+	orderRepository  interfaces.OrderRepository
+	userUseCase      services.UserUseCase
+	walletRepository interfaces.WalletRepository
 }
 
-func NewOrderUseCase(repo interfaces.OrderRepository, userUseCase services.UserUseCase) services.OrderUseCase {
+func NewOrderUseCase(repo interfaces.OrderRepository, userUseCase services.UserUseCase, walletRepo interfaces.WalletRepository) services.OrderUseCase {
 	return &orderUseCase{
-		orderRepository: repo,
-		userUseCase:     userUseCase,
+		orderRepository:  repo,
+		userUseCase:      userUseCase,
+		walletRepository: walletRepo,
 	}
 }
 func (i *orderUseCase) OrderItemsFromCart(userID, addressID, paymentID int) error {
@@ -69,18 +71,39 @@ func (i *orderUseCase) GetOrders(orderId int) (domain.OrderResponse, error) {
 }
 
 func (i *orderUseCase) CancelOrder(orderID int) error {
-	orderStatus, err := i.orderRepository.CheckOrderStatusByID(orderID)
+	paymentStatus, err := i.orderRepository.CheckPaymentStatus(orderID)
 	if err != nil {
 		return err
 	}
 
-	if orderStatus != "PENDING" {
-		return errors.New("order cannot be canceled, kindly return the product if accidentally booked")
-	}
-
-	err = i.orderRepository.CancelOrder(orderID)
+	price, err := i.orderRepository.FindFinalPrice(orderID)
 	if err != nil {
 		return err
+	}
+
+	userID, err := i.orderRepository.FindUserID(orderID)
+	if err != nil {
+		return err
+	}
+
+	if paymentStatus == "PAID" {
+		// Adding amount back to the user's wallet
+		_, errWallet := i.walletRepository.AddToWallet(price, userID)
+		if errWallet != nil {
+			return errWallet
+		}
+
+		// Update order status to CANCELLED if payment is PAID
+		_, err := i.orderRepository.UpdateOrder(orderID)
+		if err != nil {
+			return err
+		}
+	} else {
+		// If payment is not PAID, cancel the order directly
+		err = i.orderRepository.CancelOrder(orderID)
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
