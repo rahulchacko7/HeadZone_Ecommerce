@@ -14,15 +14,16 @@ type OrderRepository interface {
 	FindFinalPrice(orderID int) (int, error)
 	FindUserID(orderID int) (int, error)
 	UpdateOrder(orderID int) ([]models.CombinedOrderDetails, error)
+	UpdateReturnedOrder(orderID int) ([]models.CombinedOrderDetails, error)
 	CancelOrder(id int) error
 	GetAllOrders(userId, page, pageSize int) ([]models.OrderDetails, error)
 	GetOrderDetailsBrief(page int) ([]models.CombinedOrderDetails, error)
-	CheckOrdersStatusByID(id string) (string, error)
-	GetShipmentStatus(orderId string) (string, error)
+	CheckOrdersStatusByID(id int) (string, error)
+	GetShipmentStatus(orderId int) (string, error)
 	ApproveOrder(orderId string) error
-	ChangeOrderStatus(orderID, status string) error
-	GetShipmentsStatus(orderID string) (string, error)
-	ReturnOrder(shipmentStatus string, orderID string) error
+	ChangeOrderStatus(orderID int, status string) error
+	GetShipmentsStatus(orderID int) (string, error)
+	ReturnOrder(shipmentStatus string, orderID int) error
 	ReduceInventoryQuantity(productName string, quantity int) error
 	GetOrderDetailsByOrderId(orderID string) (models.CombinedOrderDetails, error)
 	AddRazorPayDetails(orderID string, razorPayOrderID string) error
@@ -31,4 +32,6 @@ type OrderRepository interface {
 	PaymentMethodID(orderID int) (int, error)
 	PaymentAlreadyPaid(orderID int) (bool, error)
 	GetDetailedOrderThroughId(orderId int) (models.CombinedOrderDetails, error)
+	GetOrderStatus(orderID int) (string, error)
+	CheckOrderStatusByOrderId(orderID int) (string, error)
 }

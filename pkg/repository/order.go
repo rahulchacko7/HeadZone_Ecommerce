@@ -146,7 +146,7 @@ func (o *orderRepository) GetOrderDetailsBrief(page int) ([]models.CombinedOrder
 }
 
 // CheckOrdersStatusByID retrieves the order status by ID
-func (o *orderRepository) CheckOrdersStatusByID(id string) (string, error) {
+func (o *orderRepository) CheckOrdersStatusByID(id int) (string, error) {
 	var status string
 	err := o.DB.Raw("SELECT order_status FROM orders WHERE id = ?", id).Scan(&status).Error
 	if err != nil {
@@ -156,9 +156,18 @@ func (o *orderRepository) CheckOrdersStatusByID(id string) (string, error) {
 }
 
 // GetShipmentStatus retrieves the shipment status by order ID
-func (i *orderRepository) GetShipmentStatus(orderID string) (string, error) {
+func (i *orderRepository) GetShipmentStatus(orderID int) (string, error) {
 	var shipmentStatus string
 	err := i.DB.Exec("UPDATE orders SET order_status = 'DELIVERED', payment_status = 'PAID' WHERE id = ?", orderID).Error
+	if err != nil {
+		return "", err
+	}
+	return shipmentStatus, nil
+}
+
+func (i *orderRepository) GetOrderStatus(orderID int) (string, error) {
+	var shipmentStatus string
+	err := i.DB.Raw("SELECT order_status FROM orders WHERE id = ?", orderID).Scan(&shipmentStatus).Error
 	if err != nil {
 		return "", err
 	}
@@ -175,7 +184,7 @@ func (i *orderRepository) ApproveOrder(orderID string) error {
 }
 
 // ChangeOrderStatus updates the order status for the provided order ID
-func (i *orderRepository) ChangeOrderStatus(orderID, status string) error {
+func (i *orderRepository) ChangeOrderStatus(orderID int, status string) error {
 	err := i.DB.Exec("UPDATE orders SET order_status = ? WHERE id = ?", status, orderID).Error
 	if err != nil {
 		return err
@@ -183,7 +192,7 @@ func (i *orderRepository) ChangeOrderStatus(orderID, status string) error {
 	return nil
 }
 
-func (o *orderRepository) GetShipmentsStatus(orderID string) (string, error) {
+func (o *orderRepository) GetShipmentsStatus(orderID int) (string, error) {
 
 	var shipmentStatus string
 	err := o.DB.Raw("select order_status from orders where id = ?", orderID).Scan(&shipmentStatus).Error
@@ -195,9 +204,9 @@ func (o *orderRepository) GetShipmentsStatus(orderID string) (string, error) {
 
 }
 
-func (o *orderRepository) ReturnOrder(shipmentStatus string, orderID string) error {
+func (o *orderRepository) ReturnOrder(shipmentStatus string, orderID int) error {
 
-	err := o.DB.Exec("update orders set order_status = ? where id = ?", shipmentStatus, orderID).Error
+	err := o.DB.Exec("update orders set order_status = ?, payment_status = 'RETURNED TO WALLET' where id = ?", shipmentStatus, orderID).Error
 	if err != nil {
 		return err
 	}
@@ -361,4 +370,25 @@ func (i *orderRepository) UpdateOrder(orderID int) ([]models.CombinedOrderDetail
 		return nil, err
 	}
 	return body, nil
+}
+
+func (i *orderRepository) UpdateReturnedOrder(orderID int) ([]models.CombinedOrderDetails, error) {
+	var body []models.CombinedOrderDetails
+
+	err := i.DB.Exec("UPDATE orders SET order_status ='RETURNED', payment_status = 'RETURNED TO WALLET' WHERE id = ?", orderID).Error
+	if err != nil {
+		return nil, err
+	}
+	return body, nil
+}
+
+func (o *orderRepository) CheckOrderStatusByOrderId(orderID int) (string, error) {
+
+	var status string
+	err := o.DB.Raw("select order_status from orders where id = ?", orderID).Scan(&status).Error
+	if err != nil {
+		return "", err
+	}
+
+	return status, nil
 }

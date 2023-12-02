@@ -76,6 +76,11 @@ func (i *orderUseCase) CancelOrder(orderID int) error {
 		return err
 	}
 
+	orderStatus, err := i.orderRepository.CheckOrderStatusByOrderId(orderID)
+	if err != nil {
+		return err
+	}
+
 	price, err := i.orderRepository.FindFinalPrice(orderID)
 	if err != nil {
 		return err
@@ -86,20 +91,22 @@ func (i *orderUseCase) CancelOrder(orderID int) error {
 		return err
 	}
 
-	if paymentStatus == "PAID" {
+	if paymentStatus == "PAID" && orderStatus == "DELIVERED" {
+		return errors.New("cannot cancel the item, kindly return it")
+	} else if paymentStatus == "PAID" && (orderStatus == "PENDING" || orderStatus == "SHIPPED") {
 		// Adding amount back to the user's wallet
 		_, errWallet := i.walletRepository.AddToWallet(price, userID)
 		if errWallet != nil {
 			return errWallet
 		}
 
-		// Update order status to CANCELLED if payment is PAID
+		// Update order status to CANCELLED if payment is PAID and status is PENDING or SHIPPED
 		_, err := i.orderRepository.UpdateOrder(orderID)
 		if err != nil {
 			return err
 		}
 	} else {
-		// If payment is not PAID, cancel the order directly
+		// If payment is not PAID or order status is not PENDING or SHIPPED, cancel the order directly
 		err = i.orderRepository.CancelOrder(orderID)
 		if err != nil {
 			return err
@@ -126,7 +133,7 @@ func (i *orderUseCase) GetAdminOrders(page int) ([]models.CombinedOrderDetails, 
 	return orderDetails, nil
 }
 
-func (i *orderUseCase) OrdersStatus(orderID string) error {
+func (i *orderUseCase) OrdersStatus(orderID int) error {
 	status, err := i.orderRepository.CheckOrdersStatusByID(orderID)
 	if err != nil {
 		return err
@@ -161,21 +168,36 @@ func (i *orderUseCase) OrdersStatus(orderID string) error {
 	return nil
 }
 
-func (o *orderUseCase) ReturnOrder(orderID string) error {
-
-	// check the shipment status - if the status cancelled, don't approve it
-	shipmentStatus, err := o.orderRepository.GetShipmentsStatus(orderID)
+func (o *orderUseCase) ReturnOrder(orderID int) error {
+	shipmentStatus, err := o.orderRepository.GetOrderStatus(orderID)
 	if err != nil {
 		return err
 	}
 
-	if shipmentStatus == "DELIVERED" {
-		shipmentStatus = "RETURNED"
-		return o.orderRepository.ReturnOrder(shipmentStatus, orderID)
+	userID, err := o.orderRepository.FindUserID(orderID)
+	if err != nil {
+		return err
 	}
 
-	return errors.New("can't return order")
+	price, err := o.orderRepository.FindFinalPrice(orderID)
+	if err != nil {
+		return err
+	}
 
+	// Adding amount back to the user's wallet
+	_, errWallet := o.walletRepository.AddToWallet(price, userID)
+	if errWallet != nil {
+		return errWallet
+	}
+
+	if shipmentStatus == "DELIVERED" {
+		if err := o.orderRepository.ReturnOrder("RETURNED", orderID); err != nil {
+			return err
+		}
+		return nil
+	}
+
+	return errors.New("cannot return order")
 }
 
 func (or *orderUseCase) PaymentMethodID(order_id int) (int, error) {

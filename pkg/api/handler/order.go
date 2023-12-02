@@ -4,6 +4,7 @@ import (
 	"HeadZone/pkg/usecase/interfaces"
 	models "HeadZone/pkg/utils/models"
 	response "HeadZone/pkg/utils/response"
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -136,11 +137,17 @@ func (i *OrderHandler) GetAdminOrders(c *gin.Context) {
 }
 
 func (i *OrderHandler) ApproveOrder(c *gin.Context) {
-	orderID := c.Query("order_id")
-
-	err := i.orderUseCase.OrdersStatus(orderID)
+	id := c.Query("order_id")
+	orderID, err := strconv.Atoi(id)
 	if err != nil {
-		errorRes := response.ClientResponse(http.StatusBadRequest, "could not approve order", nil, err.Error())
+		errorRes := response.ClientResponse(http.StatusBadRequest, "Invalid order ID format", nil, err.Error())
+		c.JSON(http.StatusBadRequest, errorRes)
+		return
+	}
+
+	err = i.orderUseCase.OrdersStatus(orderID)
+	if err != nil {
+		errorRes := response.ClientResponse(http.StatusBadRequest, "Could not approve order", nil, err.Error())
 		c.JSON(http.StatusBadRequest, errorRes)
 		return
 	}
@@ -150,18 +157,23 @@ func (i *OrderHandler) ApproveOrder(c *gin.Context) {
 }
 
 func (o *OrderHandler) ReturnOrder(c *gin.Context) {
-
-	orderID := c.Query("order_id")
-
-	err := o.orderUseCase.ReturnOrder(orderID)
-
+	id := c.Query("order_id")
+	orderID, err := strconv.Atoi(id)
 	if err != nil {
-		errRes := response.ClientResponse(http.StatusInternalServerError, "order could not be returned", nil, err)
+		errRes := response.ClientResponse(http.StatusBadRequest, "Invalid order ID format", nil, err)
+		c.JSON(http.StatusBadRequest, errRes)
+		return
+	}
+
+	fmt.Println("order id at handler", orderID)
+
+	err = o.orderUseCase.ReturnOrder(orderID)
+	if err != nil {
+		errRes := response.ClientResponse(http.StatusInternalServerError, "Failed to process order return", nil, err)
 		c.JSON(http.StatusInternalServerError, errRes)
 		return
 	}
 
-	successRes := response.ClientResponse(http.StatusOK, "successfully returned", nil, nil)
+	successRes := response.ClientResponse(http.StatusOK, "Order successfully returned", nil, nil)
 	c.JSON(http.StatusOK, successRes)
-
 }
