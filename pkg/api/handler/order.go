@@ -23,13 +23,16 @@ func NewOrderHandler(useCase interfaces.OrderUseCase) *OrderHandler {
 
 func (i *OrderHandler) OrderItemsFromCart(c *gin.Context) {
 
+	userId, _ := c.Get("id")
+	UserID, _ := userId.(int)
+
 	var order models.Order
 	if err := c.BindJSON(&order); err != nil {
 		errorRes := response.ClientResponse(http.StatusBadRequest, "fields provided are in wrong format", nil, err.Error())
 		c.JSON(http.StatusBadRequest, errorRes)
 		return
 	}
-	if err := i.orderUseCase.OrderItemsFromCart(order.UserID, order.AddressID, order.PaymentMethodID); err != nil {
+	if err := i.orderUseCase.OrderItemsFromCart(UserID, order.AddressID, order.PaymentMethodID); err != nil {
 		errorRes := response.ClientResponse(http.StatusBadRequest, "could not make the order", nil, err.Error())
 		c.JSON(http.StatusBadRequest, errorRes)
 		return

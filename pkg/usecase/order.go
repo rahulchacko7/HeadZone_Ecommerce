@@ -13,19 +13,31 @@ type orderUseCase struct {
 	orderRepository  interfaces.OrderRepository
 	userUseCase      services.UserUseCase
 	walletRepository interfaces.WalletRepository
+	cartRepo         interfaces.CartRepository
 }
 
-func NewOrderUseCase(repo interfaces.OrderRepository, userUseCase services.UserUseCase, walletRepo interfaces.WalletRepository) services.OrderUseCase {
+func NewOrderUseCase(repo interfaces.OrderRepository, userUseCase services.UserUseCase, walletRepo interfaces.WalletRepository, cartRepo interfaces.CartRepository) services.OrderUseCase {
 	return &orderUseCase{
 		orderRepository:  repo,
 		userUseCase:      userUseCase,
 		walletRepository: walletRepo,
+		cartRepo:         cartRepo,
 	}
 }
 func (i *orderUseCase) OrderItemsFromCart(userID, addressID, paymentID int) error {
 	cart, err := i.userUseCase.GetCart(userID)
 	if err != nil {
 		return err
+	}
+
+	exist, err := i.cartRepo.CheckCart(userID)
+
+	if err != nil {
+		return err
+	}
+
+	if !exist {
+		return errors.New("cart is empty")
 	}
 
 	var total float64
