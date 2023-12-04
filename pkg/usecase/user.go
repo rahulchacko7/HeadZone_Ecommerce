@@ -155,6 +155,10 @@ func (i *userUseCase) AddAddress(id int, address models.AddAddress) error {
 
 func (i *userUseCase) GetAddresses(id int) ([]domain.Address, error) {
 
+	if id <= 0 {
+		return []domain.Address{}, errors.New("invalid id")
+	}
+
 	addresses, err := i.userRepo.GetAddresses(id)
 	if err != nil {
 		return []domain.Address{}, errors.New("error in getting addresses")
@@ -166,6 +170,10 @@ func (i *userUseCase) GetAddresses(id int) ([]domain.Address, error) {
 
 func (i *userUseCase) EditDetails(id int, user models.EditDetailsResponse) (models.EditDetailsResponse, error) {
 
+	if id <= 0 {
+		return models.EditDetailsResponse{}, errors.New("invalid id")
+	}
+
 	body, err := i.userRepo.EditDetails(id, user)
 	if err != nil {
 		return models.EditDetailsResponse{}, err
@@ -176,6 +184,10 @@ func (i *userUseCase) EditDetails(id int, user models.EditDetailsResponse) (mode
 }
 
 func (i *userUseCase) ChangePassword(id int, old string, password string, repassword string) error {
+
+	if id <= 0 {
+		return errors.New("invalid id")
+	}
 
 	userPassword, err := i.userRepo.GetPassword(id)
 	if err != nil {
@@ -201,6 +213,10 @@ func (i *userUseCase) ChangePassword(id int, old string, password string, repass
 }
 
 func (u *userUseCase) GetCart(id int) (models.GetCartResponse, error) {
+
+	if id <= 0 {
+		return models.GetCartResponse{}, errors.New("invalid id")
+	}
 
 	//find cart id
 	cart_id, err := u.userRepo.GetCartID(id)
@@ -274,6 +290,10 @@ func (u *userUseCase) GetCart(id int) (models.GetCartResponse, error) {
 
 func (i *userUseCase) RemoveFromCart(cart, inventory int) error {
 
+	if cart <= 0 || inventory <= 0 {
+		return errors.New("enter a valid number")
+	}
+
 	err := i.userRepo.RemoveFromCart(cart, inventory)
 	if err != nil {
 		return err
@@ -284,6 +304,10 @@ func (i *userUseCase) RemoveFromCart(cart, inventory int) error {
 }
 
 func (i *userUseCase) UpdateQuantity(id, inv, qty int) error {
+
+	if id <= 0 || inv <= 0 || qty <= 0 {
+		return errors.New("enter a valid number")
+	}
 	stock, err := i.inventoryRepository.CheckStock(inv)
 	if err != nil {
 		return err

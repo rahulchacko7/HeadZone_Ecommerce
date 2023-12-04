@@ -26,6 +26,10 @@ func NewPaymentUseCase(repo usecase.OrderRepository, payment usecase.PaymentRepo
 
 func (repo *paymentUsecaseImpl) MakePaymentRazorpay(orderId, userId int) (models.CombinedOrderDetails, string, error) {
 
+	if orderId <= 0 || userId <= 0 {
+		return models.CombinedOrderDetails{}, "", errors.New("please provide valid IDs")
+	}
+
 	fmt.Println("Order iddddddd inside usecase", orderId)
 
 	order, err := repo.orderRepository.GetOrder(orderId)

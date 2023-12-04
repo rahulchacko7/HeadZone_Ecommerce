@@ -68,9 +68,6 @@ func (i *orderRepository) ReduceInventoryQuantity(productName string, quantity i
 }
 
 func (i *orderRepository) GetOrders(orderID int) (domain.OrderResponse, error) {
-	if orderID <= 0 {
-		return domain.OrderResponse{}, errors.New("order ID should be a positive number")
-	}
 
 	var order domain.OrderResponse
 

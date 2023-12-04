@@ -172,10 +172,6 @@ func (i *userDatabase) EditDetails(id int, user models.EditDetailsResponse) (mod
 
 func (i *userDatabase) ChangePassword(id int, password string) error {
 
-	if id <= 0 {
-		return errors.New("negative or zero values are not allowed")
-	}
-
 	err := i.DB.Exec("UPDATE users SET password=$1 WHERE id=$2", password, id).Error
 	if err != nil {
 		return err
@@ -187,10 +183,6 @@ func (i *userDatabase) ChangePassword(id int, password string) error {
 
 func (i *userDatabase) GetPassword(id int) (string, error) {
 
-	if id <= 0 {
-		return "", errors.New("negative or zero values are not allowed")
-	}
-
 	var userPassword string
 	err := i.DB.Raw("select password from users where id = ?", id).Scan(&userPassword).Error
 	if err != nil {
@@ -201,10 +193,6 @@ func (i *userDatabase) GetPassword(id int) (string, error) {
 }
 
 func (ad *userDatabase) GetCartID(id int) (int, error) {
-
-	if id <= 0 {
-		return 0, errors.New("negative or zero values are not allowed")
-	}
 
 	var cart_id int
 
@@ -218,10 +206,6 @@ func (ad *userDatabase) GetCartID(id int) (int, error) {
 
 func (ad *userDatabase) GetProductsInCart(cart_id int) ([]int, error) {
 
-	if cart_id <= 0 {
-		return nil, errors.New("negative or zero values are not allowed")
-	}
-
 	var cart_products []int
 
 	if err := ad.DB.Raw("select inventory_id from line_items where cart_id=?", cart_id).Scan(&cart_products).Error; err != nil {
@@ -234,10 +218,6 @@ func (ad *userDatabase) GetProductsInCart(cart_id int) ([]int, error) {
 
 func (ad *userDatabase) FindProductNames(inventory_id int) (string, error) {
 
-	if inventory_id <= 0 {
-		return "", errors.New("negative or zero values are not allowed")
-	}
-
 	var product_name string
 
 	if err := ad.DB.Raw("select product_name from inventories where id=?", inventory_id).Scan(&product_name).Error; err != nil {
@@ -249,10 +229,6 @@ func (ad *userDatabase) FindProductNames(inventory_id int) (string, error) {
 }
 
 func (ad *userDatabase) FindCartQuantity(cart_id, inventory_id int) (int, error) {
-
-	if cart_id <= 0 || inventory_id <= 0 {
-		return 0, errors.New("negative or zero values are not allowed")
-	}
 
 	var quantity int
 
@@ -277,9 +253,6 @@ func (ad *userDatabase) FindPrice(inventory_id int) (float64, error) {
 }
 
 func (ad *userDatabase) FindCategory(inventoryID int) (int, error) {
-	if inventoryID <= 0 {
-		return 0, errors.New("negative or zero values are not allowed")
-	}
 
 	var categoryID int
 
@@ -301,10 +274,6 @@ func (i *userDatabase) FindStock(id int) (int, error) {
 }
 
 func (ad *userDatabase) RemoveFromCart(cart, inventory int) error {
-
-	if cart <= 0 || inventory <= 0 {
-		return errors.New("negative or zero values are not allowed")
-	}
 
 	if err := ad.DB.Exec(`DELETE FROM line_items WHERE cart_id = $1 AND inventory_id = $2`, cart, inventory).Error; err != nil {
 		return err

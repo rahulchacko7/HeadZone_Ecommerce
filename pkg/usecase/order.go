@@ -25,6 +25,11 @@ func NewOrderUseCase(repo interfaces.OrderRepository, userUseCase services.UserU
 	}
 }
 func (i *orderUseCase) OrderItemsFromCart(userID, addressID, paymentID int) error {
+
+	if userID <= 0 || addressID <= 0 || paymentID < 0 {
+		return errors.New("enter a valid number")
+	}
+
 	cart, err := i.userUseCase.GetCart(userID)
 	if err != nil {
 		return err
@@ -75,6 +80,10 @@ func (i *orderUseCase) OrderItemsFromCart(userID, addressID, paymentID int) erro
 
 func (i *orderUseCase) GetOrders(orderId int) (domain.OrderResponse, error) {
 
+	if orderId <= 0 {
+		return domain.OrderResponse{}, errors.New("enter a valid number")
+	}
+
 	orders, err := i.orderRepository.GetOrders(orderId)
 	if err != nil {
 		return domain.OrderResponse{}, err
@@ -83,6 +92,9 @@ func (i *orderUseCase) GetOrders(orderId int) (domain.OrderResponse, error) {
 }
 
 func (i *orderUseCase) CancelOrder(orderID int) error {
+	if orderID <= 0 {
+		return errors.New("enter a valid number")
+	}
 	paymentStatus, err := i.orderRepository.CheckPaymentStatus(orderID)
 	if err != nil {
 		return err
@@ -129,6 +141,11 @@ func (i *orderUseCase) CancelOrder(orderID int) error {
 }
 
 func (i *orderUseCase) GetAllOrders(userId, page, pageSize int) ([]models.OrderDetails, error) {
+
+	if userId <= 0 || page <= 0 || pageSize <= 0 {
+		return nil, errors.New("please provide valid input values")
+	}
+
 	allorder, err := i.orderRepository.GetAllOrders(userId, page, pageSize)
 	if err != nil {
 		return []models.OrderDetails{}, err
@@ -138,6 +155,10 @@ func (i *orderUseCase) GetAllOrders(userId, page, pageSize int) ([]models.OrderD
 
 func (i *orderUseCase) GetAdminOrders(page int) ([]models.CombinedOrderDetails, error) {
 
+	if page <= 0 {
+		return nil, errors.New("enter a valid number")
+	}
+
 	orderDetails, err := i.orderRepository.GetOrderDetailsBrief(page)
 	if err != nil {
 		return []models.CombinedOrderDetails{}, err
@@ -146,6 +167,11 @@ func (i *orderUseCase) GetAdminOrders(page int) ([]models.CombinedOrderDetails, 
 }
 
 func (i *orderUseCase) OrdersStatus(orderID int) error {
+
+	if orderID <= 0 {
+		return errors.New("enter a valid number")
+	}
+
 	status, err := i.orderRepository.CheckOrdersStatusByID(orderID)
 	if err != nil {
 		return err
@@ -181,6 +207,11 @@ func (i *orderUseCase) OrdersStatus(orderID int) error {
 }
 
 func (o *orderUseCase) ReturnOrder(orderID int) error {
+
+	if orderID <= 0 {
+		return errors.New("enter a valid number")
+	}
+
 	shipmentStatus, err := o.orderRepository.GetOrderStatus(orderID)
 	if err != nil {
 		return err
@@ -213,6 +244,10 @@ func (o *orderUseCase) ReturnOrder(orderID int) error {
 }
 
 func (or *orderUseCase) PaymentMethodID(order_id int) (int, error) {
+	if order_id <= 0 {
+		return 0, errors.New("enter a valid number")
+	}
+
 	fmt.Println("mmmmmmmmmmmmmmmmm", order_id)
 	id, err := or.orderRepository.PaymentMethodID(order_id)
 	if err != nil {
