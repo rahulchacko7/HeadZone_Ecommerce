@@ -26,14 +26,14 @@ func (wt *walletRepository) GetWallet(userID int) (models.WalletAmount, error) {
 	return walletAmount, nil
 }
 
-func (wt *walletRepository) GetsWallet(orderId int) (models.WalletAmount, error) {
-	var walletAmount models.WalletAmount
-	err := wt.DB.Raw("SELECT amount FROM wallets WHERE user_id = ?", orderId).Scan(&walletAmount).Error
-	if err != nil {
-		return models.WalletAmount{}, err
-	}
-	return walletAmount, nil
-}
+// func (wt *walletRepository) GetsWallet(orderId int) (models.WalletAmount, error) {
+// 	var walletAmount models.WalletAmount
+// 	err := wt.DB.Raw("SELECT amount FROM wallets WHERE user_id = ?", orderId).Scan(&walletAmount).Error
+// 	if err != nil {
+// 		return models.WalletAmount{}, err
+// 	}
+// 	return walletAmount, nil
+// }
 
 func (wt *walletRepository) AddToWallet(Price, UserId int) (models.WalletAmount, error) {
 	fmt.Println("amount inside repo", Price)

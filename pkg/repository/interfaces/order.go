@@ -34,4 +34,5 @@ type OrderRepository interface {
 	GetDetailedOrderThroughId(orderId int) (models.CombinedOrderDetails, error)
 	GetOrderStatus(orderID int) (string, error)
 	CheckOrderStatusByOrderId(orderID int) (string, error)
+	OrderIdStatus(orderID int) (bool, error)
 }

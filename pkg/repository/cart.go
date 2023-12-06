@@ -98,7 +98,7 @@ func (ad *cartRepository) CheckCart(userID int) (bool, error) {
 	var count int
 	querry := `	SELECT COUNT(*) 
 	FROM line_items 
-	WHERE cart_id IN (SELECT cart_id FROM carts WHERE user_id = ?)
+	WHERE cart_id IN (SELECT id FROM carts WHERE user_id = ?)
 	`
 	err := ad.DB.Raw(querry, userID).Scan(&count).Error
 	if err != nil {

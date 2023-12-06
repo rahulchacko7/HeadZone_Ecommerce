@@ -37,6 +37,8 @@ func (i *orderUseCase) OrderItemsFromCart(userID, addressID, paymentID int) erro
 
 	exist, err := i.cartRepo.CheckCart(userID)
 
+	fmt.Println("exist", exist)
+
 	if err != nil {
 		return err
 	}
@@ -167,9 +169,17 @@ func (i *orderUseCase) GetAdminOrders(page int) ([]models.CombinedOrderDetails, 
 }
 
 func (i *orderUseCase) OrdersStatus(orderID int) error {
-
 	if orderID <= 0 {
 		return errors.New("enter a valid number")
+	}
+
+	// Check if order exists
+	orderExists, err := i.orderRepository.OrderIdStatus(orderID)
+	if err != nil {
+		return err
+	}
+	if !orderExists {
+		return errors.New("no order exists")
 	}
 
 	status, err := i.orderRepository.CheckOrdersStatusByID(orderID)

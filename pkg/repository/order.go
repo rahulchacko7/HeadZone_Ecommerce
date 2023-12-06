@@ -121,7 +121,7 @@ func (o *orderRepository) GetOrderDetailsBrief(page int) ([]models.CombinedOrder
 	if page == 0 {
 		page = 1
 	}
-	offset := (page - 1) * 2
+	offset := (page - 1) * 3
 
 	var orderDetails []models.CombinedOrderDetails
 
@@ -388,4 +388,18 @@ func (o *orderRepository) CheckOrderStatusByOrderId(orderID int) (string, error)
 	}
 
 	return status, nil
+}
+
+func (o *orderRepository) OrderIdStatus(orderID int) (bool, error) {
+	var count int
+	err := o.DB.Raw("SELECT count(*) FROM orders WHERE id = ?", orderID).Row().Scan(&count)
+	if err != nil {
+		return false, err
+	}
+
+	if count > 0 {
+		return true, nil
+	}
+
+	return false, nil
 }

@@ -22,9 +22,14 @@ func NewPaymentHandler(useCase interfaces.PaymentUseCase) *PaymentHandler {
 }
 
 func (handler *PaymentHandler) MakePaymentRazorpay(c *gin.Context) {
-	userId, _ := c.Get("id")
-	userIdInt, _ := userId.(int)
+	userId := c.Query("user_id")
+	userIdInt, err := strconv.Atoi(userId)
+	if err != nil {
 
+		errRes := response.ClientResponse(http.StatusBadRequest, "error", nil, errors.New("error in converting string to int userid"+err.Error()))
+		c.JSON(http.StatusBadRequest, errRes)
+		return
+	}
 	orderId := c.Query("order_id")
 	orderIdInt, err := strconv.Atoi(orderId)
 	if err != nil {
