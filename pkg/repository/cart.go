@@ -109,3 +109,12 @@ func (ad *cartRepository) CheckCart(userID int) (bool, error) {
 	}
 	return true, nil
 }
+
+func (ad *cartRepository) GetTotalPriceFromCart(userID int) (float64, error) {
+	var totalPrice float64
+	err := ad.DB.Raw("SELECT COALESCE(SUM(price), 0) FROM carts WHERE user_id = ?", userID).Scan(&totalPrice).Error
+	if err != nil {
+		return 0.0, err
+	}
+	return totalPrice, nil
+}

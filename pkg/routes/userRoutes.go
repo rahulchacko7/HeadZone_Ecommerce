@@ -7,7 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func UserRoutes(engine *gin.RouterGroup, userHandler *handler.UserHandler, otpHandler *handler.OtpHandler, inventoryHandler *handler.InventoryHandler, cartHandler *handler.CartHandler, orderHandler *handler.OrderHandler, paymentHandler *handler.PaymentHandler, walletHandler *handler.WalletHandler) {
+func UserRoutes(engine *gin.RouterGroup, userHandler *handler.UserHandler, otpHandler *handler.OtpHandler, inventoryHandler *handler.InventoryHandler, cartHandler *handler.CartHandler, orderHandler *handler.OrderHandler, paymentHandler *handler.PaymentHandler, walletHandler *handler.WalletHandler, couponHandler *handler.CouponHandler) {
 
 	engine.POST("/signup", userHandler.UserSignUp)
 	engine.POST("/login", userHandler.LoginHandler)
@@ -37,6 +37,7 @@ func UserRoutes(engine *gin.RouterGroup, userHandler *handler.UserHandler, otpHa
 				orders.GET("/all", orderHandler.GetAllOrders)
 				orders.DELETE("", orderHandler.CancelOrder)
 				orders.PUT("/return", orderHandler.ReturnOrder)
+				orders.PATCH("/redeem", couponHandler.RedeemCoupon)
 			}
 
 		}
@@ -59,6 +60,7 @@ func UserRoutes(engine *gin.RouterGroup, userHandler *handler.UserHandler, otpHa
 		{
 			checkout.GET("", cartHandler.CheckOut)
 			checkout.POST("", orderHandler.OrderItemsFromCart)
+
 		}
 
 		wallet := engine.Group("/wallet")

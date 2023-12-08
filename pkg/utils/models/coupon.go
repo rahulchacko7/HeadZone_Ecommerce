@@ -7,3 +7,7 @@ type CouponResponse struct {
 	DiscountPercentage int     `json:"discount_percentage"`
 	MinimumPrice       float64 `json:"minimum_price"`
 }
+
+type CouponDetails struct {
+	CouponName string `json:"coupon_name"`
+}

@@ -35,4 +35,5 @@ type OrderRepository interface {
 	GetOrderStatus(orderID int) (string, error)
 	CheckOrderStatusByOrderId(orderID int) (string, error)
 	OrderIdStatus(orderID int) (bool, error)
+	CartExist(UserId int) (bool, error)
 }

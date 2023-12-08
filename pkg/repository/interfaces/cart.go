@@ -10,4 +10,5 @@ type CartRepository interface {
 	AddLineItems(cart_id, inventory_id, qty int) error
 	CheckIfItemIsAlreadyAdded(cart_id, inventory_id int) (bool, error)
 	CheckCart(userID int) (bool, error)
+	GetTotalPriceFromCart(userID int) (float64, error)
 }

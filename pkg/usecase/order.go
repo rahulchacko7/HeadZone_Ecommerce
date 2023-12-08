@@ -201,18 +201,14 @@ func (i *orderUseCase) OrdersStatus(orderID int) error {
 		if err != nil {
 			return err
 		}
-
 		if shipmentStatus == "CANCELLED" {
 			return errors.New("cannot approve this order because it's cancelled")
 		}
-
-		// For admin approval, change SHIPPED to DELIVERED
 		err = i.orderRepository.ChangeOrderStatus(orderID, "DELIVERED")
 		if err != nil {
 			return err
 		}
 	}
-
 	return nil
 }
 

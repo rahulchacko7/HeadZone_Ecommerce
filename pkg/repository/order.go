@@ -403,3 +403,13 @@ func (o *orderRepository) OrderIdStatus(orderID int) (bool, error) {
 
 	return false, nil
 }
+
+func (o *orderRepository) CartExist(userID int) (bool, error) {
+	var exist bool
+	err := o.DB.Raw("select exists(select 1 from carts where id = ?)", userID).Scan(&exist).Error
+	if err != nil {
+		return false, err
+	}
+
+	return exist, nil
+}
