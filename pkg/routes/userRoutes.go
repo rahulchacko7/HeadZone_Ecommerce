@@ -37,7 +37,6 @@ func UserRoutes(engine *gin.RouterGroup, userHandler *handler.UserHandler, otpHa
 				orders.GET("/all", orderHandler.GetAllOrders)
 				orders.DELETE("", orderHandler.CancelOrder)
 				orders.PUT("/return", orderHandler.ReturnOrder)
-				orders.PATCH("/redeem", couponHandler.RedeemCoupon)
 			}
 
 		}
@@ -67,6 +66,10 @@ func UserRoutes(engine *gin.RouterGroup, userHandler *handler.UserHandler, otpHa
 		{
 			wallet.GET("", walletHandler.ViewWallet)
 
+		}
+		coupon := engine.Group("/coupon")
+		{
+			coupon.GET("", couponHandler.GetAllCoupons)
 		}
 
 	}

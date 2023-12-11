@@ -19,15 +19,15 @@ func NewCouponRepository(DB *gorm.DB) interfaces.CouponRepository {
 	}
 }
 
-func (cp *couponRepository) AddCoupon(CouponName string, CouponStatus bool, Discount int, MinPurchase float64) (models.CouponResponse, error) {
+func (cp *couponRepository) AddCoupon(CouponName string, CouponStatus bool, Discount int) (models.CouponResponse, error) {
 
 	var coupon models.CouponResponse
 
 	query := `
-		INSERT INTO coupons (coupon_name, status, discount_percentage, minimum_price)
-		VALUES (?, ?, ?, ?)
+		INSERT INTO coupons (coupon_name, status, discount_rate)
+		VALUES (?, ?, ?)
 	`
-	result := cp.DB.Exec(query, CouponName, CouponStatus, Discount, MinPurchase)
+	result := cp.DB.Exec(query, CouponName, CouponStatus, Discount)
 
 	if result.Error != nil {
 		return coupon, result.Error
@@ -35,8 +35,7 @@ func (cp *couponRepository) AddCoupon(CouponName string, CouponStatus bool, Disc
 
 	coupon.CouponName = CouponName
 	coupon.Status = CouponStatus
-	coupon.DiscountPercentage = Discount
-	coupon.MinimumPrice = MinPurchase
+	coupon.DiscountRate = Discount
 
 	return coupon, nil
 }
@@ -50,14 +49,14 @@ func (cp *couponRepository) GetCopupon() ([]models.CouponResponse, error) {
 	return coupon, nil
 }
 
-func (cp *couponRepository) UpdateCoupon(CId int, CouponName string, CouponStatus bool, Discount int, MinPurchase float64) (models.CouponResponse, error) {
+func (cp *couponRepository) UpdateCoupon(CId int, CouponName string, CouponStatus bool, Discount int) (models.CouponResponse, error) {
 	if cp.DB == nil {
 		return models.CouponResponse{}, errors.New("database connection is nil")
 	}
 	fmt.Println("couponstatus", CouponStatus)
 	fmt.Println("id", CId)
 
-	if err := cp.DB.Exec("UPDATE coupons SET coupon_name = ?, status = ?, discount_percentage = ?, minimum_price = ? WHERE id = ?", CouponName, CouponStatus, Discount, MinPurchase, CId).Error; err != nil {
+	if err := cp.DB.Exec("UPDATE coupons SET coupon_name = ?, status = ?, discount_rate = ? WHERE id = ?", CouponName, CouponStatus, Discount, CId).Error; err != nil {
 		return models.CouponResponse{}, err
 	}
 
@@ -87,37 +86,4 @@ func (cp *couponRepository) CouponValidity(coupon string) (bool, error) {
 		return false, err
 	}
 	return status, nil
-}
-
-func (cp *couponRepository) MinimumPurchase(coupon string) (int, error) {
-	var purchase int
-	err := cp.DB.Raw("SELECT minimum_price FROM coupons WHERE coupon_name = ?", coupon).Scan(purchase).Error
-	if err != nil {
-		return 0, err
-	}
-	return purchase, nil
-}
-
-func (cp *couponRepository) DiscountPercentage(coupon string) (int, error) {
-	var discount int
-	err := cp.DB.Raw("SELECT discount_percentage FROM coupons WHERE coupon_name = ?", coupon).Scan(discount).Error
-	if err != nil {
-		return 0, err
-	}
-	return discount, nil
-}
-
-func (cp *couponRepository) UpdateUsedCoupon(coupon string, UserId int) (bool, error) {
-	var couponID uint
-	err := cp.DB.Raw("SELECT id FROM coupons WHERE coupon = ?", coupon).Scan(&couponID).Error
-	if err != nil {
-		return false, err
-	}
-
-	err = cp.DB.Exec("INSERT INTO used_coupons (coupon_id,user_id,used) VALUES (?, ?, false)", couponID, UserId).Error
-	if err != nil {
-		return false, err
-	}
-
-	return true, nil
 }

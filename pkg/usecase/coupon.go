@@ -21,11 +21,11 @@ func NewCouponUseCase(repository interfaces.CouponRepository, orderRepo interfac
 	}
 }
 
-func (cp *couponUseCase) AddCoupon(CouponName string, CouponStatus bool, Discount int, MinPurchase float64) (models.CouponResponse, error) {
-	if Discount <= 0 || MinPurchase <= 0 {
+func (cp *couponUseCase) AddCoupon(CouponName string, CouponStatus bool, Discount int) (models.CouponResponse, error) {
+	if Discount <= 0 {
 		return models.CouponResponse{}, errors.New("discount or minimum purchase must be a +ve number")
 	}
-	couponResponse, err := cp.couponRepository.AddCoupon(CouponName, CouponStatus, Discount, MinPurchase)
+	couponResponse, err := cp.couponRepository.AddCoupon(CouponName, CouponStatus, Discount)
 	if err != nil {
 		return models.CouponResponse{}, err
 	}
@@ -40,62 +40,18 @@ func (cp *couponUseCase) GetCoupon() ([]models.CouponResponse, error) {
 	return coupons, nil
 }
 
-func (cp *couponUseCase) UpdateCoupon(CId int, CouponName string, CouponStatus bool, Discount int, MinPurchase float64) (models.CouponResponse, error) {
-	if Discount <= 0 || MinPurchase <= 0 || CId <= 0 {
+func (cp *couponUseCase) UpdateCoupon(CId int, CouponName string, CouponStatus bool, Discount int) (models.CouponResponse, error) {
+	if Discount <= 0 || CId <= 0 {
 		return models.CouponResponse{}, errors.New("discount or minimum purchase must be a +ve number")
 	}
-	couponResponse, err := cp.couponRepository.UpdateCoupon(CId, CouponName, CouponStatus, Discount, MinPurchase)
+	couponResponse, err := cp.couponRepository.UpdateCoupon(CId, CouponName, CouponStatus, Discount)
 	if err != nil {
 		return models.CouponResponse{}, err
 	}
 	return couponResponse, nil
 }
-func (repo *couponUseCase) RedeemCoupon(coupon string, UserID int) error {
-	CheckCart, err := repo.orderRespository.CartExist(UserID)
-	if err != nil {
-		return err
-	}
-	if !CheckCart {
-		return errors.New("Cart is empty. Cannot apply coupon")
-	}
 
-	CheckCoupon, err := repo.couponRepository.CheckCoupon(coupon)
-	if err != nil {
-		return err
-	}
-	if !CheckCoupon {
-		return errors.New("Coupon does not exist")
-	}
+// func (repo *couponUseCase) RedeemCoupon(coupon string, UserID int) error {
 
-	CouponValidity, err := repo.couponRepository.CouponValidity(coupon)
-	if err != nil {
-		return err
-	}
-	if !CouponValidity {
-		return errors.New("Coupon is inactive")
-	}
-
-	MinimumPurchase, err := repo.couponRepository.MinimumPurchase(coupon)
-	if err != nil {
-		return err
-	}
-
-	totalPriceFromCarts, err := repo.cartRepository.GetTotalPriceFromCart(UserID)
-	if err != nil {
-		return err
-	}
-
-	if totalPriceFromCarts < float64(MinimumPurchase) {
-		return errors.New("Coupon cannot be added as the total amount is less than the minimum required for the coupon")
-	}
-
-	couponStatus, err := repo.couponRepository.UpdateUsedCoupon(coupon, UserID)
-	if err != nil {
-		return err
-	}
-
-	if couponStatus {
-		return nil
-	}
-	return errors.New("Failed to add the coupon")
-}
+// 	return errors
+// }
