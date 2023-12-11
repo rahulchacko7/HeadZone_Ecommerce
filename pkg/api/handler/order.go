@@ -32,7 +32,7 @@ func (i *OrderHandler) OrderItemsFromCart(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, errorRes)
 		return
 	}
-	if err := i.orderUseCase.OrderItemsFromCart(UserID, order.AddressID, order.PaymentMethodID); err != nil {
+	if err := i.orderUseCase.OrderItemsFromCart(UserID, order.AddressID, order.PaymentMethodID, order.CouponID); err != nil {
 		errorRes := response.ClientResponse(http.StatusBadRequest, "could not make the order", nil, err.Error())
 		c.JSON(http.StatusBadRequest, errorRes)
 		return

@@ -79,11 +79,20 @@ func (cp *couponRepository) CheckCoupon(coupon string) (bool, error) {
 	return count > 0, nil
 }
 
-func (cp *couponRepository) CouponValidity(coupon string) (bool, error) {
+func (cp *couponRepository) CheckCouponValid(couponID int) (bool, error) {
 	var status bool
-	err := cp.DB.Raw("SELECT status FROM coupons WHERE coupon_name = ?", coupon).Scan(status).Error
+	err := cp.DB.Raw("SELECT status FROM coupons WHERE id = ?", couponID).Scan(&status).Error
 	if err != nil {
 		return false, err
 	}
 	return status, nil
+}
+
+func (cp *couponRepository) FindCouponPrice(couponID int) (int, error) {
+	var rate int
+	err := cp.DB.Raw("SELECT discount_rate FROM coupons WHERE id = ?", couponID).Scan(&rate).Error
+	if err != nil {
+		return 0, err
+	}
+	return rate, nil
 }

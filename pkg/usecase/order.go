@@ -14,19 +14,21 @@ type orderUseCase struct {
 	userUseCase      services.UserUseCase
 	walletRepository interfaces.WalletRepository
 	cartRepo         interfaces.CartRepository
+	couponRepository interfaces.CouponRepository
 }
 
-func NewOrderUseCase(repo interfaces.OrderRepository, userUseCase services.UserUseCase, walletRepo interfaces.WalletRepository, cartRepo interfaces.CartRepository) services.OrderUseCase {
+func NewOrderUseCase(repo interfaces.OrderRepository, userUseCase services.UserUseCase, walletRepo interfaces.WalletRepository, cartRepo interfaces.CartRepository, couponRepository interfaces.CouponRepository) services.OrderUseCase {
 	return &orderUseCase{
 		orderRepository:  repo,
 		userUseCase:      userUseCase,
 		walletRepository: walletRepo,
 		cartRepo:         cartRepo,
+		couponRepository: couponRepository,
 	}
 }
-func (i *orderUseCase) OrderItemsFromCart(userID, addressID, paymentID int) error {
+func (i *orderUseCase) OrderItemsFromCart(userID, addressID, paymentID, couponID int) error {
 
-	if userID <= 0 || addressID <= 0 || paymentID < 0 {
+	if userID <= 0 || addressID <= 0 || paymentID < 0 || couponID < 0 {
 		return errors.New("enter a valid number")
 	}
 
@@ -53,6 +55,24 @@ func (i *orderUseCase) OrderItemsFromCart(userID, addressID, paymentID int) erro
 			total += float64(item.Quantity) * float64(item.Price)
 		}
 	}
+
+	couponvalid, err := i.couponRepository.CheckCouponValid(couponID)
+	if err != nil {
+		return err
+	}
+	if !couponvalid {
+		return errors.New("this coupon is invalid")
+	}
+
+	coupon, err := i.couponRepository.FindCouponPrice(couponID)
+	if err != nil {
+		return err
+	}
+
+	totaldiscount := float64(coupon)
+
+	total = total - totaldiscount
+
 	orderID, err := i.orderRepository.OrderItems(userID, addressID, paymentID, total)
 	if err != nil {
 		return err
