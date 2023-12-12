@@ -50,3 +50,9 @@ type OrderPaymentDetails struct {
 	OrderID    int     `json:"order_id"`
 	FinalPrice float64 `json:"final_price"`
 }
+
+type ItemDetails struct {
+	ProductName string  `json:"product_name"`
+	FinalPrice  float64 `json:"final_price"`
+	Quantity    int     `json:"quantity"`
+}

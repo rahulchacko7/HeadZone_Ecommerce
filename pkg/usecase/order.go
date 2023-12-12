@@ -7,6 +7,9 @@ import (
 	"HeadZone/pkg/utils/models"
 	"errors"
 	"fmt"
+	"strconv"
+
+	"github.com/jung-kurt/gofpdf"
 )
 
 type orderUseCase struct {
@@ -36,6 +39,8 @@ func (i *orderUseCase) OrderItemsFromCart(userID, addressID, paymentID, couponID
 	if err != nil {
 		return err
 	}
+
+	fmt.Println("cart details at usecase", cart)
 
 	exist, err := i.cartRepo.CheckCart(userID)
 
@@ -280,4 +285,55 @@ func (or *orderUseCase) PaymentMethodID(order_id int) (int, error) {
 		return 0, err
 	}
 	return id, nil
+}
+
+func (or *orderUseCase) PrintInvoice(orderId int) (*gofpdf.Fpdf, error) {
+	order, err := or.orderRepository.GetDetailedOrderThroughId(orderId)
+	if err != nil {
+		return nil, err
+	}
+
+	fmt.Println("order details", order)
+
+	items, err := or.orderRepository.GetItemsByOrderId(orderId)
+	if err != nil {
+		return nil, err
+	}
+
+	// Create a new PDF document
+	pdf := gofpdf.New("P", "mm", "A4", "")
+	pdf.AddPage()
+
+	// Set font and title
+	pdf.SetFont("Arial", "B", 16)
+	pdf.Cell(40, 10, "Invoice")
+	pdf.Ln(10)
+
+	// Add customer details
+	pdf.Cell(0, 10, "Customer Name: "+order.Name)
+	pdf.Ln(10)
+	pdf.Cell(0, 10, "House Name: "+order.HouseName)
+	pdf.Ln(10)
+	pdf.Cell(0, 10, "Street: "+order.Street)
+	pdf.Ln(10)
+	pdf.Cell(0, 10, "State: "+order.State)
+	pdf.Ln(10)
+	pdf.Cell(0, 10, "City: "+order.City)
+	pdf.Ln(10)
+
+	for _, item := range items {
+		pdf.Cell(0, 10, "Item: "+item.ProductName)
+		pdf.Ln(10)
+		// Convert numerical values to strings before concatenating
+		pdf.Cell(0, 10, "Price: $"+strconv.FormatFloat(item.FinalPrice, 'f', 2, 64))
+		pdf.Ln(10)
+		pdf.Cell(0, 10, "Quantity: "+strconv.Itoa(item.Quantity))
+		pdf.Ln(10)
+	}
+	pdf.Ln(10)
+
+	// Add the total amount to the PDF
+	pdf.Cell(0, 10, "Total Amount: $"+strconv.FormatFloat(order.FinalPrice, 'f', 2, 64))
+
+	return pdf, nil
 }

@@ -59,7 +59,7 @@ func UserRoutes(engine *gin.RouterGroup, userHandler *handler.UserHandler, otpHa
 		{
 			checkout.GET("", cartHandler.CheckOut)
 			checkout.POST("", orderHandler.OrderItemsFromCart)
-
+			checkout.GET("/print", orderHandler.PrintInvoice)
 		}
 
 		wallet := engine.Group("/wallet")

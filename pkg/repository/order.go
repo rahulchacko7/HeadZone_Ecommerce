@@ -413,3 +413,21 @@ func (o *orderRepository) CartExist(userID int) (bool, error) {
 
 	return exist, nil
 }
+
+func (o *orderRepository) GetItemsByOrderId(orderId int) ([]models.ItemDetails, error) {
+	var items []models.ItemDetails
+
+	query := `
+	SELECT *
+	FROM orders o
+	JOIN carts c ON o.id = c.id
+	JOIN line_items ct ON c.id = ct.id
+	JOIN inventories i ON i.id = ct.id
+	WHERE o.id = 32;	
+			`
+
+	if err := o.DB.Raw(query, orderId).Scan(&items).Error; err != nil {
+		return []models.ItemDetails{}, err
+	}
+	return items, nil
+}

@@ -3,6 +3,8 @@ package interfaces
 import (
 	"HeadZone/pkg/domain"
 	"HeadZone/pkg/utils/models"
+
+	"github.com/jung-kurt/gofpdf"
 )
 
 type OrderUseCase interface {
@@ -14,4 +16,5 @@ type OrderUseCase interface {
 	OrdersStatus(orderId int) error
 	ReturnOrder(orderID int) error
 	PaymentMethodID(order_id int) (int, error)
+	PrintInvoice(orderIdInt int) (*gofpdf.Fpdf, error)
 }

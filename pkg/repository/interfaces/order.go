@@ -36,4 +36,5 @@ type OrderRepository interface {
 	CheckOrderStatusByOrderId(orderID int) (string, error)
 	OrderIdStatus(orderID int) (bool, error)
 	CartExist(UserId int) (bool, error)
+	GetItemsByOrderId(orderId int) ([]models.ItemDetails, error)
 }
