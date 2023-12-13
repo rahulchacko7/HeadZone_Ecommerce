@@ -80,6 +80,45 @@ func (i *orderRepository) GetOrders(orderID int) (domain.OrderResponse, error) {
 	return order, nil
 }
 
+func (i *orderRepository) OrderItemsInv(productNames []string, categoryIds []int, prices, quantities []int, totalPrices []float64, userID int, orderID int) error {
+	// Loop through the provided slices and perform necessary actions
+	for idx := range productNames {
+		orderInv := domain.OrderItemInv{
+			ProductName: productNames[idx],
+			Category_id: categoryIds[idx],
+			Quantity:    quantities[idx],
+			Price:       prices[idx],
+			Total:       totalPrices[idx],
+			UserID:      uint(userID),
+			OrderID:     uint(orderID),
+		}
+
+		fmt.Println("order id at repo ", orderID)
+		// Execute the SQL query
+		query := `
+			INSERT INTO order_item_invs (product_name, category_id, quantity, price, total, user_id, order_id)
+			VALUES (?, ?, ?, ?, ?, ?, ?)
+		`
+
+		result := i.DB.Exec(
+			query,
+			orderInv.ProductName,
+			orderInv.Category_id,
+			orderInv.Quantity,
+			orderInv.Price,
+			orderInv.Total,
+			orderInv.UserID,
+			orderInv.OrderID,
+		)
+
+		if result.Error != nil {
+			return result.Error
+		}
+	}
+
+	return nil
+}
+
 func (o *orderRepository) CheckOrderStatusByID(id int) (string, error) {
 
 	var status string
@@ -418,16 +457,15 @@ func (o *orderRepository) GetItemsByOrderId(orderId int) ([]models.ItemDetails, 
 	var items []models.ItemDetails
 
 	query := `
-	SELECT *
+	SELECT oi.id AS order_item_id, oi.product_name, oi.quantity, oi.price, oi.total, o.id AS order_id, o.created_at, o.updated_at, o.final_price, o.order_status, o.payment_status
 	FROM orders o
-	JOIN carts c ON o.id = c.id
-	JOIN line_items ct ON c.id = ct.id
-	JOIN inventories i ON i.id = ct.id
-	WHERE o.id = 32;	
-			`
+	JOIN order_item_invs oi ON o.id = oi.order_id
+	WHERE o.id = ?;
+	`
 
 	if err := o.DB.Raw(query, orderId).Scan(&items).Error; err != nil {
 		return []models.ItemDetails{}, err
 	}
+
 	return items, nil
 }

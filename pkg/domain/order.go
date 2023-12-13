@@ -55,3 +55,14 @@ type OrdersDetails struct {
 	PaymentMethod string  `json:"payment_method" gorm:"payment_method"`
 	Total         float64 `json:"total"`
 }
+
+type OrderItemInv struct {
+	ID          int     `json:"id" gorm:"id"`
+	ProductName string  `json:"product_name"`
+	Category_id int     `json:"category_id"`
+	Quantity    int     `json:"quantity"`
+	Price       int     `json:"price"`
+	Total       float64 `json:"total_price"`
+	UserID      uint    `json:"user_id"`
+	OrderID     uint    `json:"order_id"`
+}

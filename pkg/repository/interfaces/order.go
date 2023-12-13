@@ -37,4 +37,5 @@ type OrderRepository interface {
 	OrderIdStatus(orderID int) (bool, error)
 	CartExist(UserId int) (bool, error)
 	GetItemsByOrderId(orderId int) ([]models.ItemDetails, error)
+	OrderItemsInv(productNames []string, categoryIds []int, prices, quantities []int, totalPrices []float64, userID int, orderID int) error
 }
