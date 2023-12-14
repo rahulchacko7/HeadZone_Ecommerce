@@ -16,4 +16,10 @@ type AdminRepository interface {
 	GetPaymentMethod() ([]models.PaymentMethodResponse, error)
 	CheckIfPaymentMethodAlreadyExists(payment string) (bool, error)
 	DeletePaymentMethod(id int) error
+
+	TotalRevenue() (models.DashboardRevenue, error)
+	DashBoardOrder() (models.DashboardOrder, error)
+	AmountDetails() (models.DashboardAmount, error)
+	DashBoardUserDetails() (models.DashBoardUser, error)
+	DashBoardProductDetails() (models.DashBoardProduct, error)
 }

@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"strconv"
+	"time"
 
 	"gorm.io/gorm"
 )
@@ -56,7 +57,6 @@ func (ad *adminRepository) GetUserByID(id string) (domain.Users, error) {
 	return userDetails, nil
 }
 
-// function which will both block and unblock a user
 func (ad *adminRepository) UpdateBlockUserByID(user domain.Users) error {
 
 	err := ad.DB.Exec("update users set blocked = ? where id = ?", user.Blocked, user.ID).Error
@@ -131,4 +131,102 @@ func (a *adminRepository) GetPaymentMethod() ([]models.PaymentMethodResponse, er
 	}
 
 	return model, nil
+}
+
+func (a *adminRepository) TotalRevenue() (models.DashboardRevenue, error) {
+	var revenueDetails models.DashboardRevenue
+
+	startTime := time.Now().AddDate(0, 0, -1)
+
+	err := a.DB.Raw("select coalesce(sum(final_price),0) from orders where payment_status = 'PAID'  and created_at >= ?", startTime).Scan(&revenueDetails.TodayRevenue).Error
+	if err != nil {
+		return models.DashboardRevenue{}, nil
+	}
+
+	startTime = time.Now().AddDate(0, -1, 1).UTC()
+	err = a.DB.Raw("select coalesce(sum(final_price),0) from orders where payment_status = 'PAID'  and created_at >= ?", startTime).Scan(&revenueDetails.MonthRevenue).Error
+	if err != nil {
+		return models.DashboardRevenue{}, nil
+	}
+	startTime = time.Now().AddDate(-1, 1, 1).UTC()
+	err = a.DB.Raw("select coalesce(sum(final_price),0) from orders where payment_status = 'PAID'  and created_at >= ?", startTime).Scan(&revenueDetails.YearRevenue).Error
+	if err != nil {
+		return models.DashboardRevenue{}, nil
+	}
+
+	return revenueDetails, nil
+}
+
+func (ad *adminRepository) DashBoardOrder() (models.DashboardOrder, error) {
+
+	var orderDetails models.DashboardOrder
+	err := ad.DB.Raw("select count(*) from orders where payment_status = 'PAID'").Scan(&orderDetails.CompletedOrder).Error
+	if err != nil {
+		return models.DashboardOrder{}, nil
+	}
+
+	err = ad.DB.Raw("select count(*) from orders where order_status = 'PENDING' or order_status = 'PROCESSING'").Scan(&orderDetails.PendingOrder).Error
+	if err != nil {
+		return models.DashboardOrder{}, nil
+	}
+
+	err = ad.DB.Raw("select count(*) from orders where order_status = 'CANCELED'").Scan(&orderDetails.CancelledOrder).Error
+	if err != nil {
+		return models.DashboardOrder{}, nil
+	}
+
+	err = ad.DB.Raw("select count(*) from orders").Scan(&orderDetails.TotalOrder).Error
+	if err != nil {
+		return models.DashboardOrder{}, nil
+	}
+
+	err = ad.DB.Raw("select sum(quantity) from order_items").Scan(&orderDetails.TotalOrderItem).Error
+	if err != nil {
+		return models.DashboardOrder{}, nil
+	}
+
+	return orderDetails, nil
+
+}
+
+func (ad *adminRepository) AmountDetails() (models.DashboardAmount, error) {
+
+	var amountDetails models.DashboardAmount
+	err := ad.DB.Raw("select coalesce(sum(final_price),0) from orders where payment_status = 'PAID' ").Scan(&amountDetails.CreditedAmount).Error
+	if err != nil {
+		return models.DashboardAmount{}, nil
+	}
+
+	err = ad.DB.Raw("select coalesce(sum(final_price),0) from orders where payment_status = 'NOT PAID' and order_status = 'PROCESSING' or order_status = 'PENDING' or order_status = 'ORDER PLACED' ").Scan(&amountDetails.PendingAmount).Error
+	if err != nil {
+		return models.DashboardAmount{}, nil
+	}
+
+	return amountDetails, nil
+
+}
+func (ad *adminRepository) DashBoardUserDetails() (models.DashBoardUser, error) {
+	var userDetails models.DashBoardUser
+	err := ad.DB.Raw("SELECT COUNT(*) FROM users WHERE is_admin='false'").Scan(&userDetails.TotalUsers).Error
+	if err != nil {
+		return models.DashBoardUser{}, nil
+	}
+	err = ad.DB.Raw("SELECT COUNT(*)  FROM users WHERE blocked=true").Scan(&userDetails.BlockedUser).Error
+	if err != nil {
+		return models.DashBoardUser{}, nil
+	}
+	return userDetails, nil
+}
+
+func (ad *adminRepository) DashBoardProductDetails() (models.DashBoardProduct, error) {
+	var productDetails models.DashBoardProduct
+	err := ad.DB.Raw("SELECT COUNT(*) FROM inventories").Scan(&productDetails.TotalProducts).Error
+	if err != nil {
+		return models.DashBoardProduct{}, nil
+	}
+	err = ad.DB.Raw("SELECT COUNT(*) FROM inventories WHERE stock<=0").Scan(&productDetails.OutofStockProduct).Error
+	if err != nil {
+		return models.DashBoardProduct{}, nil
+	}
+	return productDetails, nil
 }

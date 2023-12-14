@@ -180,3 +180,33 @@ func (a *adminUseCase) DeletePaymentMethod(id int) error {
 	return nil
 
 }
+
+func (ad *adminUseCase) DashBoard() (models.CompleteAdminDashboard, error) {
+	userDetails, err := ad.adminRepository.DashBoardUserDetails()
+	if err != nil {
+		return models.CompleteAdminDashboard{}, err
+	}
+	productDetails, err := ad.adminRepository.DashBoardProductDetails()
+	if err != nil {
+		return models.CompleteAdminDashboard{}, err
+	}
+	orderDetails, err := ad.adminRepository.DashBoardOrder()
+	if err != nil {
+		return models.CompleteAdminDashboard{}, err
+	}
+	totalRevenue, err := ad.adminRepository.TotalRevenue()
+	if err != nil {
+		return models.CompleteAdminDashboard{}, err
+	}
+	amountDetails, err := ad.adminRepository.AmountDetails()
+	if err != nil {
+		return models.CompleteAdminDashboard{}, err
+	}
+	return models.CompleteAdminDashboard{
+		DashboardUser:    userDetails,
+		DashboardProduct: productDetails,
+		DashboardOrder:   orderDetails,
+		DashboardRevenue: totalRevenue,
+		DashboardAmount:  amountDetails,
+	}, nil
+}

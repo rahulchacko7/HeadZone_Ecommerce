@@ -87,10 +87,8 @@ func (i *orderUseCase) OrderItemsFromCart(userID, addressID, paymentID, couponID
 		return err
 	}
 
-	// Update inventory for each product in the cart after a successful order
 	for _, v := range cart.Data {
 		if err := i.orderRepository.ReduceInventoryQuantity(v.ProductName, v.Quantity); err != nil {
-			// Handle error if reducing inventory fails
 			return err
 		}
 	}
@@ -122,7 +120,6 @@ func (i *orderUseCase) OrderItemsFromCart(userID, addressID, paymentID, couponID
 		return errors.New("failed to order items")
 	}
 
-	// Remove purchased items from the user's cart
 	for _, v := range cart.Data {
 		if err := i.userUseCase.RemoveFromCart(cart.ID, v.ID); err != nil {
 			return err
@@ -172,19 +169,16 @@ func (i *orderUseCase) CancelOrder(orderID int) error {
 	if paymentStatus == "PAID" && orderStatus == "DELIVERED" {
 		return errors.New("cannot cancel the item, kindly return it")
 	} else if paymentStatus == "PAID" && (orderStatus == "PENDING" || orderStatus == "SHIPPED") {
-		// Adding amount back to the user's wallet
 		_, errWallet := i.walletRepository.AddToWallet(price, userID)
 		if errWallet != nil {
 			return errWallet
 		}
 
-		// Update order status to CANCELLED if payment is PAID and status is PENDING or SHIPPED
 		_, err := i.orderRepository.UpdateOrder(orderID)
 		if err != nil {
 			return err
 		}
 	} else {
-		// If payment is not PAID or order status is not PENDING or SHIPPED, cancel the order directly
 		err = i.orderRepository.CancelOrder(orderID)
 		if err != nil {
 			return err
@@ -225,7 +219,6 @@ func (i *orderUseCase) OrdersStatus(orderID int) error {
 		return errors.New("enter a valid number")
 	}
 
-	// Check if order exists
 	orderExists, err := i.orderRepository.OrderIdStatus(orderID)
 	if err != nil {
 		return err
@@ -243,7 +236,6 @@ func (i *orderUseCase) OrdersStatus(orderID int) error {
 	case "CANCELED", "RETURNED", "DELIVERED":
 		return errors.New("cannot approve this order because it's in a processed or canceled state")
 	case "PENDING":
-		// For admin approval, change PENDING to SHIPPED
 		err := i.orderRepository.ChangeOrderStatus(orderID, "SHIPPED")
 		if err != nil {
 			return err
@@ -285,7 +277,6 @@ func (o *orderUseCase) ReturnOrder(orderID int) error {
 		return err
 	}
 
-	// Adding amount back to the user's wallet
 	_, errWallet := o.walletRepository.AddToWallet(price, userID)
 	if errWallet != nil {
 		return errWallet
@@ -306,7 +297,6 @@ func (or *orderUseCase) PaymentMethodID(order_id int) (int, error) {
 		return 0, errors.New("enter a valid number")
 	}
 
-	fmt.Println("mmmmmmmmmmmmmmmmm", order_id)
 	id, err := or.orderRepository.PaymentMethodID(order_id)
 	if err != nil {
 		return 0, err
@@ -315,6 +305,11 @@ func (or *orderUseCase) PaymentMethodID(order_id int) (int, error) {
 }
 
 func (or *orderUseCase) PrintInvoice(orderId int) (*gofpdf.Fpdf, error) {
+
+	if orderId < 1 {
+		return nil, errors.New("enter a valid order id")
+	}
+
 	order, err := or.orderRepository.GetDetailedOrderThroughId(orderId)
 	if err != nil {
 		return nil, err
@@ -325,21 +320,23 @@ func (or *orderUseCase) PrintInvoice(orderId int) (*gofpdf.Fpdf, error) {
 		return nil, err
 	}
 
+	fmt.Println("order details ", order)
 	fmt.Println("itemssss", items)
+	fmt.Println("order status", order.OrderStatus)
+	if order.OrderStatus != "DELIVERED" {
+		return nil, errors.New("wait for the invoice until the product is received")
+	}
 
-	// Create a new PDF document
 	pdf := gofpdf.New("P", "mm", "A4", "")
 	pdf.AddPage()
 
-	// Set font and title
 	pdf.SetFont("Arial", "B", 24)
-	pdf.SetTextColor(31, 73, 125) // Set text color to a blue shade
+	pdf.SetTextColor(31, 73, 125)
 	pdf.Cell(0, 20, "Invoice")
 	pdf.Ln(20)
 
-	// Customer details section
 	pdf.SetFont("Arial", "I", 14)
-	pdf.SetTextColor(51, 51, 51) // Set text color to dark gray
+	pdf.SetTextColor(51, 51, 51)
 	pdf.Cell(0, 10, "Customer Details")
 	pdf.Ln(10)
 	customerDetails := []string{
@@ -355,7 +352,6 @@ func (or *orderUseCase) PrintInvoice(orderId int) (*gofpdf.Fpdf, error) {
 	}
 	pdf.Ln(10)
 
-	// Items section headers
 	pdf.SetFont("Arial", "B", 16)
 	pdf.SetFillColor(217, 217, 217)
 	pdf.SetTextColor(0, 0, 0)
@@ -366,7 +362,7 @@ func (or *orderUseCase) PrintInvoice(orderId int) (*gofpdf.Fpdf, error) {
 	pdf.Ln(10)
 
 	pdf.SetFont("Arial", "", 12)
-	pdf.SetFillColor(255, 255, 255) // Set white background for items
+	pdf.SetFillColor(255, 255, 255)
 	for _, item := range items {
 		pdf.CellFormat(40, 10, item.ProductName, "1", 0, "L", true, 0, "")
 		pdf.CellFormat(40, 10, "$"+strconv.FormatFloat(item.Price, 'f', 2, 64), "1", 0, "C", true, 0, "")
@@ -375,8 +371,6 @@ func (or *orderUseCase) PrintInvoice(orderId int) (*gofpdf.Fpdf, error) {
 		pdf.Ln(10)
 	}
 	pdf.Ln(10)
-
-	// Total amount section
 
 	var totalPrice float64
 	for _, item := range items {
