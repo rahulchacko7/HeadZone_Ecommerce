@@ -9,6 +9,11 @@ type OrderDetails struct {
 	PaymentStatus   string  `json:"payment_status" gorm:"payment_status:4;default:'NOT PAID';check:payment_status IN ('PAID', 'NOT PAID','REFUND IN PROGRESS','RETURNED TO WALLET')"`
 }
 
+type OrderDetailsAdmin struct {
+	TotalAmount float64 `gorm:"column:total_amount"`
+	ProductName string  `gorm:"column:product_name"`
+}
+
 type PaymentMethodResponse struct {
 	ID           uint   `gorm:"primarykey"`
 	Payment_Name string `json:"payment_name"`

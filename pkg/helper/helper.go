@@ -11,6 +11,7 @@ import (
 	"mime/multipart"
 	"time"
 
+	"github.com/360EntSecGroup-Skylar/excelize"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/feature/s3/manager"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
@@ -225,4 +226,33 @@ func (h *helper) Copy(a *models.UserDetailsResponse, b *models.UserSignInRespons
 	}
 
 	return *a, nil
+}
+
+func ConvertToExel(sales []models.OrderDetailsAdmin) (*excelize.File, error) {
+	// Create a new Excel file
+	filename := "salesReport/sales_report.xlsx"
+	file := excelize.NewFile()
+
+	// create headers for excel
+	file.SetCellValue("Sheet1", "A1", "Item")
+	file.SetCellValue("Sheet1", "B1", "Total Amount Sold")
+
+	// Add data rows to the sheet
+	// fmt.Println("sales :", sales)
+	for i, sale := range sales {
+		col1 := fmt.Sprintf("A%d", i+1)
+		col2 := fmt.Sprintf("B%d", i+1)
+		// dataRow := sheet.AddRow()
+		file.SetCellValue("Sheet1", col1, sale.ProductName)
+		file.SetCellValue("Sheet1", col2, sale.TotalAmount)
+
+	}
+
+	// save excel
+	if err := file.SaveAs(filename); err != nil {
+		return nil, err
+	}
+	// fmt.Println(file)
+
+	return file, nil
 }

@@ -22,4 +22,8 @@ type AdminRepository interface {
 	AmountDetails() (models.DashboardAmount, error)
 	DashBoardUserDetails() (models.DashBoardUser, error)
 	DashBoardProductDetails() (models.DashBoardProduct, error)
+
+	SalesByYear(yearInt int) ([]models.OrderDetailsAdmin, error)
+	SalesByMonth(monthInt int) ([]models.OrderDetailsAdmin, error)
+	SalesByDay(dayInt int) ([]models.OrderDetailsAdmin, error)
 }
