@@ -251,7 +251,7 @@ func (ad *adminRepository) SalesByYear(yearInt int) ([]models.OrderDetailsAdmin,
 	return orderDetails, nil
 }
 
-func (ad *adminRepository) SalesByMonth(monthInt int) ([]models.OrderDetailsAdmin, error) {
+func (ad *adminRepository) SalesByMonth(yearInt int, monthInt int) ([]models.OrderDetailsAdmin, error) {
 	var orderDetails []models.OrderDetailsAdmin
 
 	query := `SELECT i.product_name, SUM(oi.total_price) AS total_amount
@@ -259,10 +259,11 @@ func (ad *adminRepository) SalesByMonth(monthInt int) ([]models.OrderDetailsAdmi
               JOIN order_items oi ON o.id = oi.order_id
               JOIN inventories i ON oi.inventory_id = i.id
               WHERE o.payment_status = 'PAID'
-                AND EXTRACT(MONTH FROM o.created_at) = ?
+			  AND EXTRACT(YEAR FROM o.created_at) = ?
+			  AND EXTRACT(MONTH FROM o.created_at) = ?
               GROUP BY i.product_name`
 
-	if err := ad.DB.Raw(query, monthInt).Scan(&orderDetails).Error; err != nil {
+	if err := ad.DB.Raw(query, yearInt, monthInt).Scan(&orderDetails).Error; err != nil {
 		return []models.OrderDetailsAdmin{}, err
 	}
 
@@ -271,7 +272,7 @@ func (ad *adminRepository) SalesByMonth(monthInt int) ([]models.OrderDetailsAdmi
 	return orderDetails, nil
 }
 
-func (ad *adminRepository) SalesByDay(dayInt int) ([]models.OrderDetailsAdmin, error) {
+func (ad *adminRepository) SalesByDay(yearInt int, monthInt int, dayInt int) ([]models.OrderDetailsAdmin, error) {
 	var orderDetails []models.OrderDetailsAdmin
 
 	query := `SELECT i.product_name, SUM(oi.total_price) AS total_amount
@@ -279,14 +280,46 @@ func (ad *adminRepository) SalesByDay(dayInt int) ([]models.OrderDetailsAdmin, e
               JOIN order_items oi ON o.id = oi.order_id
               JOIN inventories i ON oi.inventory_id = i.id
               WHERE o.payment_status = 'PAID'
+			  AND EXTRACT(YEAR FROM o.created_at) = ?
+			  AND EXTRACT(MONTH FROM o.created_at) = ?
                 AND EXTRACT(DAY FROM o.created_at) = ?
               GROUP BY i.product_name`
 
-	if err := ad.DB.Raw(query, dayInt).Scan(&orderDetails).Error; err != nil {
+	if err := ad.DB.Raw(query, yearInt, monthInt, dayInt).Scan(&orderDetails).Error; err != nil {
 		return []models.OrderDetailsAdmin{}, err
 	}
 
 	fmt.Println("body at repo day", orderDetails)
 
 	return orderDetails, nil
+}
+
+func (ad *adminRepository) CustomSalesReportByDate(startTime time.Time, endTime time.Time) (models.SalesReport, error) {
+	var salesReport models.SalesReport
+	result := ad.DB.Raw("SELECT COALESCE(SUM(final_price),0) FROM orders WHERE payment_status='PAID' AND created_at >= ? AND created_at <= ?", startTime, endTime).Scan(&salesReport.TotalSales)
+	if result.Error != nil {
+		return models.SalesReport{}, result.Error
+	}
+	result = ad.DB.Raw("SELECT COUNT(*) FROM orders").Scan(&salesReport.TotalOrders)
+	if result.Error != nil {
+		return models.SalesReport{}, result.Error
+	}
+	result = ad.DB.Raw("SELECT COUNT(*) FROM orders WHERE payment_status = 'PAID' and created_at >= ? AND created_at <= ?", startTime, endTime).Scan(&salesReport.CompletedOrders)
+	if result.Error != nil {
+		return models.SalesReport{}, result.Error
+	}
+	result = ad.DB.Raw("SELECT COUNT(*) FROM orders WHERE order_status = 'PENDING'  AND created_at >= ? AND created_at<=?", startTime, endTime).Scan(&salesReport.PendingOrders)
+	if result.Error != nil {
+		return models.SalesReport{}, result.Error
+	}
+	var productID int
+	result = ad.DB.Raw("SELECT inventory_id FROM order_items GROUP BY inventory_id order by SUM(quantity) DESC LIMIT 1").Scan(&productID)
+	if result.Error != nil {
+		return models.SalesReport{}, result.Error
+	}
+	result = ad.DB.Raw("SELECT product_name FROM inventories WHERE id = ?", productID).Scan(&salesReport.TrendingProduct)
+	if result.Error != nil {
+		return models.SalesReport{}, result.Error
+	}
+	return salesReport, nil
 }

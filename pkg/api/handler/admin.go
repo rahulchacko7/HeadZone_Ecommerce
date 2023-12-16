@@ -299,3 +299,41 @@ func (a *AdminHandler) SalesByDate(c *gin.Context) {
 	succesRes := response.ClientResponse(http.StatusOK, "success", body, nil)
 	c.JSON(http.StatusOK, succesRes)
 }
+
+func (ad *AdminHandler) CustomSalesReport(c *gin.Context) {
+	startDateStr := c.Query("start")
+	endDateStr := c.Query("end")
+	if startDateStr == "" || endDateStr == "" {
+		err := response.ClientResponse(http.StatusBadRequest, "start or end date is empty", nil, "Empty date string")
+		c.JSON(http.StatusBadRequest, err)
+		return
+	}
+	startDate, err := time.Parse("02-01-2006", startDateStr)
+	if err != nil {
+		err := response.ClientResponse(http.StatusBadRequest, "start date conversion failed", nil, err.Error())
+		c.JSON(http.StatusBadRequest, err)
+		return
+	}
+	endDate, err := time.Parse("02-01-2006", endDateStr)
+	if err != nil {
+		err := response.ClientResponse(http.StatusBadRequest, "end date conversion failed", nil, err.Error())
+		c.JSON(http.StatusBadRequest, err)
+		return
+	}
+
+	if startDate.After(endDate) {
+		err := response.ClientResponse(http.StatusBadRequest, "start date is after end date", nil, "Invalid date range")
+		c.JSON(http.StatusBadRequest, err)
+		return
+	}
+
+	report, err := ad.adminUseCase.CustomSalesReportByDate(startDate, endDate)
+	if err != nil {
+		errorRes := response.ClientResponse(http.StatusInternalServerError, "sales report could not be retrieved", nil, err.Error())
+		c.JSON(http.StatusInternalServerError, errorRes)
+		return
+	}
+
+	success := response.ClientResponse(http.StatusOK, "sales report retrieved successfully", report, nil)
+	c.JSON(http.StatusOK, success)
+}

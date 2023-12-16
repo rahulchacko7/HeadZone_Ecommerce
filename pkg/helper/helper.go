@@ -229,30 +229,48 @@ func (h *helper) Copy(a *models.UserDetailsResponse, b *models.UserSignInRespons
 }
 
 func ConvertToExel(sales []models.OrderDetailsAdmin) (*excelize.File, error) {
-	// Create a new Excel file
+
 	filename := "salesReport/sales_report.xlsx"
 	file := excelize.NewFile()
 
-	// create headers for excel
 	file.SetCellValue("Sheet1", "A1", "Item")
 	file.SetCellValue("Sheet1", "B1", "Total Amount Sold")
 
-	// Add data rows to the sheet
-	// fmt.Println("sales :", sales)
 	for i, sale := range sales {
 		col1 := fmt.Sprintf("A%d", i+1)
 		col2 := fmt.Sprintf("B%d", i+1)
-		// dataRow := sheet.AddRow()
+
 		file.SetCellValue("Sheet1", col1, sale.ProductName)
 		file.SetCellValue("Sheet1", col2, sale.TotalAmount)
 
 	}
 
-	// save excel
 	if err := file.SaveAs(filename); err != nil {
 		return nil, err
 	}
-	// fmt.Println(file)
 
 	return file, nil
+}
+
+func (h *helper) GetTimeFromPeriod(timePeriod string) (time.Time, time.Time) {
+
+	endDate := time.Now()
+
+	if timePeriod == "week" {
+		startDate := endDate.AddDate(0, 0, -6)
+		return startDate, endDate
+	}
+
+	if timePeriod == "month" {
+		startDate := endDate.AddDate(0, -1, 0)
+		return startDate, endDate
+	}
+
+	if timePeriod == "year" {
+		startDate := endDate.AddDate(0, -1, 0)
+		return startDate, endDate
+	}
+
+	return endDate.AddDate(0, 0, -6), endDate
+
 }

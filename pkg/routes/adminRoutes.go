@@ -60,6 +60,7 @@ func AdminRoutes(engine *gin.RouterGroup, adminHandler *handler.AdminHandler, ca
 
 		engine.GET("/dashboard", adminHandler.DashBoard)
 		engine.GET("/salesbydate", adminHandler.SalesByDate)
+		engine.GET("/customreport", adminHandler.CustomSalesReport)
 
 	}
 }

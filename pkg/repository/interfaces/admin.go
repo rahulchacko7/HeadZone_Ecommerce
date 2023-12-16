@@ -3,6 +3,7 @@ package interfaces
 import (
 	"HeadZone/pkg/domain"
 	"HeadZone/pkg/utils/models"
+	"time"
 )
 
 type AdminRepository interface {
@@ -24,6 +25,8 @@ type AdminRepository interface {
 	DashBoardProductDetails() (models.DashBoardProduct, error)
 
 	SalesByYear(yearInt int) ([]models.OrderDetailsAdmin, error)
-	SalesByMonth(monthInt int) ([]models.OrderDetailsAdmin, error)
-	SalesByDay(dayInt int) ([]models.OrderDetailsAdmin, error)
+	SalesByMonth(yearInt int, monthInt int) ([]models.OrderDetailsAdmin, error)
+	SalesByDay(yearInt int, monthInt int, dayInt int) ([]models.OrderDetailsAdmin, error)
+
+	CustomSalesReportByDate(startTime time.Time, endTime time.Time) (models.SalesReport, error)
 }
