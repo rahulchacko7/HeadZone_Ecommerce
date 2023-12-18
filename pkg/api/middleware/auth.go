@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"HeadZone/pkg/config"
 	"net/http"
 	"strings"
 
@@ -12,10 +13,12 @@ func AdminAuthMiddleware(c *gin.Context) {
 
 	accessToken := c.Request.Header.Get("Authorization")
 
+	cfg, _ := config.LoadConfig()
+
 	accessToken = strings.TrimPrefix(accessToken, "Bearer ")
 
 	_, err := jwt.Parse(accessToken, func(token *jwt.Token) (interface{}, error) {
-		return []byte("accesssecret"), nil
+		return []byte(cfg.ACCESS_KEY_ADMIN), nil
 	})
 
 	if err != nil {

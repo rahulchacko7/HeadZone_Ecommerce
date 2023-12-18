@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"HeadZone/pkg/config"
 	"fmt"
 	"net/http"
 	"strings"
@@ -10,6 +11,7 @@ import (
 )
 
 func UserAuthMiddleware(c *gin.Context) {
+	cfg, _ := config.LoadConfig()
 	tokenString := c.GetHeader("Authorization")
 	if tokenString == "" {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Missing authorization token"})
@@ -20,7 +22,7 @@ func UserAuthMiddleware(c *gin.Context) {
 
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 
-		return []byte("comebuyjersey"), nil
+		return []byte(cfg.ACCESS_KEY_USER), nil
 	})
 
 	if err != nil || !token.Valid {

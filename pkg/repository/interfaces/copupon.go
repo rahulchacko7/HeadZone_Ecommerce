@@ -7,6 +7,6 @@ type CouponRepository interface {
 	GetCopupon() ([]models.CouponResponse, error)
 	CheckCoupon(coupon string) (bool, error)
 	UpdateCoupon(CId int, CouponName string, CouponStatus bool, Discount int) (models.CouponResponse, error)
-	CheckCouponValid(couponID int) (bool, error)
-	FindCouponPrice(couponID int) (int, error)
+	CheckCouponById(couponID int) (bool, error)
+	GetCouponById(couponID int) (int, error)
 }

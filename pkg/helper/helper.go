@@ -3,12 +3,10 @@ package helper
 import (
 	"HeadZone/pkg/helper/interfaces"
 	"HeadZone/pkg/utils/models"
-	"context"
 	"crypto/rand"
 	"encoding/base32"
 	"errors"
 	"fmt"
-	"mime/multipart"
 	"reflect"
 	"regexp"
 	"strconv"
@@ -16,10 +14,6 @@ import (
 	"unicode"
 
 	"github.com/360EntSecGroup-Skylar/excelize"
-	"github.com/aws/aws-sdk-go-v2/config"
-	"github.com/aws/aws-sdk-go-v2/feature/s3/manager"
-	"github.com/aws/aws-sdk-go-v2/service/s3"
-	"github.com/aws/aws-sdk-go/aws"
 	"github.com/golang-jwt/jwt"
 	"github.com/jinzhu/copier"
 	"github.com/twilio/twilio-go"
@@ -71,52 +65,18 @@ func (helper *helper) GenerateTokenAdmin(admin models.AdminDetailsResponse) (str
 	}
 
 	accessToken := jwt.NewWithClaims(jwt.SigningMethodHS256, accessTokenClaims)
-	accessTokenString, err := accessToken.SignedString([]byte("accesssecret"))
+	accessTokenString, err := accessToken.SignedString([]byte(helper.cfg.ACCESS_KEY_ADMIN))
 	if err != nil {
 		return "", "", err
 	}
 
 	refreshToken := jwt.NewWithClaims(jwt.SigningMethodHS256, refreshTokenClaims)
-	refreshTokenString, err := refreshToken.SignedString([]byte("refreshsecret"))
+	refreshTokenString, err := refreshToken.SignedString([]byte(helper.cfg.REFRESH_KEY_ADMIN))
 	if err != nil {
 		return "", "", err
 	}
 
 	return accessTokenString, refreshTokenString, nil
-}
-
-func (h *helper) AddImageToS3(file *multipart.FileHeader) (string, error) {
-
-	cfg, err := config.LoadDefaultConfig(context.TODO(), config.WithRegion("ap-south-1"))
-	if err != nil {
-		fmt.Println("configuration error:", err)
-		return "", err
-	}
-
-	client := s3.NewFromConfig(cfg)
-
-	uploader := manager.NewUploader(client)
-
-	f, openErr := file.Open()
-	if openErr != nil {
-		fmt.Println("opening error:", openErr)
-		return "", openErr
-	}
-	defer f.Close()
-
-	result, uploadErr := uploader.Upload(context.TODO(), &s3.PutObjectInput{
-		Bucket: aws.String("jerseyhub"),
-		Key:    aws.String(file.Filename),
-		Body:   f,
-		ACL:    "public-read",
-	})
-
-	if uploadErr != nil {
-		fmt.Println("uploading error:", uploadErr)
-		return "", uploadErr
-	}
-
-	return result.Location, nil
 }
 
 func (h *helper) TwilioSetup(username string, password string) {
@@ -174,7 +134,7 @@ func (h *helper) GenerateTokenClients(user models.UserDetailsResponse) (string, 
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	tokenString, err := token.SignedString([]byte("comebuyjersey"))
+	tokenString, err := token.SignedString([]byte(h.cfg.ACCESS_KEY_USER))
 
 	if err != nil {
 		return "", err

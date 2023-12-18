@@ -30,9 +30,9 @@ func NewOrderUseCase(repo interfaces.OrderRepository, userUseCase services.UserU
 		couponRepository: couponRepository,
 	}
 }
-func (i *orderUseCase) OrderItemsFromCart(userID, addressID, paymentID, couponID int) error {
+func (i *orderUseCase) OrderItemsFromCart(userID, addressID, paymentID, couponId int) error {
 
-	if userID <= 0 || addressID <= 0 || paymentID < 0 || couponID < 0 {
+	if userID <= 0 || addressID <= 0 || paymentID < 0 || couponId < 0 {
 		return errors.New("enter a valid number")
 	}
 
@@ -62,68 +62,83 @@ func (i *orderUseCase) OrderItemsFromCart(userID, addressID, paymentID, couponID
 		}
 	}
 
-	couponvalid, err := i.couponRepository.CheckCouponValid(couponID)
-	if err != nil {
-		return err
-	}
-	if !couponvalid {
-		return errors.New("this coupon is invalid")
-	}
-
-	coupon, err := i.couponRepository.FindCouponPrice(couponID)
-	if err != nil {
-		return err
-	}
-
-	totaldiscount := float64(coupon)
-
-	total = total - totaldiscount
-
-	orderID, err := i.orderRepository.OrderItems(userID, addressID, paymentID, total)
-	if err != nil {
-		return err
-	}
-	fmt.Println("orderid use1:......", orderID)
-	if err := i.orderRepository.AddOrderProducts(orderID, cart.Data); err != nil {
-		return err
-	}
-
-	for _, v := range cart.Data {
-		if err := i.orderRepository.ReduceInventoryQuantity(v.ProductName, v.Quantity); err != nil {
+	if couponId == 0 {
+		orderID, err := i.orderRepository.OrderItems(userID, addressID, paymentID, total)
+		if err != nil {
+			return err
+		}
+		if err := i.orderRepository.AddOrderProducts(orderID, cart.Data); err != nil {
 			return err
 		}
 	}
+	if couponId != 0 {
 
-	fmt.Println("orderid use2:......", orderID)
-
-	var (
-		categoryIds  []int
-		productNames []string
-		prices       []int
-		quantities   []int
-		totalPrices  []float64
-	)
-
-	fmt.Println("orderid use3:......", orderID)
-
-	for _, item := range cart.Data {
-		categoryIds = append(categoryIds, item.Category_id)
-		productNames = append(productNames, item.ProductName)
-		prices = append(prices, item.Price)
-		quantities = append(quantities, item.Quantity)
-		totalPrices = append(totalPrices, item.Total)
-	}
-
-	fmt.Println("order id at use4 ", orderID)
-
-	err = i.orderRepository.OrderItemsInv(productNames, categoryIds, prices, quantities, totalPrices, userID, orderID)
-	if err != nil {
-		return errors.New("failed to order items")
-	}
-
-	for _, v := range cart.Data {
-		if err := i.userUseCase.RemoveFromCart(cart.ID, v.ID); err != nil {
+		couponIdExist, err := i.couponRepository.CheckCouponById(couponId)
+		fmt.Println("coupon id exist bool", couponIdExist)
+		if err != nil {
 			return err
+		}
+		if !couponIdExist {
+			return errors.New("coupon does not exist")
+		}
+		if couponId < 0 {
+			return errors.New("negative values are not accepted")
+		}
+		coupon, err := i.couponRepository.GetCouponById(couponId)
+		if err != nil {
+			return errors.New("error in getting coupon")
+		}
+
+		totaldiscount := float64(coupon)
+
+		total = total - totaldiscount
+
+		orderID, err := i.orderRepository.OrderItems(userID, addressID, paymentID, total)
+		if err != nil {
+			return err
+		}
+		fmt.Println("orderid use1:......", orderID)
+		if err := i.orderRepository.AddOrderProducts(orderID, cart.Data); err != nil {
+			return err
+		}
+
+		for _, v := range cart.Data {
+			if err := i.orderRepository.ReduceInventoryQuantity(v.ProductName, v.Quantity); err != nil {
+				return err
+			}
+		}
+
+		fmt.Println("orderid use2:......", orderID)
+
+		var (
+			categoryIds  []int
+			productNames []string
+			prices       []int
+			quantities   []int
+			totalPrices  []float64
+		)
+
+		fmt.Println("orderid use3:......", orderID)
+
+		for _, item := range cart.Data {
+			categoryIds = append(categoryIds, item.Category_id)
+			productNames = append(productNames, item.ProductName)
+			prices = append(prices, item.Price)
+			quantities = append(quantities, item.Quantity)
+			totalPrices = append(totalPrices, item.Total)
+		}
+
+		fmt.Println("order id at use4 ", orderID)
+
+		err = i.orderRepository.OrderItemsInv(productNames, categoryIds, prices, quantities, totalPrices, userID, orderID)
+		if err != nil {
+			return errors.New("failed to order items")
+		}
+
+		for _, v := range cart.Data {
+			if err := i.userUseCase.RemoveFromCart(cart.ID, v.ID); err != nil {
+				return err
+			}
 		}
 	}
 
