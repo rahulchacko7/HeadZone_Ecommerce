@@ -15,7 +15,7 @@ func UserRoutes(engine *gin.RouterGroup, userHandler *handler.UserHandler, otpHa
 	engine.POST("/otplogin", otpHandler.SendOTP)
 	engine.POST("/verifyotp", otpHandler.VerifyOTP)
 
-	engine.GET("", inventoryHandler.ListProducts)
+	engine.GET("/products", inventoryHandler.ListProducts)
 
 	engine.GET("/payment", paymentHandler.MakePaymentRazorpay) // Update this route
 	engine.GET("/verifypayment", paymentHandler.VerifyPayment) // Update this route

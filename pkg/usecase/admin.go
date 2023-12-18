@@ -215,6 +215,14 @@ func (ad *adminUseCase) DashBoard() (models.CompleteAdminDashboard, error) {
 }
 func (ad *adminUseCase) SalesByDate(dayInt int, monthInt int, yearInt int) ([]models.OrderDetailsAdmin, error) {
 
+	if dayInt == 0 && monthInt == 0 && yearInt == 0 {
+		return []models.OrderDetailsAdmin{}, errors.New("must enter a value for day, month, and year")
+	}
+
+	if dayInt < 0 || monthInt < 0 || yearInt < 0 {
+		return []models.OrderDetailsAdmin{}, errors.New("no such values are allowded")
+	}
+
 	if yearInt >= 2020 {
 		if monthInt == 0 && dayInt == 0 {
 

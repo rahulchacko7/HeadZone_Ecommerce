@@ -14,6 +14,10 @@ type Helper interface {
 	GenerateTokenClients(user models.UserDetailsResponse) (string, error)
 	GenerateRefferalCode() (string, error)
 	PasswordHashing(string) (string, error)
+	ValidateAlphabets(data string) (bool, error)
 	CompareHashAndPassword(a string, b string) error
+	ValidatePin(pin string) bool
+	ValidatePhoneNumber(phone string) bool
 	Copy(a *models.UserDetailsResponse, b *models.UserSignInResponse) (models.UserDetailsResponse, error)
+	ValidateDatatype(data, intOrString string) (bool, error)
 }

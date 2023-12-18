@@ -334,6 +334,6 @@ func (ad *AdminHandler) CustomSalesReport(c *gin.Context) {
 		return
 	}
 
-	success := response.ClientResponse(http.StatusOK, "sales report retrieved successfully", report, nil)
+	success := response.ClientResponse(http.StatusOK, "custom report retrieved successfully", report, nil)
 	c.JSON(http.StatusOK, success)
 }

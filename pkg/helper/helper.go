@@ -9,7 +9,11 @@ import (
 	"errors"
 	"fmt"
 	"mime/multipart"
+	"reflect"
+	"regexp"
+	"strconv"
 	"time"
+	"unicode"
 
 	"github.com/360EntSecGroup-Skylar/excelize"
 	"github.com/aws/aws-sdk-go-v2/config"
@@ -273,4 +277,45 @@ func (h *helper) GetTimeFromPeriod(timePeriod string) (time.Time, time.Time) {
 
 	return endDate.AddDate(0, 0, -6), endDate
 
+}
+
+func (h *helper) ValidatePhoneNumber(phone string) bool {
+	phoneNumber := phone
+	pattern := `^\d{10}$`
+	regex := regexp.MustCompile(pattern)
+	value := regex.MatchString(phoneNumber)
+	return value
+}
+
+func (h *helper) ValidatePin(pin string) bool {
+
+	match, _ := regexp.MatchString(`^\d{4}(\d{2})?$`, pin)
+	return match
+
+}
+
+func (h *helper) ValidateDatatype(data, intOrString string) (bool, error) {
+
+	switch intOrString {
+	case "int":
+		if _, err := strconv.Atoi(data); err != nil {
+			return false, errors.New("data is not an integer")
+		}
+		return true, nil
+	case "string":
+		kind := reflect.TypeOf(data).Kind()
+		return kind == reflect.String, nil
+	default:
+		return false, errors.New("data is not" + intOrString)
+	}
+
+}
+
+func (h *helper) ValidateAlphabets(data string) (bool, error) {
+	for _, char := range data {
+		if !unicode.IsLetter(char) {
+			return false, errors.New("data contains non-alphabetic characters")
+		}
+	}
+	return true, nil
 }

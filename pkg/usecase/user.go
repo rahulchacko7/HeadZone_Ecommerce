@@ -10,6 +10,8 @@ import (
 	repo "HeadZone/pkg/repository/interfaces"
 	"HeadZone/pkg/utils/models"
 	"errors"
+
+	"golang.org/x/crypto/bcrypt"
 )
 
 type userUseCase struct {
@@ -34,31 +36,39 @@ var InternalError = "Internal Server Error"
 var ErrorHashingPassword = "Error In Hashing Password"
 
 func (u *userUseCase) UserSignUp(user models.UserDetails) (models.TokenUsers, error) {
-	// Check whether the user already exist. If yes, show the error message, since this is signUp
+	if user.Name == "" {
+		return models.TokenUsers{}, errors.New("username cannot be empty")
+	}
+	namevalidate, err := u.helper.ValidateDatatype(user.Name, "string")
+	if err != nil {
+		return models.TokenUsers{}, errors.New("invalid format for name")
+	}
+	if !namevalidate {
+		return models.TokenUsers{}, errors.New("not a string")
+	}
+
 	userExist := u.userRepo.CheckUserAvailability(user.Email)
 	if userExist {
 		return models.TokenUsers{}, errors.New("user already exist, sign in")
 	}
+
+	phonenumber := u.helper.ValidatePhoneNumber(user.Phone)
+	if !phonenumber {
+		return models.TokenUsers{}, errors.New("invalid phone")
+	}
+
 	if user.Password != user.ConfirmPassword {
 		return models.TokenUsers{}, errors.New("password does not match")
 	}
-
-	// Hash password since details are validated
-
-	hashedPassword, err := u.helper.PasswordHashing(user.Password)
-	if err != nil {
-		return models.TokenUsers{}, errors.New(ErrorHashingPassword)
+	if user.Password == "" {
+		return models.TokenUsers{}, errors.New("password cannot be empty")
 	}
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), 10)
+	if err != nil {
+		return models.TokenUsers{}, errors.New("internal server error")
+	}
+	user.Password = string(hashedPassword)
 
-	user.Password = hashedPassword
-
-	// countPhone := len(user.Phone)
-
-	// if countPhone != 10 {
-	// 	return models.TokenUsers{}, errors.New("invalid phone number")
-	// }
-
-	// add user details to the database
 	userData, err := u.userRepo.UserSignUp(user)
 	if err != nil {
 		return models.TokenUsers{}, errors.New("could not add the user")
@@ -133,9 +143,28 @@ func (i *userUseCase) GetUserDetails(id int) (models.UserDetailsResponse, error)
 
 }
 
-func (i *userUseCase) AddAddress(id int, address models.AddAddress) error {
+func (u *userUseCase) AddAddress(id int, address models.AddAddress) error {
 
-	rslt := i.userRepo.CheckIfFirstAddress(id)
+	if address.Name == "" || address.HouseName == "" || address.Street == "" || address.City == "" || address.State == "" || address.Phone == "" || address.Pin == "" {
+		return errors.New("field cannot be empty")
+	}
+	ok, err := u.helper.ValidateAlphabets(address.Name)
+	if err != nil {
+		return errors.New("invalid format for name")
+	}
+	if !ok {
+		return errors.New("invalid format for name")
+	}
+	phonenumber := u.helper.ValidatePhoneNumber(address.Phone)
+	if !phonenumber {
+		return errors.New("invalid phone")
+	}
+	pinnumber := u.helper.ValidatePin(address.Pin)
+	if !pinnumber {
+		return errors.New("invalid pin number")
+	}
+
+	rslt := u.userRepo.CheckIfFirstAddress(id)
 	var result bool
 
 	if !rslt {
@@ -144,11 +173,10 @@ func (i *userUseCase) AddAddress(id int, address models.AddAddress) error {
 		result = false
 	}
 
-	err := i.userRepo.AddAddress(id, address, result)
+	err = u.userRepo.AddAddress(id, address, result)
 	if err != nil {
 		return errors.New("error in adding address")
 	}
-
 	return nil
 
 }
