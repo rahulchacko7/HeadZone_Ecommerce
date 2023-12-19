@@ -49,7 +49,7 @@ func (helper *helper) GenerateTokenAdmin(admin models.AdminDetailsResponse) (str
 		Email: admin.Email,
 		Role:  "admin",
 		StandardClaims: jwt.StandardClaims{
-			ExpiresAt: time.Now().Add(time.Minute * 20).Unix(),
+			ExpiresAt: time.Now().Add(time.Minute * 30).Unix(),
 			IssuedAt:  time.Now().Unix(),
 		},
 	}
@@ -128,7 +128,7 @@ func (h *helper) GenerateTokenClients(user models.UserDetailsResponse) (string, 
 		Email: user.Email,
 		Role:  "client",
 		StandardClaims: jwt.StandardClaims{
-			ExpiresAt: time.Now().Add(time.Hour * 48).Unix(),
+			ExpiresAt: time.Now().Add(time.Minute * 30).Unix(),
 			IssuedAt:  time.Now().Unix(),
 		},
 	}

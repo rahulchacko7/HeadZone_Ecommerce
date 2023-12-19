@@ -10,7 +10,7 @@ type Admin struct {
 }
 
 type TokenAdmin struct {
-	Admin        models.AdminDetailsResponse
-	AccessToken  string
-	RefreshToken string
+	Admin       models.AdminDetailsResponse
+	AccessToken string
+	// RefreshToken string
 }

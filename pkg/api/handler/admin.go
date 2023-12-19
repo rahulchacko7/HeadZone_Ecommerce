@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/go-playground/validator"
 	"github.com/golang-jwt/jwt"
 )
 
@@ -25,13 +26,20 @@ func NewAdminHandler(usecase services.AdminUseCase) *AdminHandler {
 	}
 }
 
-func (ad *AdminHandler) LoginHandler(c *gin.Context) { // login handler for the admin
+func (ad *AdminHandler) LoginHandler(c *gin.Context) {
 
-	// var adminDetails models.AdminLogin
 	var adminDetails models.AdminLogin
 	if err := c.BindJSON(&adminDetails); err != nil {
 		errRes := response.ClientResponse(http.StatusBadRequest, "details not in correct format", nil, err.Error())
 		c.JSON(http.StatusBadRequest, errRes)
+		return
+	}
+
+	err := validator.New().Struct(adminDetails)
+
+	if err != nil {
+		errResp := response.ClientResponse(http.StatusBadRequest, "constraints not satisfied", nil, err.Error())
+		c.JSON(http.StatusBadRequest, errResp)
 		return
 	}
 
@@ -43,7 +51,7 @@ func (ad *AdminHandler) LoginHandler(c *gin.Context) { // login handler for the 
 	}
 
 	c.Set("Access", admin.AccessToken)
-	c.Set("Refresh", admin.RefreshToken)
+	// c.Set("Refresh", admin.RefreshToken)
 
 	successRes := response.ClientResponse(http.StatusOK, "Admin authenticated successfully", admin, nil)
 	c.JSON(http.StatusOK, successRes)

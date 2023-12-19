@@ -162,7 +162,6 @@ func (i *UserHandler) EditDetails(c *gin.Context) {
 	}
 
 	successRes := response.ClientResponse(http.StatusCreated, "addresses fetched succesfully", body, nil)
-	// fmt.Println(userCreated)
 
 	c.JSON(http.StatusCreated, successRes)
 }

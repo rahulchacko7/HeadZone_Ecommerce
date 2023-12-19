@@ -31,13 +31,11 @@ func NewAdminUseCase(repo repo.AdminRepository, h interfaces.Helper) services.Ad
 
 func (ad *adminUseCase) LoginHandler(adminDetails models.AdminLogin) (domain.TokenAdmin, error) {
 
-	// getting details of the admin based on the email provided
 	adminCompareDetails, err := ad.adminRepository.LoginHandler(adminDetails)
 	if err != nil {
 		return domain.TokenAdmin{}, err
 	}
 
-	// compare password from database and that provided from admins
 	err = bcrypt.CompareHashAndPassword([]byte(adminCompareDetails.Password), []byte(adminDetails.Password))
 	if err != nil {
 		return domain.TokenAdmin{}, err
@@ -45,22 +43,21 @@ func (ad *adminUseCase) LoginHandler(adminDetails models.AdminLogin) (domain.Tok
 
 	var adminDetailsResponse models.AdminDetailsResponse
 
-	//  copy all details except password and sent it back to the front end
 	err = copier.Copy(&adminDetailsResponse, &adminCompareDetails)
 	if err != nil {
 		return domain.TokenAdmin{}, err
 	}
 
-	access, refresh, err := ad.helper.GenerateTokenAdmin(adminDetailsResponse)
+	access, _, err := ad.helper.GenerateTokenAdmin(adminDetailsResponse)
 
 	if err != nil {
 		return domain.TokenAdmin{}, err
 	}
 
 	return domain.TokenAdmin{
-		Admin:        adminDetailsResponse,
-		AccessToken:  access,
-		RefreshToken: refresh,
+		Admin:       adminDetailsResponse,
+		AccessToken: access,
+		// RefreshToken: refresh,
 	}, nil
 
 }

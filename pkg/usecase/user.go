@@ -202,6 +202,22 @@ func (i *userUseCase) EditDetails(id int, user models.EditDetailsResponse) (mode
 		return models.EditDetailsResponse{}, errors.New("invalid id")
 	}
 
+	if user.Name == "" {
+		return models.EditDetailsResponse{}, errors.New("username cannot be empty")
+	}
+	namevalidate, err := i.helper.ValidateDatatype(user.Name, "string")
+	if err != nil {
+		return models.EditDetailsResponse{}, errors.New("invalid format for name")
+	}
+	if !namevalidate {
+		return models.EditDetailsResponse{}, errors.New("not a string")
+	}
+
+	phonenumber := i.helper.ValidatePhoneNumber(user.Phone)
+	if !phonenumber {
+		return models.EditDetailsResponse{}, errors.New("invalid phone")
+	}
+
 	body, err := i.userRepo.EditDetails(id, user)
 	if err != nil {
 		return models.EditDetailsResponse{}, err
