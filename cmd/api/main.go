@@ -13,7 +13,7 @@ import (
 
 // @title Go + Gin E-Commerce API
 // @version 1.0.0
-// @description TechDeck is an E-commerce platform to purchase and sell Electronic itmes
+// @description HeadZone is an E-commerce platform to purchase and sell Headphones
 // @contact.name API Support
 // @securityDefinitions.apikey BearerTokenAuth
 // @in header

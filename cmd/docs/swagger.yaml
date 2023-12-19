@@ -1,0 +1,247 @@
+definitions:
+  models.AddAddress:
+    properties:
+      city:
+        type: string
+      house_name:
+        type: string
+      name:
+        type: string
+      phone:
+        type: string
+      pin:
+        type: string
+      state:
+        type: string
+      street:
+        type: string
+    required:
+    - city
+    - house_name
+    - name
+    - phone
+    - pin
+    - state
+    - street
+    type: object
+  models.Address:
+    properties:
+      city:
+        type: string
+      house_name:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      pin:
+        type: string
+      state:
+        type: string
+      street:
+        type: string
+      user_id:
+        type: integer
+    required:
+    - city
+    - house_name
+    - name
+    - pin
+    - state
+    - street
+    type: object
+  models.TokenUsers:
+    properties:
+      token:
+        type: string
+      users:
+        $ref: '#/definitions/models.UserDetailsResponse'
+    type: object
+  models.UserDetails:
+    properties:
+      confirmpassword:
+        type: string
+      email:
+        type: string
+      name:
+        type: string
+      password:
+        type: string
+      phone:
+        type: string
+    required:
+    - phone
+    type: object
+  models.UserDetailsResponse:
+    properties:
+      email:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      phone:
+        type: string
+    required:
+    - phone
+    type: object
+  models.UserLogin:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    type: object
+  response.Response:
+    properties:
+      data: {}
+      error: {}
+      message:
+        description: StatusCode int         `json:"status_code"`
+        type: string
+    type: object
+info:
+  contact:
+    name: API Support
+  description: HeadZone is an E-commerce platform to purchase and sell Headphones
+  title: Go + Gin E-Commerce API
+  version: 1.0.0
+paths:
+  /user/{id}/address:
+    post:
+      consumes:
+      - application/json
+      description: Adds a new address for the user
+      parameters:
+      - description: Address details in JSON format
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.AddAddress'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully added address
+          schema:
+            type: string
+        "400":
+          description: Invalid request or address addition failed
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Add a new address
+      tags:
+      - users
+  /user/login:
+    post:
+      consumes:
+      - application/json
+      description: Logs in a user with provided credentials
+      parameters:
+      - description: User login details in JSON format
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.UserLogin'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User details logged in successfully
+          schema:
+            $ref: '#/definitions/models.UserDetails'
+        "400":
+          description: Invalid request or constraints not satisfied
+          schema:
+            $ref: '#/definitions/response.Response'
+        "401":
+          description: 'Unauthorized: Invalid credentials'
+          schema:
+            $ref: '#/definitions/models.UserDetails'
+      summary: Log in a user
+      tags:
+      - users
+  /user/profile/addresses/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Get addresses associated with a user ID
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Addresses retrieved successfully
+          schema:
+            items:
+              $ref: '#/definitions/models.Address'
+            type: array
+        "400":
+          description: Could not retrieve records or invalid request
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Retrieve addresses for a user
+      tags:
+      - addresses
+  /user/profile{id}:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve user details by ID
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User details retrieved successfully
+          schema:
+            $ref: '#/definitions/models.UserDetailsResponse'
+        "400":
+          description: Failed to retrieve user details
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Get user details
+      tags:
+      - users
+  /user/signup:
+    post:
+      consumes:
+      - application/json
+      description: Create a new user account
+      parameters:
+      - description: User details in JSON format
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.UserDetails'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: User signed up successfully
+          schema:
+            $ref: '#/definitions/models.UserDetails'
+        "400":
+          description: Invalid request or constraints not satisfied
+          schema:
+            $ref: '#/definitions/models.TokenUsers'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/models.TokenUsers'
+      summary: Register a new user
+      tags:
+      - users
+securityDefinitions:
+  BearerTokenAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

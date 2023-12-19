@@ -67,6 +67,17 @@ func (u *UserHandler) UserSignUp(c *gin.Context) {
 
 }
 
+// LoginHandler handles the user login functionality.
+// @Summary Log in a user
+// @Description Logs in a user with provided credentials
+// @Tags users
+// @Accept json
+// @Produce json
+// @Param request body models.UserLogin true "User login details in JSON format"
+// @Success 200 {object} models.UserDetails "User details logged in successfully"
+// @Failure 400 {object} response.Response "Invalid request or constraints not satisfied"
+// @Failure 401 {object} models.UserDetails "Unauthorized: Invalid credentials"
+// @Router /user/login [post]
 func (u *UserHandler) LoginHandler(c *gin.Context) {
 
 	var user models.UserLogin
@@ -96,6 +107,15 @@ func (u *UserHandler) LoginHandler(c *gin.Context) {
 
 }
 
+// GetUserDetails handles the retrieval of user details.
+// @Summary Get user details
+// @Description Retrieve user details by ID
+// @Tags users
+// @Accept json
+// @Produce json
+// @Success 200 {object} models.UserDetailsResponse "User details retrieved successfully"
+// @Failure 400 {object} response.Response "Failed to retrieve user details"
+// @Router /user/profile{id} [get]
 func (i *UserHandler) GetUserDetails(c *gin.Context) {
 	idString, _ := c.Get("id")
 	id, _ := idString.(int)
@@ -110,14 +130,18 @@ func (i *UserHandler) GetUserDetails(c *gin.Context) {
 	c.JSON(http.StatusOK, successRes)
 }
 
+// AddAddress handles adding a new address for a user.
+// @Summary Add a new address
+// @Description Adds a new address for the user
+// @Tags users
+// @Accept json
+// @Produce json
+// @Param request body models.AddAddress true "Address details in JSON format"
+// @Success 200 {string} string "Successfully added address"
+// @Failure 400 {object} response.Response "Invalid request or address addition failed"
+// @Router /user/{id}/address [post]
 func (i *UserHandler) AddAddress(c *gin.Context) {
 	id, _ := c.Get("id")
-	// id, err := strconv.Atoi(c.Query("id"))
-	// if err != nil {
-	// 	errorRes := response.ClientResponse(http.StatusBadRequest, "check path parameter", nil, err.Error())
-	// 	c.JSON(http.StatusBadRequest, errorRes)
-	// 	return
-	// }
 
 	var address models.AddAddress
 	if err := c.BindJSON(&address); err != nil {
@@ -137,6 +161,15 @@ func (i *UserHandler) AddAddress(c *gin.Context) {
 
 }
 
+// GetAddresses handles the retrieval of addresses for a user.
+// @Summary Retrieve addresses for a user
+// @Description Get addresses associated with a user ID
+// @Tags addresses
+// @Accept json
+// @Produce json
+// @Success 200 {object} []models.Address "Addresses retrieved successfully"
+// @Failure 400 {object} response.Response "Could not retrieve records or invalid request"
+// @Router /user/profile/addresses/{id} [get]
 func (i *UserHandler) GetAddresses(c *gin.Context) {
 	idString, _ := c.Get("id")
 	id, _ := idString.(int)
@@ -151,6 +184,16 @@ func (i *UserHandler) GetAddresses(c *gin.Context) {
 	c.JSON(http.StatusOK, successRes)
 }
 
+// EditDetails handles the editing of user details.
+// @Summary Edit user details
+// @Description Edit user details based on the provided information
+// @Tags users
+// @Accept json
+// @Produce json
+// @Param request body models.EditDetailsResponse true "User details to be updated"
+// @Success 201 {object} models.EditDetailsResponse "Updated user details"
+// @Failure 400 {object} response.Response "Invalid request or error updating values"
+// @Router /user/profile/{id}/edit [put]
 func (i *UserHandler) EditDetails(c *gin.Context) {
 
 	idString, _ := c.Get("id")
@@ -175,6 +218,18 @@ func (i *UserHandler) EditDetails(c *gin.Context) {
 	c.JSON(http.StatusCreated, successRes)
 }
 
+// ChangePassword handles the change password functionality.
+// @Summary Change password for a user
+// @Description Change the user's password
+// @Tags profile
+// @Accept json
+// @Produce json
+// @Param Authorization header string true "JWT Token"
+// @Param request body models.ChangePassword true "User password change details in JSON format"
+// @Success 200 {object} models.ChangePassword "Password changed successfully"
+// @Failure 400 {object} response.Response "Invalid request or password change failed"
+// @Failure 401 {object} response.Response "Unauthorized: Invalid credentials"
+// @Router user/profile [patch]
 func (i *UserHandler) ChangePassword(c *gin.Context) {
 
 	idString, _ := c.Get("id")

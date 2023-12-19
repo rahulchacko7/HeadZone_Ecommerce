@@ -55,9 +55,15 @@ func (i *inventoryUseCase) ListProducts(pageNo, pageList int) ([]models.Inventor
 			continue
 		}
 
+		// Create an InventoryUserResponse with necessary fields mapped from the product
 		inventoryResponse := models.InventoryUserResponse{
-
-			Rating: rating,
+			ID:          product.ID,
+			CategoryID:  product.CategoryID,
+			ProductName: product.ProductName,
+			Color:       product.Color,
+			Price:       product.Price,
+			Rating:      rating,
+			// Include other fields from the 'product' as needed
 		}
 
 		inventoryResponses = append(inventoryResponses, inventoryResponse)
