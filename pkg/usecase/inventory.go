@@ -22,15 +22,15 @@ func NewInventoryUseCase(repo repo.InventoryRepository, h interfaces.Helper) use
 	}
 }
 
-func (i *inventoryUseCase) AddInventory(inventory models.AddInventories) (models.InventoryResponse, error) {
+func (i *inventoryUseCase) AddInventory(inventory models.AddInventories) (models.Inventory, error) {
 
 	if inventory.Stock < 0 || inventory.Price < 0 || inventory.CategoryID < 0 {
-		return models.InventoryResponse{}, errors.New("negative values not allowed for stock, price, or category ID")
+		return models.Inventory{}, errors.New("negative values not allowed for stock, price, or category ID")
 	}
 
 	inventoryResponse, err := i.repository.AddInventory(inventory)
 	if err != nil {
-		return models.InventoryResponse{}, err
+		return models.Inventory{}, err
 	}
 
 	return inventoryResponse, nil

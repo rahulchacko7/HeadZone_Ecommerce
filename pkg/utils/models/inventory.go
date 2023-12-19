@@ -11,12 +11,12 @@ type SetNewName struct {
 }
 
 type InventoryResponse struct {
-	ProductID   int    `json:"id"`
-	CategoryID  int    `json:"category_id"`
-	ProductName string `json:"product_name"`
-	Color       string `json:"color"`
-	Stock       int    `json:"stock"`
-	Price       int    `json:"price"`
+	ProductID   int     `json:"id"`
+	CategoryID  uint    `json:"category_id"`
+	ProductName string  `json:"product_name"`
+	Color       string  `json:"color" `
+	Stock       int     `json:"stock"`
+	Price       float64 `json:"price"`
 }
 
 type InventoryUpdate struct {

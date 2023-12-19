@@ -21,18 +21,18 @@ func NewInventoryRepository(DB *gorm.DB) interfaces.InventoryRepository {
 	}
 }
 
-func (i *inventoryRepository) AddInventory(inventory models.AddInventories) (models.InventoryResponse, error) {
+func (i *inventoryRepository) AddInventory(inventory models.AddInventories) (models.Inventory, error) {
 	// Check if the product already exists based on product name and category ID
 	var count int64
 	i.DB.Model(&models.Inventory{}).Where("product_name = ? AND category_id = ?", inventory.ProductName, inventory.CategoryID).Count(&count)
 	if count > 0 {
 		// Product already exists, return an error or handle as needed
-		return models.InventoryResponse{}, errors.New("product already exists in the database")
+		return models.Inventory{}, errors.New("product already exists in the database")
 	}
 
 	// Check for negative stock or price values
 	if inventory.Stock < 0 || inventory.Price < 0 {
-		return models.InventoryResponse{}, errors.New("stock and price cannot be negative")
+		return models.Inventory{}, errors.New("stock and price cannot be negative")
 	}
 
 	// If the product doesn't exist and values are valid, proceed with inserting it into the database
@@ -42,10 +42,10 @@ func (i *inventoryRepository) AddInventory(inventory models.AddInventories) (mod
     `
 	err := i.DB.Exec(query, inventory.CategoryID, inventory.ProductName, inventory.Color, inventory.Stock, inventory.Price).Error
 	if err != nil {
-		return models.InventoryResponse{}, err
+		return models.Inventory{}, err
 	}
 
-	var inventoryResponse models.InventoryResponse
+	var inventoryResponse models.Inventory
 	// Populate inventoryResponse as needed
 
 	return inventoryResponse, nil
