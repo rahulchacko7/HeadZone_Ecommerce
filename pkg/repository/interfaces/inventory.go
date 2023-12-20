@@ -17,4 +17,6 @@ type InventoryRepository interface {
 	FetchProductDetails(productId uint) (models.Inventory, error)
 	GetInventory(prefix string) ([]models.InventoryUserResponse, error)
 	FilterByCategory(CategoryIdInt int) ([]models.InventoryUserResponse, error)
+	ProductRating(id int, productID int, rating float64) error
+	ExtractRating(productID int) (float64, error)
 }

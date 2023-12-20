@@ -19,3 +19,10 @@ type Inventory struct {
 	Stock       int      `json:"stock"`
 	Price       float64  `json:"price"`
 }
+
+type Rating struct {
+	ID        uint    `json:"id" gorm:"primaryKey"`
+	UserID    uint    `json:"user_id"`
+	Productid int     `json:"product_id"`
+	Rating    float64 `json:"rating"`
+}

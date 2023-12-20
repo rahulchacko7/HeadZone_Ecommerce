@@ -26,17 +26,27 @@ func NewUserHandler(usecase services.UserUseCase) *UserHandler {
 		userUseCase: usecase,
 	}
 }
+
+// UserSignUp handles user sign-up functionality.
+// @Summary Register a new user
+// @Description Create a new user account
+// @Tags users
+// @Accept json
+// @Produce json
+// @Param request body models.UserDetails true "User details in JSON format"
+// @Success 201 {object} models.UserDetails "User signed up successfully"
+// @Failure 400 {object} models.TokenUsers "Invalid request or constraints not satisfied"
+// @Failure 500 {object}  models.TokenUsers "Internal server error"
+// @Router /user/signup [post]
 func (u *UserHandler) UserSignUp(c *gin.Context) {
 
 	var user models.UserDetails
-	// bind the user details to the struct
 	if err := c.BindJSON(&user); err != nil {
 		errRes := response.ClientResponse(http.StatusBadRequest, "fields provided are in wrong format", nil, err.Error())
 		c.JSON(http.StatusBadRequest, errRes)
 		return
 	}
 
-	// checking whether the data sent by the user has all the correct constraints specified by Users struct
 	err := validator.New().Struct(user)
 	if err != nil {
 		errRes := response.ClientResponse(http.StatusBadRequest, "constraints not satisfied", nil, err.Error())
@@ -45,7 +55,6 @@ func (u *UserHandler) UserSignUp(c *gin.Context) {
 		return
 	}
 
-	// business logic goes inside this function
 	userCreated, err := u.userUseCase.UserSignUp(user)
 	if err != nil {
 		errRes := response.ClientResponse(http.StatusBadRequest, "User could not signed up", nil, err.Error())

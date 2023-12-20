@@ -14,4 +14,5 @@ type InventoryUseCase interface {
 	ShowIndividualProducts(id string) (models.InventoryUserResponse, error)
 	SearchProductsOnPrefix(prefix string) ([]models.InventoryUserResponse, error)
 	FilterByCategory(CategoryIdInt int) ([]models.InventoryUserResponse, error)
+	ProductRating(id int, productID int, rating float64) error
 }

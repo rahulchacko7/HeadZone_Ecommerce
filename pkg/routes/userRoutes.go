@@ -45,6 +45,7 @@ func UserRoutes(engine *gin.RouterGroup, userHandler *handler.UserHandler, otpHa
 		{
 			products.POST("/search", inventoryHandler.SearchProducts)
 			products.POST("/filter", inventoryHandler.FilterCategory)
+			products.POST("/rating", inventoryHandler.ProductRating)
 		}
 
 		cart := engine.Group("/cart")

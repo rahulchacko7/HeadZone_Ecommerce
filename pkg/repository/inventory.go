@@ -5,7 +5,6 @@ import (
 	"HeadZone/pkg/repository/interfaces"
 	"HeadZone/pkg/utils/models"
 	"errors"
-	"fmt"
 	"strconv"
 
 	"gorm.io/gorm"
@@ -52,22 +51,33 @@ func (i *inventoryRepository) AddInventory(inventory models.AddInventories) (mod
 }
 
 func (prod *inventoryRepository) ListProducts(pageList, offset int) ([]models.InventoryUserResponse, error) {
-	var product_list []models.InventoryUserResponse
+	var productList []models.InventoryUserResponse
 
 	query := `
 		SELECT i.id, i.category_id, c.category, i.product_name, i.color, i.price 
 		FROM inventories i 
 		INNER JOIN categories c ON i.category_id = c.id 
-		LIMIT $1 OFFSET $2
+		LIMIT ? OFFSET ?
 	`
-	fmt.Println(pageList, offset)
-	err := prod.DB.Raw(query, pageList, offset).Scan(&product_list).Error
 
+	err := prod.DB.Raw(query, pageList, offset).Scan(&productList).Error
 	if err != nil {
-		return []models.InventoryUserResponse{}, errors.New("error checking user details")
+		return nil, errors.New("error fetching product list")
 	}
-	fmt.Println("product list", product_list)
-	return product_list, nil
+
+	return productList, nil
+}
+
+func (prod *inventoryRepository) ExtractRating(productID int) (float64, error) {
+	query := "SELECT AVG(rating) FROM ratings WHERE productid = ?"
+
+	var averageRating float64
+	err := prod.DB.Raw(query, productID).Scan(&averageRating).Error
+	if err != nil {
+		return 0, errors.New("error fetching rating")
+	}
+
+	return averageRating, nil
 }
 
 func (db *inventoryRepository) EditInventory(inventory domain.Inventory, id int) (domain.Inventory, error) {
@@ -206,4 +216,15 @@ func (i *inventoryRepository) FilterByCategory(CategoryIdInt int) ([]models.Inve
 	}
 
 	return product_list, nil
+}
+
+func (i *inventoryRepository) ProductRating(id int, productID int, rating float64) error {
+	query := `INSERT INTO ratings (user_id, productid, rating) VALUES (?, ?, ?)`
+
+	err := i.DB.Exec(query, id, productID, rating).Error
+	if err != nil {
+		return err
+	}
+
+	return nil // Return nil indicating success
 }

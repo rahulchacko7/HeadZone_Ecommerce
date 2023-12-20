@@ -37,17 +37,33 @@ func (i *inventoryUseCase) AddInventory(inventory models.AddInventories) (models
 }
 
 func (i *inventoryUseCase) ListProducts(pageNo, pageList int) ([]models.InventoryUserResponse, error) {
-
 	if pageList <= 0 || pageNo <= 0 {
-		return []models.InventoryUserResponse{}, errors.New("there is no inventory as you mentioned")
+		return nil, errors.New("invalid page or list size")
 	}
 
 	offset := (pageNo - 1) * pageList
 	productList, err := i.repository.ListProducts(pageList, offset)
 	if err != nil {
-		return []models.InventoryUserResponse{}, err
+		return nil, err
 	}
-	return productList, nil
+
+	var inventoryResponses []models.InventoryUserResponse
+	for _, product := range productList {
+		rating, err := i.repository.ExtractRating(int(product.ID))
+		if err != nil {
+			// Handle the error or skip this product if rating extraction fails
+			continue
+		}
+
+		inventoryResponse := models.InventoryUserResponse{
+
+			Rating: rating,
+		}
+
+		inventoryResponses = append(inventoryResponses, inventoryResponse)
+	}
+
+	return inventoryResponses, nil
 }
 
 func (usecase *inventoryUseCase) EditInventory(inventory domain.Inventory, id int) (domain.Inventory, error) {
@@ -137,4 +153,17 @@ func (i *inventoryUseCase) FilterByCategory(CategoryIdInt int) ([]models.Invento
 	}
 
 	return product_list, nil
+}
+
+func (i *inventoryUseCase) ProductRating(id int, productID int, rating float64) error {
+	if id < 1 || productID < 1 || rating < 1 {
+		return errors.New("id, productID, and rating must be positive values")
+	}
+
+	err := i.repository.ProductRating(id, productID, rating)
+	if err != nil {
+		return errors.New("failed to get the rating: " + err.Error())
+	}
+
+	return nil
 }

@@ -44,32 +44,29 @@ func (i *InventoryHandler) AddInventory(c *gin.Context) {
 }
 
 func (i *InventoryHandler) ListProducts(c *gin.Context) {
-
 	pageNo := c.DefaultQuery("page", "1")
 	pageList := c.DefaultQuery("per_page", "5")
 	pageNoInt, err := strconv.Atoi(pageNo)
 	if err != nil {
-		errRes := response.ClientResponse(http.StatusBadRequest, "Product cannot be displayed", nil, err.Error())
+		errRes := response.ClientResponse(http.StatusBadRequest, "Invalid page number", nil, err.Error())
 		c.JSON(http.StatusBadRequest, errRes)
 		return
 	}
 	pageListInt, err := strconv.Atoi(pageList)
 	if err != nil {
-		errRes := response.ClientResponse(http.StatusBadRequest, "Product cannot be displayed", nil, err.Error())
-		c.JSON(http.StatusBadRequest, errRes)
-	}
-
-	products_list, err := i.InventoryUseCase.ListProducts(pageNoInt, pageListInt)
-
-	if err != nil {
-		errRes := response.ClientResponse(http.StatusBadRequest, "Product cannot be displayed", nil, err.Error())
+		errRes := response.ClientResponse(http.StatusBadRequest, "Invalid per_page value", nil, err.Error())
 		c.JSON(http.StatusBadRequest, errRes)
 		return
 	}
 
-	message := "product list"
+	productsList, err := i.InventoryUseCase.ListProducts(pageNoInt, pageListInt)
+	if err != nil {
+		errRes := response.ClientResponse(http.StatusBadRequest, "Failed to fetch products", nil, err.Error())
+		c.JSON(http.StatusBadRequest, errRes)
+		return
+	}
 
-	successRes := response.ClientResponse(http.StatusOK, message, products_list, nil)
+	successRes := response.ClientResponse(http.StatusOK, "Product list", productsList, nil)
 	c.JSON(http.StatusOK, successRes)
 }
 
@@ -194,4 +191,34 @@ func (i *InventoryHandler) FilterCategory(c *gin.Context) {
 	c.JSON(http.StatusOK, sucessRes)
 	return
 
+}
+
+func (i *InventoryHandler) ProductRating(c *gin.Context) {
+	idString, _ := c.Get("id")
+	id, _ := idString.(int)
+
+	productID, err := strconv.Atoi(c.Query("product_id"))
+	if err != nil {
+		errorRes := response.ClientResponse(http.StatusBadRequest, "check parameters properly", nil, err.Error())
+		c.JSON(http.StatusBadRequest, errorRes)
+		return
+	}
+
+	rating, err := strconv.Atoi(c.Query("rating"))
+	if err != nil {
+		errorRes := response.ClientResponse(http.StatusBadRequest, "check parameters properly", nil, err.Error())
+		c.JSON(http.StatusBadRequest, errorRes)
+		return
+	}
+
+	err = i.InventoryUseCase.ProductRating(id, productID, float64(rating))
+	if err != nil {
+		errRes := response.ClientResponse(http.StatusBadRequest, "rating cannot be displayed", nil, err.Error())
+		c.JSON(http.StatusBadRequest, errRes)
+		return
+	}
+
+	successRes := response.ClientResponse(http.StatusOK, "Suceessfully rated the product", nil, nil)
+	c.JSON(http.StatusOK, successRes)
+	return
 }
