@@ -43,6 +43,17 @@ func (i *InventoryHandler) AddInventory(c *gin.Context) {
 
 }
 
+// ListProducts handles the retrieval of products with pagination.
+// @Summary List products with pagination
+// @Description Retrieves a list of products with pagination support
+// @Tags products
+// @Accept json
+// @Produce json
+// @Param page query integer false "Page number for pagination (default: 1)"
+// @Param per_page query integer false "Number of products per page (default: 5)"
+// @Success 200 {array} models.InventoryUserResponse "List of products"
+// @Failure 400 {object} response.Response "Invalid request or failed to fetch products"
+// @Router /user/products [get]
 func (i *InventoryHandler) ListProducts(c *gin.Context) {
 	pageNo := c.DefaultQuery("page", "1")
 	pageList := c.DefaultQuery("per_page", "5")
@@ -189,7 +200,6 @@ func (i *InventoryHandler) FilterCategory(c *gin.Context) {
 
 	sucessRes := response.ClientResponse(http.StatusOK, "Products List", product_list, nil)
 	c.JSON(http.StatusOK, sucessRes)
-	return
 
 }
 
@@ -220,5 +230,4 @@ func (i *InventoryHandler) ProductRating(c *gin.Context) {
 
 	successRes := response.ClientResponse(http.StatusOK, "Suceessfully rated the product", nil, nil)
 	c.JSON(http.StatusOK, successRes)
-	return
 }

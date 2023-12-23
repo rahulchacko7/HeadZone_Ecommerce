@@ -20,6 +20,17 @@ func NewCategoryHandler(usecase interfaces.CategoryUseCase) *CategoryHandler {
 	}
 }
 
+// AddCategory handles the addition of a new category.
+// @Summary Add a new category
+// @Description Add a new category to the system
+// @Tags Admin Category Management
+// @Accept json
+// @Produce json
+// @security BearerTokenAuth
+// @Param body body domain.Category true "Category object to be added"
+// @Success 200 {object} domain.Category "Successfully added category"
+// @Failure 400 {object} response.Response "Invalid request or incorrect format"
+// @Router /admin/category [post]
 func (cat *CategoryHandler) AddCategory(c *gin.Context) {
 
 	var category domain.Category
@@ -40,6 +51,7 @@ func (cat *CategoryHandler) AddCategory(c *gin.Context) {
 	c.JSON(http.StatusOK, successRes)
 }
 
+// @Tags Admin Category Management
 func (Cat *CategoryHandler) GetCategory(c *gin.Context) {
 
 	categories, err := Cat.CategoryUseCase.GetCategories()
@@ -54,6 +66,18 @@ func (Cat *CategoryHandler) GetCategory(c *gin.Context) {
 
 }
 
+// UpdateCategory handles the updating of a category name.
+// @Summary Update a category name
+// @Description Update an existing category name in the system
+// @Tags Admin Category Management
+// @Accept json
+// @Produce json
+// @security BearerTokenAuth
+// @Param request body models.SetNewName true "Current and New names in JSON format"
+// @Success 200 {object} domain.Category "Successfully updated category name"
+// @Failure 400 {object} response.Response "Invalid request or incorrect format"
+// @Failure 400 {object} response.Response "Could not update the category"
+// @Router /admin/category [put]
 func (Cat *CategoryHandler) UpdateCategory(c *gin.Context) {
 	var p models.SetNewName
 
@@ -73,6 +97,7 @@ func (Cat *CategoryHandler) UpdateCategory(c *gin.Context) {
 	c.JSON(http.StatusOK, successRes)
 }
 
+// @Tags Admin Category Management
 func (Cat *CategoryHandler) DeleteCategory(c *gin.Context) {
 
 	categoryID := c.Query("id")

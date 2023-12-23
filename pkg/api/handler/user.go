@@ -218,18 +218,6 @@ func (i *UserHandler) EditDetails(c *gin.Context) {
 	c.JSON(http.StatusCreated, successRes)
 }
 
-// ChangePassword handles the change password functionality.
-// @Summary Change password for a user
-// @Description Change the user's password
-// @Tags profile
-// @Accept json
-// @Produce json
-// @Param Authorization header string true "JWT Token"
-// @Param request body models.ChangePassword true "User password change details in JSON format"
-// @Success 200 {object} models.ChangePassword "Password changed successfully"
-// @Failure 400 {object} response.Response "Invalid request or password change failed"
-// @Failure 401 {object} response.Response "Unauthorized: Invalid credentials"
-// @Router user/profile [patch]
 func (i *UserHandler) ChangePassword(c *gin.Context) {
 
 	idString, _ := c.Get("id")

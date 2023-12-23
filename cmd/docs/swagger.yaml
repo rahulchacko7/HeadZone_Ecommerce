@@ -1,4 +1,18 @@
 definitions:
+  domain.Category:
+    properties:
+      category:
+        type: string
+      id:
+        type: integer
+    type: object
+  domain.TokenAdmin:
+    properties:
+      accessToken:
+        type: string
+      admin:
+        $ref: '#/definitions/models.AdminDetailsResponse'
+    type: object
   models.AddAddress:
     properties:
       city:
@@ -49,6 +63,70 @@ definitions:
     - pin
     - state
     - street
+    type: object
+  models.AdminDetailsResponse:
+    properties:
+      email:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+    type: object
+  models.AdminLogin:
+    properties:
+      email:
+        type: string
+      password:
+        maxLength: 20
+        minLength: 8
+        type: string
+    required:
+    - email
+    type: object
+  models.EditDetailsResponse:
+    properties:
+      email:
+        type: string
+      name:
+        description: Id    int    `json:"id"`
+        type: string
+      phone:
+        type: string
+    type: object
+  models.InventoryUserResponse:
+    properties:
+      category_id:
+        type: integer
+      color:
+        type: string
+      id:
+        type: integer
+      price:
+        type: integer
+      productname:
+        type: string
+      rating:
+        type: number
+    type: object
+  models.NewPaymentMethod:
+    properties:
+      payment_method:
+        type: string
+    type: object
+  models.PaymentMethod:
+    properties:
+      id:
+        type: integer
+      payment_name:
+        type: string
+    type: object
+  models.SetNewName:
+    properties:
+      current:
+        type: string
+      new:
+        type: string
     type: object
   models.TokenUsers:
     properties:
@@ -107,6 +185,341 @@ info:
   title: Go + Gin E-Commerce API
   version: 1.0.0
 paths:
+  /admin:
+    post:
+      consumes:
+      - application/json
+      description: Authenticate an admin user
+      parameters:
+      - description: Admin login details in JSON format
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.AdminLogin'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Admin authenticated successfully
+          schema:
+            $ref: '#/definitions/domain.TokenAdmin'
+        "400":
+          description: Unable to authenticate user
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Authenticate admin
+      tags:
+      - Admin
+  /admin/category:
+    post:
+      consumes:
+      - application/json
+      description: Add a new category to the system
+      parameters:
+      - description: Category object to be added
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/domain.Category'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully added category
+          schema:
+            $ref: '#/definitions/domain.Category'
+        "400":
+          description: Invalid request or incorrect format
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerTokenAuth: []
+      summary: Add a new category
+      tags:
+      - Admin Category Management
+    put:
+      consumes:
+      - application/json
+      description: Update an existing category name in the system
+      parameters:
+      - description: Current and New names in JSON format
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.SetNewName'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully updated category name
+          schema:
+            $ref: '#/definitions/domain.Category'
+        "400":
+          description: Could not update the category
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerTokenAuth: []
+      summary: Update a category name
+      tags:
+      - Admin Category Management
+  /admin/customreport:
+    get:
+      consumes:
+      - application/json
+      description: Generates a sales report within the specified date range. Requires
+        'start' and 'end' dates in the format 'DD-MM-YYYY'.
+      parameters:
+      - description: Start date (DD-MM-YYYY)
+        in: query
+        name: start
+        required: true
+        type: string
+      - description: End date (DD-MM-YYYY)
+        in: query
+        name: end
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Custom sales report retrieved successfully
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Invalid request or incorrect format
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerTokenAuth: []
+      summary: Generate custom sales report
+      tags:
+      - Admin Dashboard
+  /admin/dashboard:
+    get:
+      description: Get details for the dashboard
+      responses:
+        "200":
+          description: Successfully received the dashboard details
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Invalid request or incorrect format
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerTokenAuth: []
+      summary: Retrieve dashboard details
+      tags:
+      - Admin Dashboard
+  /admin/payment-method:
+    post:
+      consumes:
+      - application/json
+      description: Add a new payment method to the system
+      parameters:
+      - description: New payment method details in JSON format
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.NewPaymentMethod'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully added Payment Method
+          schema:
+            type: string
+        "400":
+          description: Invalid request or incorrect format
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerTokenAuth: []
+      summary: Create a new payment method
+      tags:
+      - Admin Payment Method
+  /admin/payment-methods:
+    delete:
+      description: Delete a payment method by its ID
+      parameters:
+      - description: Payment method ID to delete
+        in: query
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: Successfully deleted the payment method
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Invalid request or incorrect format
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerTokenAuth: []
+      summary: Delete a payment method
+      tags:
+      - Admin Payment Method
+    get:
+      description: Get a list of all available payment methods in the system
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of payment methods
+          schema:
+            items:
+              $ref: '#/definitions/models.PaymentMethod'
+            type: array
+        "400":
+          description: Invalid request or incorrect format
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerTokenAuth: []
+      summary: Retrieve available payment methods
+      tags:
+      - Admin Payment Method
+  /admin/salesbydate:
+    get:
+      consumes:
+      - application/json
+      description: Get sales details based on the provided year, month, and day parameters.
+        Generate reports in PDF or Excel format.
+      parameters:
+      - description: Year (YYYY)
+        in: query
+        name: year
+        required: true
+        type: integer
+      - description: Month (1-12)
+        in: query
+        name: month
+        required: true
+        type: integer
+      - description: Day (1-31)
+        in: query
+        name: day
+        required: true
+        type: integer
+      - description: Specify 'pdf' or 'excel' to download the report in PDF or Excel
+          format respectively
+        in: query
+        name: download
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully received the sales details
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Invalid request or incorrect format
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerTokenAuth: []
+      summary: Retrieve sales details by date
+      tags:
+      - Admin Dashboard
+  /admin/users:
+    get:
+      consumes:
+      - application/json
+      description: Get a list of users based on the provided page number
+      parameters:
+      - description: Page number for user retrieval
+        in: query
+        name: page
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved the users
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Page number not in the right format or could not retrieve records
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerTokenAuth: []
+      summary: Retrieve users
+      tags:
+      - Admin User Management
+  /admin/users/block:
+    post:
+      consumes:
+      - application/json
+      description: Block a user based on their ID
+      parameters:
+      - description: User ID to block
+        in: query
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully blocked the user
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: User could not be blocked
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerTokenAuth: []
+      summary: Block a user
+      tags:
+      - Admin User Management
+  /admin/users/unblock:
+    post:
+      consumes:
+      - application/json
+      description: Unblock a user based on their ID
+      parameters:
+      - description: User ID to be unblocked
+        in: query
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully unblocked the user
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: User could not be unblocked
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerTokenAuth: []
+      summary: Unblock a user
+      tags:
+      - Admin User Management
   /user/{id}/address:
     post:
       consumes:
@@ -163,17 +576,67 @@ paths:
       summary: Log in a user
       tags:
       - users
+  /user/products:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves a list of products with pagination support
+      parameters:
+      - description: 'Page number for pagination (default: 1)'
+        in: query
+        name: page
+        type: integer
+      - description: 'Number of products per page (default: 5)'
+        in: query
+        name: per_page
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of products
+          schema:
+            items:
+              $ref: '#/definitions/models.InventoryUserResponse'
+            type: array
+        "400":
+          description: Invalid request or failed to fetch products
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: List products with pagination
+      tags:
+      - products
+  /user/profile/{id}/edit:
+    put:
+      consumes:
+      - application/json
+      description: Edit user details based on the provided information
+      parameters:
+      - description: User details to be updated
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.EditDetailsResponse'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Updated user details
+          schema:
+            $ref: '#/definitions/models.EditDetailsResponse'
+        "400":
+          description: Invalid request or error updating values
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Edit user details
+      tags:
+      - users
   /user/profile/addresses/{id}:
     get:
       consumes:
       - application/json
       description: Get addresses associated with a user ID
-      parameters:
-      - description: User ID
-        in: path
-        name: id
-        required: true
-        type: integer
       produces:
       - application/json
       responses:
