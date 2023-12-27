@@ -22,6 +22,18 @@ func NewInventoryHandler(usecase interfaces.InventoryUseCase) *InventoryHandler 
 		InventoryUseCase: usecase,
 	}
 }
+
+// AddInventory adds new inventory.
+// @Summary Add new inventory
+// @Description Adds new inventory details
+// @Tags Admin Inventory Management
+// @Accept json
+// @Produce json
+// @security BearerTokenAuth
+// @Param inventory body models.AddInventories true "Inventory object to be added"
+// @Success 200 {object} models.InventoryResponse "Success"
+// @Failure 400 {object} response.Response "Error adding inventory"
+// @Router /admin/inventory [post]
 func (i *InventoryHandler) AddInventory(c *gin.Context) {
 	var inventory models.AddInventories
 
@@ -46,7 +58,7 @@ func (i *InventoryHandler) AddInventory(c *gin.Context) {
 // ListProducts handles the retrieval of products with pagination.
 // @Summary List products with pagination
 // @Description Retrieves a list of products with pagination support
-// @Tags products
+// @Tags User Product
 // @Accept json
 // @Produce json
 // @Param page query integer false "Page number for pagination (default: 1)"
@@ -81,6 +93,18 @@ func (i *InventoryHandler) ListProducts(c *gin.Context) {
 	c.JSON(http.StatusOK, successRes)
 }
 
+// EditInventory edits an existing inventory item.
+// @Summary Edit existing inventory
+// @Description Edits details of an existing inventory item by ID
+// @Tags Admin Inventory Management
+// @Accept json
+// @Produce json
+// @security BearerTokenAuth
+// @Param inventory_id query int true "Inventory ID to edit"
+// @Param inventory body domain.Inventory true "Inventory object to be edited"
+// @Success 200 {object} response.Response "Success"
+// @Failure 400 {object} response.Response "Error editing inventory"
+// @Router /admin/inventory [put]
 func (u *InventoryHandler) EditInventory(c *gin.Context) {
 	var inventory domain.Inventory
 
@@ -110,6 +134,18 @@ func (u *InventoryHandler) EditInventory(c *gin.Context) {
 	c.JSON(http.StatusOK, successRes)
 }
 
+// DeleteInventory deletes an inventory item by its ID.
+// @Summary Delete an inventory item
+// @Description Deletes an inventory item by its ID
+// @Tags Admin Inventory Management
+// @Accept json
+// @Produce json
+// @security BearerTokenAuth
+// @Param id query int true "Inventory ID to delete"
+// @Success 200 {object} response.Response "Success"
+// @Failure 400 {object} response.Response "Error deleting inventory"
+// @Router /admin/inventory [delete]
+
 func (u *InventoryHandler) DeleteInventory(c *gin.Context) {
 
 	inventoryID := c.Query("id")
@@ -124,6 +160,18 @@ func (u *InventoryHandler) DeleteInventory(c *gin.Context) {
 	c.JSON(http.StatusOK, successRes)
 }
 
+// UpdateInventory updates the stock of an inventory item by its ID.
+// @Summary Update inventory stock
+// @Description Updates the stock of an inventory item by its ID
+// @Tags Admin Inventory Management
+// @Accept json
+// @Produce json
+// @security BearerTokenAuth
+// @Param Productid body int true "Product ID"
+// @Param Stock body int true "New Stock"
+// @Success 200 {object} response.Response "Success"
+// @Failure 400 {object} response.Response "Error updating inventory stock"
+// @Router /admin/inventory [put]
 func (i *InventoryHandler) UpdateInventory(c *gin.Context) {
 
 	var p models.InventoryUpdate
@@ -159,6 +207,17 @@ func (i *InventoryHandler) ShowIndividualProducts(c *gin.Context) {
 	c.JSON(http.StatusOK, successRes)
 }
 
+// UpdateInventory updates the stock of an inventory item by its ID.
+// @Summary Update inventory stock
+// @Description Updates the stock of an inventory item by its ID
+// @Tags User Product
+// @Accept json
+// @Produce json
+// @Param Productid body int true "Product ID"
+// @Param Stock body int true "New Stock"
+// @Success 200 {object} response.Response "Success"
+// @Failure 400 {object} response.Response "Error updating inventory stock"
+// @Router /user/products/search [put]
 func (i *InventoryHandler) SearchProducts(c *gin.Context) {
 
 	var prefix models.SearchItems
@@ -180,6 +239,17 @@ func (i *InventoryHandler) SearchProducts(c *gin.Context) {
 	c.JSON(http.StatusOK, successRes)
 }
 
+// FilterCategory filters products by category ID.
+// @Summary Filter products by category ID
+// @Description Filters products based on the provided category ID
+// @Tags User Category
+// @Accept json
+// @Produce json
+// @Param category_id query integer true "Category ID"
+// @Success 200 {object} response.Response "Success"
+// @Failure 400 {object} response.Response "Invalid category ID"
+// @Failure 500 {object} response.Response "Internal server error"
+// @Router /user/products/filter [get]
 func (i *InventoryHandler) FilterCategory(c *gin.Context) {
 
 	CategoryId := c.Query("category_id")
@@ -203,6 +273,20 @@ func (i *InventoryHandler) FilterCategory(c *gin.Context) {
 
 }
 
+// ProductRating handles the rating of a product by a user.
+// @Summary Rate a product
+// @Description Allows a user to rate a specific product
+// @Tags User Product
+// @Accept json
+// @Produce json
+// @Security ApiKeyAuth
+// @Param product_id query integer true "Product ID"
+// @Param rating query integer true "Rating (1-5)"
+// @Success 200 {object} response.Response "Success"
+// @Failure 400 {object} response.Response "Invalid parameters"
+// @Failure 401 {object} response.Response "Unauthorized"
+// @Failure 500 {object} response.Response "Internal server error"
+// @Router /inventory/rate [post]
 func (i *InventoryHandler) ProductRating(c *gin.Context) {
 	idString, _ := c.Get("id")
 	id, _ := idString.(int)

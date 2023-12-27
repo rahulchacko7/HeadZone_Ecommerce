@@ -113,6 +113,7 @@ func (u *UserHandler) LoginHandler(c *gin.Context) {
 // @Tags users
 // @Accept json
 // @Produce json
+// @security BearerTokenAuth
 // @Success 200 {object} models.UserDetailsResponse "User details retrieved successfully"
 // @Failure 400 {object} response.Response "Failed to retrieve user details"
 // @Router /user/profile{id} [get]
@@ -136,6 +137,7 @@ func (i *UserHandler) GetUserDetails(c *gin.Context) {
 // @Tags users
 // @Accept json
 // @Produce json
+// @security BearerTokenAuth
 // @Param request body models.AddAddress true "Address details in JSON format"
 // @Success 200 {string} string "Successfully added address"
 // @Failure 400 {object} response.Response "Invalid request or address addition failed"
@@ -167,6 +169,7 @@ func (i *UserHandler) AddAddress(c *gin.Context) {
 // @Tags addresses
 // @Accept json
 // @Produce json
+// @security BearerTokenAuth
 // @Success 200 {object} []models.Address "Addresses retrieved successfully"
 // @Failure 400 {object} response.Response "Could not retrieve records or invalid request"
 // @Router /user/profile/addresses/{id} [get]
@@ -190,6 +193,7 @@ func (i *UserHandler) GetAddresses(c *gin.Context) {
 // @Tags users
 // @Accept json
 // @Produce json
+// @security BearerTokenAuth
 // @Param request body models.EditDetailsResponse true "User details to be updated"
 // @Success 201 {object} models.EditDetailsResponse "Updated user details"
 // @Failure 400 {object} response.Response "Invalid request or error updating values"
@@ -218,6 +222,18 @@ func (i *UserHandler) EditDetails(c *gin.Context) {
 	c.JSON(http.StatusCreated, successRes)
 }
 
+// ChangePassword allows a user to change their password.
+// @Summary Change Password
+// @Description Allows a user to update their password
+// @Tags Users
+// @Accept json
+// @Produce json
+// @security BearerTokenAuth
+// @Param id header integer true "User ID"
+// @Param ChangePassword body models.ChangePassword true "Change Password Request"
+// @Success 200 {object} response.ClientResponse "Password changed successfully"
+// @Failure 400 {object} response.ClientResponse "Invalid request format or password change failure"
+// @Router /user/change-password [post]
 func (i *UserHandler) ChangePassword(c *gin.Context) {
 
 	idString, _ := c.Get("id")
@@ -241,6 +257,17 @@ func (i *UserHandler) ChangePassword(c *gin.Context) {
 
 }
 
+// GetCart retrieves the user's cart contents.
+// @Summary Get User Cart
+// @Description Retrieves the products in the user's cart
+// @Tags User Cart Management
+// @Accept json
+// @Produce json
+// @security BearerTokenAuth
+// @Param id header integer true "User ID"
+// @Success 200 {object} response.Response "User's cart retrieved successfully"
+// @Failure 400 {object} response.Response "Failed to retrieve the cart"
+// @Router /user/cart [get]
 func (i *UserHandler) GetCart(c *gin.Context) {
 	idString, _ := c.Get("id")
 	id, _ := idString.(int)
@@ -255,6 +282,18 @@ func (i *UserHandler) GetCart(c *gin.Context) {
 	c.JSON(http.StatusOK, successRes)
 }
 
+// RemoveFromCart removes a product from the user's cart.
+// @Summary Remove Product from Cart
+// @Description Removes a specific product from the user's cart by cart ID and inventory ID
+// @Tags User Cart Managament
+// @Accept json
+// @Produce json
+// @security BearerTokenAuth
+// @Param cart_id query integer true "Cart ID"
+// @Param inventory_id query integer true "Inventory ID"
+// @Success 200 {object} response.ClientResponse "Product removed successfully from the cart"
+// @Failure 400 {object} response.ClientResponse "Failed to remove the product from the cart"
+// @Router /user/cart [delete]
 func (i *UserHandler) RemoveFromCart(c *gin.Context) {
 
 	cartID, err := strconv.Atoi(c.Query("cart_id"))
@@ -281,6 +320,19 @@ func (i *UserHandler) RemoveFromCart(c *gin.Context) {
 	c.JSON(http.StatusOK, successRes)
 }
 
+// UpdateQuantity updates the quantity of a product in the user's cart.
+// @Summary Update Product Quantity in Cart
+// @Description Updates the quantity of a specific product in the user's cart by ID and inventory ID
+// @Tags User Cart Managament
+// @Accept json
+// @Produce json
+// @security BearerTokenAuth
+// @Param id query integer true "Product ID"
+// @Param inventory query integer true "Inventory ID"
+// @Param quantity query integer true "New Quantity"
+// @Success 200 {object} response.Response "Quantity updated successfully in the cart"
+// @Failure 400 {object} response.Response "Failed to update the quantity in the cart"
+// @Router /user/cart [put]
 func (i *UserHandler) UpdateQuantity(c *gin.Context) {
 	id, err := strconv.Atoi(c.Query("id"))
 	if err != nil {

@@ -20,6 +20,17 @@ func NewOtpHandler(useCase interfaces.OtpUseCase) *OtpHandler {
 	}
 }
 
+// SendOTP sends an OTP (One-Time Password) to a specified phone number.
+// @Summary Send OTP
+// @Description Sends an OTP (One-Time Password) to the provided phone number
+// @Tags User OTP
+// @Accept json
+// @Produce json
+// @Param phone body models.OTPData true "Phone number to receive OTP"
+// @Success 200 {object} response.Response "OTP sent successfully"
+// @Failure 400 {object} response.Response "Invalid request format or phone number"
+// @Failure 502 {object} response.Response "Bad Gateway error"
+// @Router /user/otplogin [post]
 func (ot *OtpHandler) SendOTP(c *gin.Context) {
 
 	var phone models.OTPData
@@ -40,6 +51,17 @@ func (ot *OtpHandler) SendOTP(c *gin.Context) {
 
 }
 
+// VerifyOTP verifies the provided OTP (One-Time Password).
+// @Summary Verify OTP
+// @Description Verifies the provided OTP (One-Time Password)
+// @Tags User OTP
+// @Accept json
+// @Produce json
+// @Param code body models.VerifyData true "Data to verify OTP"
+// @Success 200 {object} response.Response "OTP verified successfully"
+// @Failure 400 {object} response.Response "Invalid request format or OTP"
+// @Failure 502 {object} response.Response "Bad Gateway error"
+// @Router /user/verifyotp [post]
 func (ot *OtpHandler) VerifyOTP(c *gin.Context) {
 	fmt.Println(1)
 

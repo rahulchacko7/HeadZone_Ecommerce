@@ -18,6 +18,17 @@ func NewWalletHandler(usecase interfaces.WalletUsecase) *WalletHandler {
 	}
 }
 
+// ViewWallet retrieves the wallet details for a specific user.
+// @Summary View User's Wallet
+// @Description Retrieves the wallet details for a specific user by ID
+// @Tags User Wallet Management
+// @Accept json
+// @Produce json
+// @security BearerTokenAuth
+// @Param id header integer true "User ID"
+// @Success 200 {object} response.ClientResponse "Wallet details retrieved successfully"
+// @Failure 400 {object} response.ClientResponse "Failed to retrieve wallet details"
+// @Router /user/wallet [get]
 func (handler *WalletHandler) ViewWallet(c *gin.Context) {
 	idString, _ := c.Get("id")
 	id, _ := idString.(int)

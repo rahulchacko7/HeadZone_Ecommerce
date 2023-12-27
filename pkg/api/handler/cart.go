@@ -20,6 +20,20 @@ func NewCartHandler(usecase interfaces.CartUseCase) *CartHandler {
 	}
 }
 
+// AddToCart adds a product to the user's cart.
+// @Summary Add a product to the cart
+// @Description Adds a selected product to the user's cart based on provided parameters
+// @Tags cart
+// @Accept json
+// @Produce json
+// @security BearerTokenAuth
+// @Param inventory_id query integer true "Inventory ID of the product to be added"
+// @Param quantity query integer true "Quantity of the product to be added"
+// @Security ApiKeyAuth
+// @Success 200 {object} interface{} "Successfully added to cart"
+// @Failure 400 {object} response.Response "Invalid request or incorrect format"
+// @Failure 401 {object} response.Response "Unauthorized"
+// @Router /user/cart [post]
 func (i *CartHandler) AddToCart(c *gin.Context) {
 	idString, _ := c.Get("id")
 	UserID, _ := idString.(int)
@@ -48,6 +62,17 @@ func (i *CartHandler) AddToCart(c *gin.Context) {
 	c.JSON(http.StatusOK, successRes)
 }
 
+// CheckOut fetches the products in the user's cart for checkout.
+// @Summary Get products for checkout
+// @Description Retrieves the products in the user's cart for checkout
+// @Tags cart
+// @Accept json
+// @Produce json
+// @security BearerTokenAuth
+// @Success 200 {object} interface{} "Successfully got all records"
+// @Failure 400 {object} response.Response "Invalid request or incorrect format"
+// @Failure 401 {object} response.Response "Unauthorized"
+// @Router /user/check-out [get]
 func (i *CartHandler) CheckOut(c *gin.Context) {
 	idString, _ := c.Get("id")
 	id, _ := idString.(int)

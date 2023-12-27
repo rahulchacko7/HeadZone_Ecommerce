@@ -51,7 +51,16 @@ func (cat *CategoryHandler) AddCategory(c *gin.Context) {
 	c.JSON(http.StatusOK, successRes)
 }
 
+// GetCategory retrieves all categories.
+// @Summary Get all categories
+// @Description Retrieves all available categories
 // @Tags Admin Category Management
+// @Accept json
+// @Produce json
+// @security BearerTokenAuth
+// @Success 200 {object} []models.Category "Successfully got all categories"
+// @Failure 400 {object} response.Response "Invalid request or incorrect format"
+// @Router /admin/category [get]
 func (Cat *CategoryHandler) GetCategory(c *gin.Context) {
 
 	categories, err := Cat.CategoryUseCase.GetCategories()
@@ -97,7 +106,17 @@ func (Cat *CategoryHandler) UpdateCategory(c *gin.Context) {
 	c.JSON(http.StatusOK, successRes)
 }
 
+// DeleteCategory deletes a category by ID.
+// @Summary Delete a category by ID
+// @Description Deletes a category based on the provided ID
 // @Tags Admin Category Management
+// @Accept json
+// @Produce json
+// @security BearerTokenAuth
+// @Param id query string true "Category ID to delete"
+// @Success 200 {object} response.Response "Successfully deleted the category"
+// @Failure 400 {object} response.Response "Invalid request or incorrect format"
+// @Router /admin/category [delete]
 func (Cat *CategoryHandler) DeleteCategory(c *gin.Context) {
 
 	categoryID := c.Query("id")

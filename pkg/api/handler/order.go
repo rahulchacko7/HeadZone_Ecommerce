@@ -22,6 +22,20 @@ func NewOrderHandler(useCase interfaces.OrderUseCase) *OrderHandler {
 	}
 }
 
+// OrderItemsFromCart creates an order from the items in the user's cart.
+// @Summary Create an order from cart items
+// @Description Allows a user to create an order from items in their cart
+// @Tags User Order Management
+// @Accept json
+// @Produce json
+// @security BearerTokenAuth
+// @Param id header integer true "User ID"
+// @Param order body models.Order true "Order details"
+// @Success 200 {object} response.Response "Success"
+// @Failure 400 {object} response.Response "Invalid request format"
+// @Failure 401 {object} response.Response "Unauthorized"
+// @Failure 500 {object} response.Response "Internal server error"
+// @Router /user/check-out [post]
 func (i *OrderHandler) OrderItemsFromCart(c *gin.Context) {
 
 	userId, _ := c.Get("id")
@@ -42,6 +56,18 @@ func (i *OrderHandler) OrderItemsFromCart(c *gin.Context) {
 	c.JSON(http.StatusOK, successRes)
 }
 
+// GetOrders retrieves orders based on the provided order ID.
+// @Summary Retrieve orders
+// @Description Retrieves orders based on the provided order ID
+// @Tags User Order Management
+// @Accept json
+// @Produce json
+// @security BearerTokenAuth
+// @Param order_id query integer true "Order ID"
+// @Success 200 {object} response.Response "Success"
+// @Failure 400 {object} response.Response "Invalid request format or missing ID"
+// @Failure 500 {object} response.Response "Internal server error"
+// @Router /user/profile/orders [get]
 func (i *OrderHandler) GetOrders(c *gin.Context) {
 
 	idString := c.Query("order_id")
@@ -64,6 +90,18 @@ func (i *OrderHandler) GetOrders(c *gin.Context) {
 
 }
 
+// CancelOrder cancels an order based on the provided order ID.
+// @Summary Cancel an order
+// @Description Cancels an order based on the provided order ID
+// @Tags Admin Order Management
+// @Accept json
+// @Produce json
+// @security BearerTokenAuth
+// @Param order_id query integer true "Order ID"
+// @Success 200 {object} response.Response "Success"
+// @Failure 400 {object} response.Response "Invalid request format or missing ID"
+// @Failure 500 {object} response.Response "Internal server error"
+// @Router /user/profile/orders [put]
 func (i OrderHandler) CancelOrder(c *gin.Context) {
 	idString := c.Query("order_id")
 	orderID, err := strconv.Atoi(idString)
@@ -85,6 +123,19 @@ func (i OrderHandler) CancelOrder(c *gin.Context) {
 	c.JSON(http.StatusOK, successRes)
 }
 
+// GetAllOrders retrieves paginated orders for a specific user.
+// @Summary Get all orders
+// @Description Retrieves paginated orders for a specific user
+// @Tags Admin Order Management
+// @Accept json
+// @Produce json
+// @security BearerTokenAuth
+// @Param page query integer false "Page number (default: 1)"
+// @Param count query integer false "Number of items per page (default: 10)"
+// @Success 200 {object} response.Response "Success"
+// @Failure 400 {object} response.Response "Invalid request format or missing ID"
+// @Failure 500 {object} response.Response "Internal server error"
+// @Router /user/profile/orders/all [get]
 func (i *OrderHandler) GetAllOrders(c *gin.Context) {
 
 	pageStr := c.DefaultQuery("page", "1")
@@ -117,6 +168,18 @@ func (i *OrderHandler) GetAllOrders(c *gin.Context) {
 
 }
 
+// GetAdminOrders retrieves paginated orders for admin view.
+// @Summary Get admin orders
+// @Description Retrieves paginated orders for admin view
+// @Tags Admin Order Management
+// @Accept json
+// @Produce json
+// @security BearerTokenAuth
+// @Param page query integer true "Page number"
+// @Success 200 {object} response.Response "Success"
+// @Failure 400 {object} response.Response "Invalid request format"
+// @Failure 500 {object} response.Response "Internal server error"
+// @Router /admin/orders [get]
 func (i *OrderHandler) GetAdminOrders(c *gin.Context) {
 
 	pageStr := c.Query("page")
@@ -140,6 +203,18 @@ func (i *OrderHandler) GetAdminOrders(c *gin.Context) {
 
 }
 
+// ApproveOrder approves an order by its ID.
+// @Summary Approve an order
+// @Description Approves an order by its ID
+// @Tags Admin Order Management
+// @Accept json
+// @Produce json
+// @security BearerTokenAuth
+// @Param order_id query integer true "Order ID"
+// @Success 200 {object} response.Response "Success"
+// @Failure 400 {object} response.Response "Invalid request format"
+// @Failure 500 {object} response.Response "Internal server error"
+// @Router /admin/orders/status [GET]
 func (i *OrderHandler) ApproveOrder(c *gin.Context) {
 	id := c.Query("order_id")
 	orderID, err := strconv.Atoi(id)
@@ -160,6 +235,17 @@ func (i *OrderHandler) ApproveOrder(c *gin.Context) {
 	c.JSON(http.StatusOK, successRes)
 }
 
+// ReturnOrder handles the return of an order by its ID.
+// @Summary Return an order
+// @Description Returns an order by its ID
+// @Tags Orders
+// @Accept json
+// @Produce json
+// @Param order_id query integer true "Order ID"
+// @Success 200 {object} response.Response "Success"
+// @Failure 400 {object} response.Response "Invalid request format"
+// @Failure 500 {object} response.Response "Internal server error"
+// @Router /orders/return [put]
 func (o *OrderHandler) ReturnOrder(c *gin.Context) {
 	id := c.Query("order_id")
 	orderID, err := strconv.Atoi(id)
@@ -182,6 +268,18 @@ func (o *OrderHandler) ReturnOrder(c *gin.Context) {
 	c.JSON(http.StatusOK, successRes)
 }
 
+// PrintInvoice generates and provides a PDF invoice for a specific order ID.
+// @Summary Print an invoice
+// @Description Generates and provides a PDF invoice for a specific order ID
+// @Tags User Invoice
+// @Accept json
+// @Produce pdf
+// @security BearerTokenAuth
+// @Param order_id query integer true "Order ID"
+// @Success 200 {string} pdf "Invoice PDF file"
+// @Failure 400 {object} response.Response "Invalid request format"
+// @Failure 502 {object} response.Response "Bad Gateway error"
+// @Router /user/check-out/print [get]
 func (O *OrderHandler) PrintInvoice(c *gin.Context) {
 	orderId := c.Query("order_id")
 	orderIdInt, err := strconv.Atoi(orderId)
