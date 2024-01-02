@@ -82,7 +82,7 @@ func (handler *CouponHandler) GetCoupons(c *gin.Context) {
 // @Param CouponDetails body models.CouponResponse true "Coupon details to update"
 // @Success 200 {object} models.CouponResponse "Successfully updated coupon"
 // @Failure 400 {object} response.Response "Error updating coupon"
-// @Router /admin/coupon [put]
+// @Router /admin/coupon [patch]
 func (handler *CouponHandler) UpdateCoupon(c *gin.Context) {
 	CouponId := c.Query("id")
 	CId, err := strconv.Atoi(CouponId)

@@ -26,8 +26,8 @@ func NewWalletHandler(usecase interfaces.WalletUsecase) *WalletHandler {
 // @Produce json
 // @security BearerTokenAuth
 // @Param id header integer true "User ID"
-// @Success 200 {object} response.ClientResponse "Wallet details retrieved successfully"
-// @Failure 400 {object} response.ClientResponse "Failed to retrieve wallet details"
+// @Success 200 {object} response.Response "Wallet details retrieved successfully"
+// @Failure 400 {object} response.Response "Failed to retrieve wallet details"
 // @Router /user/wallet [get]
 func (handler *WalletHandler) ViewWallet(c *gin.Context) {
 	idString, _ := c.Get("id")

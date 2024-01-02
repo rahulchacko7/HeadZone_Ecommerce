@@ -93,7 +93,7 @@ func (i *OrderHandler) GetOrders(c *gin.Context) {
 // CancelOrder cancels an order based on the provided order ID.
 // @Summary Cancel an order
 // @Description Cancels an order based on the provided order ID
-// @Tags Admin Order Management
+// @Tags User Order Management
 // @Accept json
 // @Produce json
 // @security BearerTokenAuth
@@ -101,7 +101,7 @@ func (i *OrderHandler) GetOrders(c *gin.Context) {
 // @Success 200 {object} response.Response "Success"
 // @Failure 400 {object} response.Response "Invalid request format or missing ID"
 // @Failure 500 {object} response.Response "Internal server error"
-// @Router /user/profile/orders [put]
+// @Router /user/profile/orders [delete]
 func (i OrderHandler) CancelOrder(c *gin.Context) {
 	idString := c.Query("order_id")
 	orderID, err := strconv.Atoi(idString)
@@ -238,14 +238,14 @@ func (i *OrderHandler) ApproveOrder(c *gin.Context) {
 // ReturnOrder handles the return of an order by its ID.
 // @Summary Return an order
 // @Description Returns an order by its ID
-// @Tags Orders
+// @Tags User Order Management
 // @Accept json
 // @Produce json
 // @Param order_id query integer true "Order ID"
 // @Success 200 {object} response.Response "Success"
 // @Failure 400 {object} response.Response "Invalid request format"
 // @Failure 500 {object} response.Response "Internal server error"
-// @Router /orders/return [put]
+// @Router /user/profile/orders/return [put]
 func (o *OrderHandler) ReturnOrder(c *gin.Context) {
 	id := c.Query("order_id")
 	orderID, err := strconv.Atoi(id)
@@ -273,7 +273,7 @@ func (o *OrderHandler) ReturnOrder(c *gin.Context) {
 // @Description Generates and provides a PDF invoice for a specific order ID
 // @Tags User Invoice
 // @Accept json
-// @Produce pdf
+// @pdf
 // @security BearerTokenAuth
 // @Param order_id query integer true "Order ID"
 // @Success 200 {string} pdf "Invoice PDF file"

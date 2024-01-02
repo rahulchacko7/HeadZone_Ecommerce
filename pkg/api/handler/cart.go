@@ -23,7 +23,7 @@ func NewCartHandler(usecase interfaces.CartUseCase) *CartHandler {
 // AddToCart adds a product to the user's cart.
 // @Summary Add a product to the cart
 // @Description Adds a selected product to the user's cart based on provided parameters
-// @Tags cart
+// @Tags User Cart Management
 // @Accept json
 // @Produce json
 // @security BearerTokenAuth
@@ -65,7 +65,7 @@ func (i *CartHandler) AddToCart(c *gin.Context) {
 // CheckOut fetches the products in the user's cart for checkout.
 // @Summary Get products for checkout
 // @Description Retrieves the products in the user's cart for checkout
-// @Tags cart
+// @Tags User Cart Management
 // @Accept json
 // @Produce json
 // @security BearerTokenAuth

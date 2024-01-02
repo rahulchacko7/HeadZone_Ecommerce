@@ -228,7 +228,7 @@ func (i *AdminHandler) NewPaymentMethod(c *gin.Context) {
 // @Success 200 {object} []models.PaymentMethod "List of payment methods"
 // @Failure 400 {object} response.Response "Invalid request or incorrect format"
 // @Failure 500 {object} response.Response "Internal server error"
-// @Router /admin/payment-methods [get]
+// @Router /admin/payment-method [get]
 func (a *AdminHandler) ListPaymentMethods(c *gin.Context) {
 
 	categories, err := a.adminUseCase.ListPaymentMethods()
@@ -253,7 +253,7 @@ func (a *AdminHandler) ListPaymentMethods(c *gin.Context) {
 // @Success 200 {object} response.Response "Successfully deleted the payment method"
 // @Failure 400 {object} response.Response "Invalid request or incorrect format"
 // @Failure 500 {object} response.Response "Internal server error"
-// @Router /admin/payment-methods [delete]
+// @Router /admin/payment-method [delete]
 func (a *AdminHandler) DeletePaymentMethod(c *gin.Context) {
 
 	id, err := strconv.Atoi(c.Query("id"))

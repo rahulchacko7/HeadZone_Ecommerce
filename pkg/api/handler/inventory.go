@@ -93,17 +93,17 @@ func (i *InventoryHandler) ListProducts(c *gin.Context) {
 	c.JSON(http.StatusOK, successRes)
 }
 
-// EditInventory edits an existing inventory item.
-// @Summary Edit existing inventory
-// @Description Edits details of an existing inventory item by ID
+// EditInventory updates an inventory item based on the provided details.
+// @Summary Edit an inventory item
+// @Description Update an inventory item by ID
 // @Tags Admin Inventory Management
 // @Accept json
 // @Produce json
 // @security BearerTokenAuth
-// @Param inventory_id query int true "Inventory ID to edit"
-// @Param inventory body domain.Inventory true "Inventory object to be edited"
-// @Success 200 {object} response.Response "Success"
-// @Failure 400 {object} response.Response "Error editing inventory"
+// @Param inventory_id query integer true "Inventory ID to update"
+// @Param Inventory body domain.Inventory true "Inventory object to update"
+// @Success 200 {object} response.Response "Successfully updated inventory"
+// @Failure 400 {object} response.Response "Invalid request format or fields in the wrong format"
 // @Router /admin/inventory [put]
 func (u *InventoryHandler) EditInventory(c *gin.Context) {
 	var inventory domain.Inventory
@@ -145,7 +145,6 @@ func (u *InventoryHandler) EditInventory(c *gin.Context) {
 // @Success 200 {object} response.Response "Success"
 // @Failure 400 {object} response.Response "Error deleting inventory"
 // @Router /admin/inventory [delete]
-
 func (u *InventoryHandler) DeleteInventory(c *gin.Context) {
 
 	inventoryID := c.Query("id")
@@ -171,7 +170,7 @@ func (u *InventoryHandler) DeleteInventory(c *gin.Context) {
 // @Param Stock body int true "New Stock"
 // @Success 200 {object} response.Response "Success"
 // @Failure 400 {object} response.Response "Error updating inventory stock"
-// @Router /admin/inventory [put]
+// @Router /admin/inventory/stock [put]
 func (i *InventoryHandler) UpdateInventory(c *gin.Context) {
 
 	var p models.InventoryUpdate
@@ -286,7 +285,7 @@ func (i *InventoryHandler) FilterCategory(c *gin.Context) {
 // @Failure 400 {object} response.Response "Invalid parameters"
 // @Failure 401 {object} response.Response "Unauthorized"
 // @Failure 500 {object} response.Response "Internal server error"
-// @Router /inventory/rate [post]
+// @Router /user/products/rating [post]
 func (i *InventoryHandler) ProductRating(c *gin.Context) {
 	idString, _ := c.Get("id")
 	id, _ := idString.(int)

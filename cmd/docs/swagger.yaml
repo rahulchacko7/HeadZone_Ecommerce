@@ -6,6 +6,23 @@ definitions:
       id:
         type: integer
     type: object
+  domain.Inventory:
+    properties:
+      category:
+        $ref: '#/definitions/domain.Category'
+      category_id:
+        type: integer
+      color:
+        type: string
+      id:
+        type: integer
+      price:
+        type: number
+      product_name:
+        type: string
+      stock:
+        type: integer
+    type: object
   domain.TokenAdmin:
     properties:
       accessToken:
@@ -37,6 +54,21 @@ definitions:
     - pin
     - state
     - street
+    type: object
+  models.AddInventories:
+    properties:
+      category_id:
+        type: integer
+      color:
+        type: string
+      id:
+        type: integer
+      price:
+        type: number
+      product_name:
+        type: string
+      stock:
+        type: integer
     type: object
   models.Address:
     properties:
@@ -84,6 +116,33 @@ definitions:
     required:
     - email
     type: object
+  models.Category:
+    properties:
+      category:
+        type: string
+      id:
+        type: integer
+    type: object
+  models.ChangePassword:
+    properties:
+      old_password:
+        type: string
+      password:
+        type: string
+      re_password:
+        type: string
+    type: object
+  models.CouponResponse:
+    properties:
+      coupon_name:
+        type: string
+      discount_rate:
+        type: integer
+      id:
+        type: integer
+      status:
+        type: boolean
+    type: object
   models.EditDetailsResponse:
     properties:
       email:
@@ -93,6 +152,21 @@ definitions:
         type: string
       phone:
         type: string
+    type: object
+  models.InventoryResponse:
+    properties:
+      category_id:
+        type: integer
+      color:
+        type: string
+      id:
+        type: integer
+      price:
+        type: number
+      product_name:
+        type: string
+      stock:
+        type: integer
     type: object
   models.InventoryUserResponse:
     properties:
@@ -113,6 +187,24 @@ definitions:
     properties:
       payment_method:
         type: string
+    type: object
+  models.OTPData:
+    properties:
+      phone:
+        type: string
+    required:
+    - phone
+    type: object
+  models.Order:
+    properties:
+      address_id:
+        type: integer
+      coupon_id:
+        type: integer
+      payment_id:
+        type: integer
+      user_id:
+        type: integer
     type: object
   models.PaymentMethod:
     properties:
@@ -170,6 +262,16 @@ definitions:
       password:
         type: string
     type: object
+  models.VerifyData:
+    properties:
+      code:
+        type: string
+      phone:
+        type: string
+    required:
+    - code
+    - phone
+    type: object
   response.Response:
     properties:
       data: {}
@@ -212,6 +314,54 @@ paths:
       tags:
       - Admin
   /admin/category:
+    delete:
+      consumes:
+      - application/json
+      description: Deletes a category based on the provided ID
+      parameters:
+      - description: Category ID to delete
+        in: query
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully deleted the category
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Invalid request or incorrect format
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerTokenAuth: []
+      summary: Delete a category by ID
+      tags:
+      - Admin Category Management
+    get:
+      consumes:
+      - application/json
+      description: Retrieves all available categories
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully got all categories
+          schema:
+            items:
+              $ref: '#/definitions/models.Category'
+            type: array
+        "400":
+          description: Invalid request or incorrect format
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerTokenAuth: []
+      summary: Get all categories
+      tags:
+      - Admin Category Management
     post:
       consumes:
       - application/json
@@ -266,6 +416,87 @@ paths:
       summary: Update a category name
       tags:
       - Admin Category Management
+  /admin/coupon:
+    get:
+      consumes:
+      - application/json
+      description: Fetches all available coupons
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: '#/definitions/models.CouponResponse'
+        "400":
+          description: Error retrieving coupons
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerTokenAuth: []
+      summary: Retrieve all coupons
+      tags:
+      - Admin Coupon Management
+    patch:
+      consumes:
+      - application/json
+      description: Update an existing coupon's details such as name, status, and discount
+        rate
+      parameters:
+      - description: Coupon ID to update
+        in: query
+        name: id
+        required: true
+        type: integer
+      - description: Coupon details to update
+        in: body
+        name: CouponDetails
+        required: true
+        schema:
+          $ref: '#/definitions/models.CouponResponse'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully updated coupon
+          schema:
+            $ref: '#/definitions/models.CouponResponse'
+        "400":
+          description: Error updating coupon
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerTokenAuth: []
+      summary: Update an existing coupon by ID
+      tags:
+      - Admin Coupon Management
+    post:
+      consumes:
+      - application/json
+      description: Adds a new coupon with provided details
+      parameters:
+      - description: Coupon details in JSON format
+        in: body
+        name: CouponDetails
+        required: true
+        schema:
+          $ref: '#/definitions/models.CouponResponse'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully updated the coupon
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Invalid request or incorrect format
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerTokenAuth: []
+      summary: Add a new coupon
+      tags:
+      - Admin Coupon Management
   /admin/customreport:
     get:
       consumes:
@@ -316,35 +547,189 @@ paths:
       summary: Retrieve dashboard details
       tags:
       - Admin Dashboard
-  /admin/payment-method:
-    post:
+  /admin/inventory:
+    delete:
       consumes:
       - application/json
-      description: Add a new payment method to the system
+      description: Deletes an inventory item by its ID
       parameters:
-      - description: New payment method details in JSON format
-        in: body
-        name: request
+      - description: Inventory ID to delete
+        in: query
+        name: id
         required: true
-        schema:
-          $ref: '#/definitions/models.NewPaymentMethod'
+        type: integer
       produces:
       - application/json
       responses:
         "200":
-          description: Successfully added Payment Method
+          description: Success
           schema:
-            type: string
+            $ref: '#/definitions/response.Response'
         "400":
-          description: Invalid request or incorrect format
+          description: Error deleting inventory
           schema:
             $ref: '#/definitions/response.Response'
       security:
       - BearerTokenAuth: []
-      summary: Create a new payment method
+      summary: Delete an inventory item
       tags:
-      - Admin Payment Method
-  /admin/payment-methods:
+      - Admin Inventory Management
+    post:
+      consumes:
+      - application/json
+      description: Adds new inventory details
+      parameters:
+      - description: Inventory object to be added
+        in: body
+        name: inventory
+        required: true
+        schema:
+          $ref: '#/definitions/models.AddInventories'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: '#/definitions/models.InventoryResponse'
+        "400":
+          description: Error adding inventory
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerTokenAuth: []
+      summary: Add new inventory
+      tags:
+      - Admin Inventory Management
+    put:
+      consumes:
+      - application/json
+      description: Update an inventory item by ID
+      parameters:
+      - description: Inventory ID to update
+        in: query
+        name: inventory_id
+        required: true
+        type: integer
+      - description: Inventory object to update
+        in: body
+        name: Inventory
+        required: true
+        schema:
+          $ref: '#/definitions/domain.Inventory'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully updated inventory
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Invalid request format or fields in the wrong format
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerTokenAuth: []
+      summary: Edit an inventory item
+      tags:
+      - Admin Inventory Management
+  /admin/inventory/stock:
+    put:
+      consumes:
+      - application/json
+      description: Updates the stock of an inventory item by its ID
+      parameters:
+      - description: Product ID
+        in: body
+        name: Productid
+        required: true
+        schema:
+          type: integer
+      - description: New Stock
+        in: body
+        name: Stock
+        required: true
+        schema:
+          type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Error updating inventory stock
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerTokenAuth: []
+      summary: Update inventory stock
+      tags:
+      - Admin Inventory Management
+  /admin/orders:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves paginated orders for admin view
+      parameters:
+      - description: Page number
+        in: query
+        name: page
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Invalid request format
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerTokenAuth: []
+      summary: Get admin orders
+      tags:
+      - Admin Order Management
+  /admin/orders/status:
+    get:
+      consumes:
+      - application/json
+      description: Approves an order by its ID
+      parameters:
+      - description: Order ID
+        in: query
+        name: order_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Invalid request format
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerTokenAuth: []
+      summary: Approve an order
+      tags:
+      - Admin Order Management
+  /admin/payment-method:
     delete:
       description: Delete a payment method by its ID
       parameters:
@@ -393,6 +778,33 @@ paths:
       security:
       - BearerTokenAuth: []
       summary: Retrieve available payment methods
+      tags:
+      - Admin Payment Method
+    post:
+      consumes:
+      - application/json
+      description: Add a new payment method to the system
+      parameters:
+      - description: New payment method details in JSON format
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.NewPaymentMethod'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully added Payment Method
+          schema:
+            type: string
+        "400":
+          description: Invalid request or incorrect format
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerTokenAuth: []
+      summary: Create a new payment method
       tags:
       - Admin Payment Method
   /admin/salesbydate:
@@ -520,32 +932,265 @@ paths:
       summary: Unblock a user
       tags:
       - Admin User Management
-  /user/{id}/address:
-    post:
+  /user/cart:
+    delete:
       consumes:
       - application/json
-      description: Adds a new address for the user
+      description: Removes a specific product from the user's cart by cart ID and
+        inventory ID
       parameters:
-      - description: Address details in JSON format
-        in: body
-        name: request
+      - description: Cart ID
+        in: query
+        name: cart_id
         required: true
-        schema:
-          $ref: '#/definitions/models.AddAddress'
+        type: integer
+      - description: Inventory ID
+        in: query
+        name: inventory_id
+        required: true
+        type: integer
       produces:
       - application/json
       responses:
         "200":
-          description: Successfully added address
+          description: Product removed successfully from the cart
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Failed to remove the product from the cart
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerTokenAuth: []
+      summary: Remove Product from Cart
+      tags:
+      - User Cart Management
+    get:
+      consumes:
+      - application/json
+      description: Retrieves the products in the user's cart
+      parameters:
+      - description: User ID
+        in: header
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User's cart retrieved successfully
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Failed to retrieve the cart
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerTokenAuth: []
+      summary: Get User Cart
+      tags:
+      - User Cart Management
+    post:
+      consumes:
+      - application/json
+      description: Adds a selected product to the user's cart based on provided parameters
+      parameters:
+      - description: Inventory ID of the product to be added
+        in: query
+        name: inventory_id
+        required: true
+        type: integer
+      - description: Quantity of the product to be added
+        in: query
+        name: quantity
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully added to cart
+          schema:
+            type: object
+        "400":
+          description: Invalid request or incorrect format
+          schema:
+            $ref: '#/definitions/response.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerTokenAuth: []
+      - ApiKeyAuth: []
+      summary: Add a product to the cart
+      tags:
+      - User Cart Management
+    put:
+      consumes:
+      - application/json
+      description: Updates the quantity of a specific product in the user's cart by
+        ID and inventory ID
+      parameters:
+      - description: Product ID
+        in: query
+        name: id
+        required: true
+        type: integer
+      - description: Inventory ID
+        in: query
+        name: inventory
+        required: true
+        type: integer
+      - description: New Quantity
+        in: query
+        name: quantity
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Quantity updated successfully in the cart
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Failed to update the quantity in the cart
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerTokenAuth: []
+      summary: Update Product Quantity in Cart
+      tags:
+      - User Cart Management
+  /user/change-password:
+    patch:
+      consumes:
+      - application/json
+      description: Allows a user to update their password
+      parameters:
+      - description: User ID
+        in: header
+        name: id
+        required: true
+        type: integer
+      - description: Change Password Request
+        in: body
+        name: ChangePassword
+        required: true
+        schema:
+          $ref: '#/definitions/models.ChangePassword'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Password changed successfully
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Invalid request format or password change failure
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerTokenAuth: []
+      summary: Change Password
+      tags:
+      - User Profile Management
+  /user/check-out:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves the products in the user's cart for checkout
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully got all records
+          schema:
+            type: object
+        "400":
+          description: Invalid request or incorrect format
+          schema:
+            $ref: '#/definitions/response.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerTokenAuth: []
+      summary: Get products for checkout
+      tags:
+      - User Cart Management
+    post:
+      consumes:
+      - application/json
+      description: Allows a user to create an order from items in their cart
+      parameters:
+      - description: User ID
+        in: header
+        name: id
+        required: true
+        type: integer
+      - description: Order details
+        in: body
+        name: order
+        required: true
+        schema:
+          $ref: '#/definitions/models.Order'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Invalid request format
+          schema:
+            $ref: '#/definitions/response.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerTokenAuth: []
+      summary: Create an order from cart items
+      tags:
+      - User Order Management
+  /user/check-out/print:
+    get:
+      consumes:
+      - application/json
+      description: Generates and provides a PDF invoice for a specific order ID
+      parameters:
+      - description: Order ID
+        in: query
+        name: order_id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: Invoice PDF file
           schema:
             type: string
         "400":
-          description: Invalid request or address addition failed
+          description: Invalid request format
           schema:
             $ref: '#/definitions/response.Response'
-      summary: Add a new address
+        "502":
+          description: Bad Gateway error
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerTokenAuth: []
+      summary: Print an invoice
       tags:
-      - users
+      - User Invoice
   /user/login:
     post:
       consumes:
@@ -575,7 +1220,37 @@ paths:
             $ref: '#/definitions/models.UserDetails'
       summary: Log in a user
       tags:
-      - users
+      - User Profile Management
+  /user/otplogin:
+    post:
+      consumes:
+      - application/json
+      description: Sends an OTP (One-Time Password) to the provided phone number
+      parameters:
+      - description: Phone number to receive OTP
+        in: body
+        name: phone
+        required: true
+        schema:
+          $ref: '#/definitions/models.OTPData'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OTP sent successfully
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Invalid request format or phone number
+          schema:
+            $ref: '#/definitions/response.Response'
+        "502":
+          description: Bad Gateway error
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Send OTP
+      tags:
+      - User OTP
   /user/products:
     get:
       consumes:
@@ -605,8 +1280,156 @@ paths:
             $ref: '#/definitions/response.Response'
       summary: List products with pagination
       tags:
-      - products
-  /user/profile/{id}/edit:
+      - User Product
+  /user/products/filter:
+    get:
+      consumes:
+      - application/json
+      description: Filters products based on the provided category ID
+      parameters:
+      - description: Category ID
+        in: query
+        name: category_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Invalid category ID
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Filter products by category ID
+      tags:
+      - User Category
+  /user/products/rating:
+    post:
+      consumes:
+      - application/json
+      description: Allows a user to rate a specific product
+      parameters:
+      - description: Product ID
+        in: query
+        name: product_id
+        required: true
+        type: integer
+      - description: Rating (1-5)
+        in: query
+        name: rating
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Invalid parameters
+          schema:
+            $ref: '#/definitions/response.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Rate a product
+      tags:
+      - User Product
+  /user/products/search:
+    put:
+      consumes:
+      - application/json
+      description: Updates the stock of an inventory item by its ID
+      parameters:
+      - description: Product ID
+        in: body
+        name: Productid
+        required: true
+        schema:
+          type: integer
+      - description: New Stock
+        in: body
+        name: Stock
+        required: true
+        schema:
+          type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Error updating inventory stock
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Update inventory stock
+      tags:
+      - User Product
+  /user/profile:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve user details by ID
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User details retrieved successfully
+          schema:
+            $ref: '#/definitions/models.UserDetailsResponse'
+        "400":
+          description: Failed to retrieve user details
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerTokenAuth: []
+      summary: Get user details
+      tags:
+      - User Profile Management
+    post:
+      consumes:
+      - application/json
+      description: Adds a new address for the user
+      parameters:
+      - description: Address details in JSON format
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.AddAddress'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully added address
+          schema:
+            type: string
+        "400":
+          description: Invalid request or address addition failed
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerTokenAuth: []
+      summary: Add a new address
+      tags:
+      - User Profile Management
     put:
       consumes:
       - application/json
@@ -629,10 +1452,12 @@ paths:
           description: Invalid request or error updating values
           schema:
             $ref: '#/definitions/response.Response'
+      security:
+      - BearerTokenAuth: []
       summary: Edit user details
       tags:
-      - users
-  /user/profile/addresses/{id}:
+      - User Profile Management
+  /user/profile/address:
     get:
       consumes:
       - application/json
@@ -650,28 +1475,135 @@ paths:
           description: Could not retrieve records or invalid request
           schema:
             $ref: '#/definitions/response.Response'
+      security:
+      - BearerTokenAuth: []
       summary: Retrieve addresses for a user
       tags:
-      - addresses
-  /user/profile{id}:
-    get:
+      - User Profile Management
+  /user/profile/orders:
+    delete:
       consumes:
       - application/json
-      description: Retrieve user details by ID
+      description: Cancels an order based on the provided order ID
+      parameters:
+      - description: Order ID
+        in: query
+        name: order_id
+        required: true
+        type: integer
       produces:
       - application/json
       responses:
         "200":
-          description: User details retrieved successfully
-          schema:
-            $ref: '#/definitions/models.UserDetailsResponse'
-        "400":
-          description: Failed to retrieve user details
+          description: Success
           schema:
             $ref: '#/definitions/response.Response'
-      summary: Get user details
+        "400":
+          description: Invalid request format or missing ID
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerTokenAuth: []
+      summary: Cancel an order
       tags:
-      - users
+      - User Order Management
+    get:
+      consumes:
+      - application/json
+      description: Retrieves orders based on the provided order ID
+      parameters:
+      - description: Order ID
+        in: query
+        name: order_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Invalid request format or missing ID
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerTokenAuth: []
+      summary: Retrieve orders
+      tags:
+      - User Order Management
+  /user/profile/orders/all:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves paginated orders for a specific user
+      parameters:
+      - description: 'Page number (default: 1)'
+        in: query
+        name: page
+        type: integer
+      - description: 'Number of items per page (default: 10)'
+        in: query
+        name: count
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Invalid request format or missing ID
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerTokenAuth: []
+      summary: Get all orders
+      tags:
+      - Admin Order Management
+  /user/profile/orders/return:
+    put:
+      consumes:
+      - application/json
+      description: Returns an order by its ID
+      parameters:
+      - description: Order ID
+        in: query
+        name: order_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Invalid request format
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Return an order
+      tags:
+      - User Order Management
   /user/signup:
     post:
       consumes:
@@ -701,7 +1633,64 @@ paths:
             $ref: '#/definitions/models.TokenUsers'
       summary: Register a new user
       tags:
-      - users
+      - User Profile Management
+  /user/verifyotp:
+    post:
+      consumes:
+      - application/json
+      description: Verifies the provided OTP (One-Time Password)
+      parameters:
+      - description: Data to verify OTP
+        in: body
+        name: code
+        required: true
+        schema:
+          $ref: '#/definitions/models.VerifyData'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OTP verified successfully
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Invalid request format or OTP
+          schema:
+            $ref: '#/definitions/response.Response'
+        "502":
+          description: Bad Gateway error
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Verify OTP
+      tags:
+      - User OTP
+  /user/wallet:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves the wallet details for a specific user by ID
+      parameters:
+      - description: User ID
+        in: header
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Wallet details retrieved successfully
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Failed to retrieve wallet details
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerTokenAuth: []
+      summary: View User's Wallet
+      tags:
+      - User Wallet Management
 securityDefinitions:
   BearerTokenAuth:
     in: header

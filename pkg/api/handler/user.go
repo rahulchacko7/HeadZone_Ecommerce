@@ -30,7 +30,7 @@ func NewUserHandler(usecase services.UserUseCase) *UserHandler {
 // UserSignUp handles user sign-up functionality.
 // @Summary Register a new user
 // @Description Create a new user account
-// @Tags users
+// @Tags User Profile Management
 // @Accept json
 // @Produce json
 // @Param request body models.UserDetails true "User details in JSON format"
@@ -70,7 +70,7 @@ func (u *UserHandler) UserSignUp(c *gin.Context) {
 // LoginHandler handles the user login functionality.
 // @Summary Log in a user
 // @Description Logs in a user with provided credentials
-// @Tags users
+// @Tags User Profile Management
 // @Accept json
 // @Produce json
 // @Param request body models.UserLogin true "User login details in JSON format"
@@ -110,13 +110,13 @@ func (u *UserHandler) LoginHandler(c *gin.Context) {
 // GetUserDetails handles the retrieval of user details.
 // @Summary Get user details
 // @Description Retrieve user details by ID
-// @Tags users
+// @Tags User Profile Management
 // @Accept json
 // @Produce json
 // @security BearerTokenAuth
 // @Success 200 {object} models.UserDetailsResponse "User details retrieved successfully"
 // @Failure 400 {object} response.Response "Failed to retrieve user details"
-// @Router /user/profile{id} [get]
+// @Router /user/profile [get]
 func (i *UserHandler) GetUserDetails(c *gin.Context) {
 	idString, _ := c.Get("id")
 	id, _ := idString.(int)
@@ -134,14 +134,14 @@ func (i *UserHandler) GetUserDetails(c *gin.Context) {
 // AddAddress handles adding a new address for a user.
 // @Summary Add a new address
 // @Description Adds a new address for the user
-// @Tags users
+// @Tags User Profile Management
 // @Accept json
 // @Produce json
 // @security BearerTokenAuth
 // @Param request body models.AddAddress true "Address details in JSON format"
 // @Success 200 {string} string "Successfully added address"
 // @Failure 400 {object} response.Response "Invalid request or address addition failed"
-// @Router /user/{id}/address [post]
+// @Router /user/profile [post]
 func (i *UserHandler) AddAddress(c *gin.Context) {
 	id, _ := c.Get("id")
 
@@ -166,13 +166,13 @@ func (i *UserHandler) AddAddress(c *gin.Context) {
 // GetAddresses handles the retrieval of addresses for a user.
 // @Summary Retrieve addresses for a user
 // @Description Get addresses associated with a user ID
-// @Tags addresses
+// @Tags User Profile Management
 // @Accept json
 // @Produce json
 // @security BearerTokenAuth
 // @Success 200 {object} []models.Address "Addresses retrieved successfully"
 // @Failure 400 {object} response.Response "Could not retrieve records or invalid request"
-// @Router /user/profile/addresses/{id} [get]
+// @Router /user/profile/address [get]
 func (i *UserHandler) GetAddresses(c *gin.Context) {
 	idString, _ := c.Get("id")
 	id, _ := idString.(int)
@@ -190,14 +190,14 @@ func (i *UserHandler) GetAddresses(c *gin.Context) {
 // EditDetails handles the editing of user details.
 // @Summary Edit user details
 // @Description Edit user details based on the provided information
-// @Tags users
+// @Tags User Profile Management
 // @Accept json
 // @Produce json
 // @security BearerTokenAuth
 // @Param request body models.EditDetailsResponse true "User details to be updated"
 // @Success 201 {object} models.EditDetailsResponse "Updated user details"
 // @Failure 400 {object} response.Response "Invalid request or error updating values"
-// @Router /user/profile/{id}/edit [put]
+// @Router /user/profile [put]
 func (i *UserHandler) EditDetails(c *gin.Context) {
 
 	idString, _ := c.Get("id")
@@ -225,15 +225,15 @@ func (i *UserHandler) EditDetails(c *gin.Context) {
 // ChangePassword allows a user to change their password.
 // @Summary Change Password
 // @Description Allows a user to update their password
-// @Tags Users
+// @Tags User Profile Management
 // @Accept json
 // @Produce json
 // @security BearerTokenAuth
 // @Param id header integer true "User ID"
 // @Param ChangePassword body models.ChangePassword true "Change Password Request"
-// @Success 200 {object} response.ClientResponse "Password changed successfully"
-// @Failure 400 {object} response.ClientResponse "Invalid request format or password change failure"
-// @Router /user/change-password [post]
+// @Success 200 {object} response.Response "Password changed successfully"
+// @Failure 400 {object} response.Response "Invalid request format or password change failure"
+// @Router /user/change-password [patch]
 func (i *UserHandler) ChangePassword(c *gin.Context) {
 
 	idString, _ := c.Get("id")
@@ -285,14 +285,14 @@ func (i *UserHandler) GetCart(c *gin.Context) {
 // RemoveFromCart removes a product from the user's cart.
 // @Summary Remove Product from Cart
 // @Description Removes a specific product from the user's cart by cart ID and inventory ID
-// @Tags User Cart Managament
+// @Tags User Cart Management
 // @Accept json
 // @Produce json
 // @security BearerTokenAuth
 // @Param cart_id query integer true "Cart ID"
 // @Param inventory_id query integer true "Inventory ID"
-// @Success 200 {object} response.ClientResponse "Product removed successfully from the cart"
-// @Failure 400 {object} response.ClientResponse "Failed to remove the product from the cart"
+// @Success 200 {object} response.Response "Product removed successfully from the cart"
+// @Failure 400 {object} response.Response "Failed to remove the product from the cart"
 // @Router /user/cart [delete]
 func (i *UserHandler) RemoveFromCart(c *gin.Context) {
 
@@ -323,7 +323,7 @@ func (i *UserHandler) RemoveFromCart(c *gin.Context) {
 // UpdateQuantity updates the quantity of a product in the user's cart.
 // @Summary Update Product Quantity in Cart
 // @Description Updates the quantity of a specific product in the user's cart by ID and inventory ID
-// @Tags User Cart Managament
+// @Tags User Cart Management
 // @Accept json
 // @Produce json
 // @security BearerTokenAuth
