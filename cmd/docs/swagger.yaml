@@ -1354,7 +1354,7 @@ paths:
     put:
       consumes:
       - application/json
-      description: Updates the stock of an inventory item by its ID
+      description: Search for a product
       parameters:
       - description: Product ID
         in: body

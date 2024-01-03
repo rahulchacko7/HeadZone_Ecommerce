@@ -1680,7 +1680,7 @@ const docTemplate = `{
         },
         "/user/products/search": {
             "put": {
-                "description": "Updates the stock of an inventory item by its ID",
+                "description": "Search for a product",
                 "consumes": [
                     "application/json"
                 ],

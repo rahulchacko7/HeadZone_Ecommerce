@@ -208,7 +208,7 @@ func (i *InventoryHandler) ShowIndividualProducts(c *gin.Context) {
 
 // UpdateInventory updates the stock of an inventory item by its ID.
 // @Summary Update inventory stock
-// @Description Updates the stock of an inventory item by its ID
+// @Description Search for a product
 // @Tags User Product
 // @Accept json
 // @Produce json
