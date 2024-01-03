@@ -43,14 +43,14 @@ func (i *InventoryHandler) AddInventory(c *gin.Context) {
 		return
 	}
 	fmt.Println("kkkkkkkkkk", inventory)
-	InventoryResponse, err := i.InventoryUseCase.AddInventory(inventory)
+	_, err := i.InventoryUseCase.AddInventory(inventory)
 	if err != nil {
 		errRes := response.ClientResponse(http.StatusBadRequest, "Could not add the Inventory", nil, err.Error())
 		c.JSON(http.StatusBadRequest, errRes)
 		return
 	}
 
-	successRes := response.ClientResponse(http.StatusOK, "Successfully added inventory", InventoryResponse, nil)
+	successRes := response.ClientResponse(http.StatusOK, "Successfully added inventory", nil, nil)
 	c.JSON(http.StatusOK, successRes)
 
 }
