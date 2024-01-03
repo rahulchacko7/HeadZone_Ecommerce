@@ -134,10 +134,10 @@ func (ad *adminUseCase) GetUsers(page int) ([]models.UserDetailsAtAdmin, error) 
 
 func (i *adminUseCase) NewPaymentMethod(id string) error {
 
-	parsedID, err := strconv.Atoi(id)
-	if err != nil || parsedID <= 0 {
-		return errors.New("invalid id")
-	}
+	// parsedID, err := strconv.Atoi(id)
+	// if err != nil || parsedID <= 0 {
+	// 	return errors.New("invalid id")
+	// }
 
 	exists, err := i.adminRepository.CheckIfPaymentMethodAlreadyExists(id)
 	if err != nil {
