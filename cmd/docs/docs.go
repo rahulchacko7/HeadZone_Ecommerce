@@ -509,7 +509,7 @@ const docTemplate = `{
                     "200": {
                         "description": "Success",
                         "schema": {
-                            "$ref": "#/definitions/models.InventoryResponse"
+                            "$ref": "#/definitions/models.Null"
                         }
                     },
                     "400": {
@@ -2445,29 +2445,6 @@ const docTemplate = `{
                 }
             }
         },
-        "models.InventoryResponse": {
-            "type": "object",
-            "properties": {
-                "category_id": {
-                    "type": "integer"
-                },
-                "color": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "integer"
-                },
-                "price": {
-                    "type": "number"
-                },
-                "product_name": {
-                    "type": "string"
-                },
-                "stock": {
-                    "type": "integer"
-                }
-            }
-        },
         "models.InventoryUserResponse": {
             "type": "object",
             "properties": {
@@ -2495,6 +2472,14 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "payment_method": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.Null": {
+            "type": "object",
+            "properties": {
+                "_": {
                     "type": "string"
                 }
             }

@@ -153,21 +153,6 @@ definitions:
       phone:
         type: string
     type: object
-  models.InventoryResponse:
-    properties:
-      category_id:
-        type: integer
-      color:
-        type: string
-      id:
-        type: integer
-      price:
-        type: number
-      product_name:
-        type: string
-      stock:
-        type: integer
-    type: object
   models.InventoryUserResponse:
     properties:
       category_id:
@@ -186,6 +171,11 @@ definitions:
   models.NewPaymentMethod:
     properties:
       payment_method:
+        type: string
+    type: object
+  models.Null:
+    properties:
+      _:
         type: string
     type: object
   models.OTPData:
@@ -591,7 +581,7 @@ paths:
         "200":
           description: Success
           schema:
-            $ref: '#/definitions/models.InventoryResponse'
+            $ref: '#/definitions/models.Null'
         "400":
           description: Error adding inventory
           schema:

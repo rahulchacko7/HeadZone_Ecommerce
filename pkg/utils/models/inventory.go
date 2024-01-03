@@ -89,3 +89,7 @@ type Order struct {
 type SearchItems struct {
 	ProductName string `json:"product_name"`
 }
+
+type Null struct {
+	Err string `json:"_"`
+}

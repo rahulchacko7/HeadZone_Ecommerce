@@ -31,7 +31,7 @@ func NewInventoryHandler(usecase interfaces.InventoryUseCase) *InventoryHandler 
 // @Produce json
 // @security BearerTokenAuth
 // @Param inventory body models.AddInventories true "Inventory object to be added"
-// @Success 200 {object} models.InventoryResponse "Success"
+// @Success 200 {object} models.Null "Success"
 // @Failure 400 {object} response.Response "Error adding inventory"
 // @Router /admin/inventory [post]
 func (i *InventoryHandler) AddInventory(c *gin.Context) {
