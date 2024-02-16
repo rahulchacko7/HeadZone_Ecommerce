@@ -45,10 +45,10 @@ func (c *userDatabase) UserSignUp(user models.UserDetails) (models.UserDetailsRe
 	fmt.Println("userId at signup", newUserID)
 
 	// Create a wallet entry for the new user with an initial amount of 0
-	err = c.DB.Exec("INSERT INTO wallets (user_id, amount) VALUES (?, ?)", newUserID, 0).Error
-	if err != nil {
-		return models.UserDetailsResponse{}, err
-	}
+	// err = c.DB.Exec("INSERT INTO wallets (user_id, amount) VALUES (?, ?)", newUserID, 0).Error
+	// if err != nil {
+	// 	return models.UserDetailsResponse{}, err
+	// }
 
 	return userDetails, nil
 }
