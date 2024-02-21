@@ -75,10 +75,10 @@ func TestUserSignUp(t *testing.T) {
 						AddRow(1, "Rahul", "rahulchacko888@gmail.com", "9867327710"))
 			},
 			want: models.UserDetailsResponse{
-				Id:     1,
-				Name:   "Rahul",
-				Email:  "rahulchacko888@gmail.com",
-				Phone:  "9867327710",
+				Id:    1,
+				Name:  "Rahul",
+				Email: "rahulchacko888@gmail.com",
+				Phone: "9867327710",
 			},
 			wantErr: nil,
 		},
@@ -115,4 +115,78 @@ func TestUserSignUp(t *testing.T) {
 		})
 
 	}
+}
+
+func Test_FindUserByEmail(t *testing.T) {
+	tests := []struct {
+		name    string
+		args    models.UserLogin
+		stub    func(sqlmock.Sqlmock)
+		want    models.UserSignInResponse
+		wantErr error
+	}{
+		{
+			name: "success",
+			args: models.UserLogin{
+				Email:    "rahulchacko123@gmail.com",
+				Password: "1234",
+			},
+			stub: func(mockSQL sqlmock.Sqlmock) {
+				expectedQuery := `^SELECT \* FROM users(.+)$`
+				mockSQL.ExpectQuery(expectedQuery).WithArgs("rahulchacko123@gmail.com").
+					WillReturnRows(sqlmock.NewRows([]string{"id", "user_id", "name", "email", "phone", "password"}).
+						AddRow(1, 1, "Rahul", "rahulchacko123@gmail.com", "+917012493965", "4321"))
+			},
+
+			want: models.UserSignInResponse{
+				Id:       1,
+				UserID:   1,
+				Name:     "Rahul",
+				Email:    "rahulchacko123@gmail.com",
+				Phone:    "+917012493965",
+				Password: "4321",
+			},
+			wantErr: nil,
+		},
+		{
+			name: "error",
+			args: models.UserLogin{
+				Email:    "rahulchacko123@gmail.com",
+				Password: "1234",
+			},
+			stub: func(mockSQL sqlmock.Sqlmock) {
+
+				expectedQuery := `^SELECT \* FROM users(.+)$`
+
+				mockSQL.ExpectQuery(expectedQuery).WithArgs("rahulchacko123@gmail.com").
+					WillReturnError(errors.New("new error"))
+
+			},
+
+			want:    models.UserSignInResponse{},
+			wantErr: errors.New("error checking user details"),
+		},
+	}
+
+	for _, tt := range tests {
+
+		t.Run(tt.name, func(t *testing.T) {
+			mockDB, mockSQL, _ := sqlmock.New()
+			defer mockDB.Close()
+
+			gormDB, _ := gorm.Open(postgres.New(postgres.Config{
+				Conn: mockDB,
+			}), &gorm.Config{})
+
+			tt.stub(mockSQL)
+
+			u := NewUserRepository(gormDB)
+
+			result, err := u.FindUserByEmail(tt.args)
+
+			assert.Equal(t, tt.want, result)
+			assert.Equal(t, tt.wantErr, err)
+		})
+	}
+
 }
