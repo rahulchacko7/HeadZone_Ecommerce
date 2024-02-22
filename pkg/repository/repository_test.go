@@ -190,3 +190,56 @@ func Test_FindUserByEmail(t *testing.T) {
 	}
 
 }
+
+type id struct {
+	id int
+}
+
+func Test_GetUserDetails(t *testing.T) {
+	tests := []struct {
+		name    string
+		args    id
+		stub    func(sqlmock.Sqlmock)
+		want    models.UserDetailsResponse
+		wantErr error
+	}{
+		{
+			name: "Success",
+			args: id{
+				id: 1,
+			},
+			stub: func(mockSQL sqlmock.Sqlmock) {
+				expectedQuery := `^select id,name,email,phone from users where id=?`
+				mockSQL.ExpectQuery(expectedQuery).WithArgs(1).
+					WillReturnRows(sqlmock.NewRows([]string{"id", "name", "email", "phone"}).AddRow(1, "Arun CM", "aruncm@gmale.com", "+1234567890"))
+			},
+			want: models.UserDetailsResponse{
+				Id:    1,
+				Name:  "Arun CM",
+				Email: "aruncm@gmale.com",
+				Phone: "+1234567890", // Corrected phone number
+			},
+			wantErr: nil,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			mockDB, mockSQL, _ := sqlmock.New()
+			defer mockDB.Close()
+
+			gormDB, _ := gorm.Open(postgres.New(postgres.Config{
+				Conn: mockDB,
+			}), &gorm.Config{})
+
+			tt.stub(mockSQL)
+
+			ad := userDatabase{DB: gormDB}
+
+			result, err := ad.GetUserDetails(tt.args.id)
+
+			assert.Equal(t, tt.want, result)
+			assert.Equal(t, tt.wantErr, err)
+		})
+	}
+}
