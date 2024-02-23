@@ -243,3 +243,64 @@ func Test_GetUserDetails(t *testing.T) {
 		})
 	}
 }
+
+// func Test_GetAddresses(t *testing.T) {
+// 	testCase := []struct {
+// 		name    string
+// 		args    int
+// 		stub    func(mockSQL sqlmock.Sqlmock)
+// 		want    []domain.Address
+// 		wantErr error
+// 	}{
+// 		{
+// 			name: "Success",
+// 			args: 1,
+// 			stub: func(mockSQL sqlmock.Sqlmock) {
+// 				expectedQuery := `select * from addresses where user_id=\$1`
+// 				mockSQL.ExpectQuery(expectedQuery).WithArgs(1).
+// 					WillReturnRows(sqlmock.NewRows([]string{"id", "user_id", "name", "house_name", "street", "city", "state", "phone", "pin"}).
+// 						AddRow(1, 1, "Rahul", "Thakadiyil house", "Thekkethukavala", "Kottayam", "Kerala", "", "686519"))
+// 			},
+// 			want: []domain.Address{
+// 				{
+// 					Id:        1,
+// 					UserID:    1,
+// 					Name:      "Rahul",
+// 					HouseName: "Thakadiyil house",
+// 					Street:    "Thekkethukavala",
+// 					City:      "Kottayam",
+// 					State:     "Kerala",
+// 					Phone:     "",
+// 					Pin:       "686519",
+// 				},
+// 			},
+// 			wantErr: nil,
+// 		},
+// 		{
+// 			name: "Failed",
+// 			args: 1,
+// 			stub: func(mockSQL sqlmock.Sqlmock) {
+// 				expectedQuery := `select \* from addresses where user_id=\$1`
+// 				mockSQL.ExpectQuery(expectedQuery).WithArgs(1).
+// 					WillReturnError(errors.New("error in getting addresses"))
+// 			},
+// 			want:    nil,
+// 			wantErr: errors.New("error in getting addresses"),
+// 		},
+// 	}
+
+// 	for _, tt := range testCase {
+// 		t.Run(tt.name, func(t *testing.T) {
+// 			mockDB, mockSQL, _ := sqlmock.New()
+// 			defer mockDB.Close()
+// 			gormDB, _ := gorm.Open(postgres.New(postgres.Config{
+// 				Conn: mockDB,
+// 			}), &gorm.Config{})
+// 			tt.stub(mockSQL)
+// 			ad := userDatabase{DB: gormDB}
+// 			result, err := ad.GetAddresses(tt.args)
+// 			assert.Equal(t, tt.want, result)
+// 			assert.Equal(t, tt.wantErr, err)
+// 		})
+// 	}
+// }

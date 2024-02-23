@@ -8,3 +8,5 @@ wire: ## Generate wire_gen.go
 swag: 
 	swag init -g cmd/api/main.go -o ./cmd/docs 
 
+test:
+	go test ./...
