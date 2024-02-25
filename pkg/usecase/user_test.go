@@ -2,8 +2,9 @@ package usecase
 
 import (
 	"HeadZone/pkg/config"
+	domain "HeadZone/pkg/domain"
+	mockhelper "HeadZone/pkg/helper/mock"
 	mockRepository "HeadZone/pkg/repository/Repomock"
-	"HeadZone/pkg/utils/models"
 	"errors"
 	"testing"
 
@@ -11,7 +12,7 @@ import (
 	"go.uber.org/mock/gomock"
 )
 
-func Test_AddAddress(t *testing.T) {
+func Test_GetAddresses(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -19,49 +20,37 @@ func Test_AddAddress(t *testing.T) {
 	cfg := config.Config{}
 	otpRepo := mockRepository.NewMockOtpRepository(ctrl)
 	inventoryRepo := mockRepository.NewMockInventoryRepository(ctrl)
-	helper := mockRepository.NewMockHelper(ctrl)
+	helper := mockhelper.NewMockHelper(ctrl)
 
 	userUseCase := NewUserUseCase(userRepo, cfg, otpRepo, inventoryRepo, helper)
 
 	testData := map[string]struct {
-		input   models.AddAddress
-		stub    func(*mockRepository.MockUserRepository, models.AddAddress)
+		input   int
+		stub    func(*mockRepository.MockUserRepository, *mockhelper.MockHelper, int)
+		want    []domain.Address
 		wantErr error
 	}{
 		"success": {
-			input: models.AddAddress{
-				Name:      "Rahul",
-				HouseName: "thakadiyil house",
-				Street:    "pallippuram",
-				City:      "cherthala",
-				State:     "kerala",
-				Pin:       "688541",
+			input: 1,
+			stub: func(userrepo *mockRepository.MockUserRepository, helper *mockhelper.MockHelper, data int) {
+				userrepo.EXPECT().GetAddresses(data).Times(1).Return([]domain.Address{}, nil)
 			},
-			stub: func(userRepo *mockRepository.MockUserRepository, data models.AddAddress) {
-				userRepo.EXPECT().AddAddress(1, data, "").Return(nil).Times(1)
-			},
+			want:    []domain.Address{},
 			wantErr: nil,
 		},
-		"failure": {
-			input: models.AddAddress{
-				Name:      "akhil",
-				HouseName: "chekkiyil house",
-				Street:    "pallippuram",
-				City:      "cherthala",
-				State:     "kerala",
-				Pin:       "688541",
+		"failed": {
+			input: 1,
+			stub: func(userrepo *mockRepository.MockUserRepository, helper *mockhelper.MockHelper, data int) {
+				userrepo.EXPECT().GetAddresses(data).Times(1).Return([]domain.Address{}, errors.New("error"))
 			},
-			stub: func(userRepo *mockRepository.MockUserRepository, data models.AddAddress) {
-				userRepo.EXPECT().AddAddress(1, data, "").Return(errors.New("could not add the address")).Times(1)
-			},
-			wantErr: errors.New("could not add the address"),
+			want:    []domain.Address{},
+			wantErr: errors.New("error in getting addresses"), // Corrected error string
 		},
 	}
-	for testName, test := range testData {
-		t.Run(testName, func(t *testing.T) {
-			test.stub(userRepo, test.input)
-			err := userUseCase.AddAddress(1, test.input)
-			assert.Equal(t, test.wantErr, err)
-		})
+	for _, test := range testData {
+		test.stub(userRepo, helper, test.input)
+		result, err := userUseCase.GetAddresses(test.input)
+		assert.Equal(t, test.want, result)
+		assert.Equal(t, test.wantErr, err)
 	}
 }

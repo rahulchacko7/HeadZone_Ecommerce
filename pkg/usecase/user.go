@@ -183,9 +183,9 @@ func (u *userUseCase) AddAddress(id int, address models.AddAddress) error {
 
 func (i *userUseCase) GetAddresses(id int) ([]domain.Address, error) {
 
-	if id <= 0 {
-		return []domain.Address{}, errors.New("invalid id")
-	}
+	// if id <= 0 {
+	// 	return []domain.Address{}, errors.New("invalid id")
+	// }
 
 	addresses, err := i.userRepo.GetAddresses(id)
 	if err != nil {
