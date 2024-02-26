@@ -32,4 +32,4 @@ jobs:
             cd HeadZone_Ecommerce
             git pull
             go build -o api ./cmd/api
-            sudo systemctl restart headzone.service
+            sudo systemctl restart headzone.rahulchacko.tech.service 
