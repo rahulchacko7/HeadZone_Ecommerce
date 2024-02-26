@@ -44,8 +44,7 @@ func Test_GetAddresses(t *testing.T) {
 				userrepo.EXPECT().GetAddresses(data).Times(1).Return([]domain.Address{}, errors.New("error"))
 			},
 			want:    []domain.Address{},
-			wantErr: errors.New("error in getting addresses"), // Corrected error string
-		},
+			wantErr: errors.New("error in getting addresses"), 
 	}
 	for _, test := range testData {
 		test.stub(userRepo, helper, test.input)
