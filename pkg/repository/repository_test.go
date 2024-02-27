@@ -21,7 +21,7 @@ func TestCheckUserAvailability(t *testing.T) {
 		want bool
 	}{
 		{
-			name: "successful, user available",
+			name: "successful, user available", //successfully worked
 			arg:  "rahul2@gmail.com",
 			stub: func(mock sqlmock.Sqlmock) {
 				mock.ExpectQuery(regexp.QuoteMeta("select count(*) from users where email='rahul2@gmail.com'")).
