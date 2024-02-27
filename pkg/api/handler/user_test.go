@@ -32,12 +32,12 @@ func Test_UserSignUp(t *testing.T) {
 				Password:        "54321",
 				ConfirmPassword: "54321",
 			},
-			buildstub: func(useCaseMock *mock_interfaces.MockUserUseCase, sighupData models.UserDetails) {
-				err := validator.New().Struct(sighupData)
+			buildstub: func(useCaseMock *mock_interfaces.MockUserUseCase, signupData models.UserDetails) {
+				err := validator.New().Struct(signupData)
 				if err != nil {
 					fmt.Println("validation failed")
 				}
-				useCaseMock.EXPECT().UserSignUp(sighupData).Times(1).Return(models.TokenUsers{
+				useCaseMock.EXPECT().UserSignUp(signupData).Times(1).Return(models.TokenUsers{
 					Users: models.UserDetailsResponse{
 						Id:    1,
 						Name:  "rahul",

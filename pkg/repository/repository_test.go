@@ -28,6 +28,14 @@ func TestCheckUserAvailability(t *testing.T) {
 					WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(1))
 			},
 			want: true,
+		}, {
+			name: "failed, user not available",
+			arg:  "rahul7@gmail.com",
+			stub: func(mock sqlmock.Sqlmock) {
+				mock.ExpectQuery(regexp.QuoteMeta("select count(*) from users where email='rahul7@gmail.com'")).
+					WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(0))
+			},
+			want: false,
 		},
 	}
 	for _, tt := range tests {
