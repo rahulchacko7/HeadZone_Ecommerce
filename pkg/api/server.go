@@ -19,7 +19,7 @@ func NewServerHTTP(userHandler *handler.UserHandler, adminHandler *handler.Admin
 	engine := gin.New()
 
 	engine.Use(gin.Logger())
-	engine.LoadHTMLGlob("pkg/templates/index.html")
+	engine.LoadHTMLGlob("pkg/template/index.html")
 	engine.GET("/validate-token", adminHandler.ValidateRefreshTokenAndCreateNewAccess)
 
 	engine.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))

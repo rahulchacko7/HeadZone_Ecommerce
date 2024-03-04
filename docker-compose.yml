@@ -1,0 +1,36 @@
+version: "3.8"
+services:
+  postgres:
+    image: postgres
+    restart: always
+    environment:
+       POSTGRES_USER: rahul
+       POSTGRES_PASSWORD: 12345
+       POSTGRES_DB: adminboard
+    networks:
+      - mydb
+    volumes:
+      - database-postgres:/var/lib/postgresql/data
+
+  HeadZone:
+    image: headzone
+    restart: on-failure
+    environment:
+      DB_HOST: "postgres"
+      DB_NAME: "adminboard"
+      DB_USER: "rahul"
+      DB_PORT: "5432"
+      DB_PASSWORD: "12345"
+    depends_on:
+      - postgres
+    networks:
+      - mydb
+    ports:
+      - "3000:3000"
+
+volumes:
+  database-postgres:
+
+networks:
+  mydb:
+    driver: bridge
