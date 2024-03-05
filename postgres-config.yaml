@@ -3,8 +3,8 @@ kind: ConfigMap
 metadata:
   name: postgres-config
 data:
-  postgres-password: 12345
-  postgres-host: localhost
-  postgres-db: adminboard
-  postgres-user: rahul
+  postgres-password: "12345"
+  postgres-host: "postgres-service"
+  postgres-db: "adminboard"
+  postgres-user: "rahul"
   postgres-port: "5432"

@@ -16,9 +16,9 @@ spec:
     spec:
       containers:
         - name: headzone
-          image: rahulchacko7/headzone:latest
+          image: rahulchacko/headzone:latest
           ports:
-            - containerPort: 3000
+            - containerPort: 8080
           env:
             - name: DB_USER
               valueFrom:
@@ -56,6 +56,6 @@ spec:
   type: LoadBalancer
   ports:
     - protocol: TCP
-      port: 3000
-      targetPort: 3000
+      port: 8080
+      targetPort: 8080
       nodePort: 30001
